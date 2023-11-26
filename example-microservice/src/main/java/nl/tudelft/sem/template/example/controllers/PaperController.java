@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.example.controllers;
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.Paper;
 import nl.tudelft.sem.template.example.reponses.PaperAbstract;
+import nl.tudelft.sem.template.example.reponses.WholePaper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,11 +34,20 @@ public class PaperController {
      *
      * @return the paper, its ID and abstract
      */
-    @GetMapping("/readPaper")
-    public ResponseEntity<PaperAbstract> readPaper() {
+    @GetMapping("/getTitleAndAbstract")
+    public ResponseEntity<PaperAbstract> getTitleAndAbstract() {
         return ResponseEntity.ok(new PaperAbstract());
     }
 
+    /**
+     * Returns the whole paper to read
+     *
+     * @return the paper for the reviewers to read
+     */
+    @GetMapping("/readPaper")
+    public ResponseEntity<WholePaper> readPaper() {
+        return ResponseEntity.ok(new WholePaper());
+    }
 
 
 }
