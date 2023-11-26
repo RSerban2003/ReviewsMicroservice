@@ -1,26 +1,18 @@
-package nl.tudelft.sem.template.example.domain;
+package nl.tudelft.sem.template.example.reponses;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
-
-import javax.persistence.Basic;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import java.io.Serializable;
+import lombok.Setter;
+import nl.tudelft.sem.template.example.domain.Paper;
 import java.util.UUID;
 
-@Entity
 @Getter
+@Setter
 @JsonIdentityInfo(scope = Paper.class, generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "ID")
-public class Paper implements Serializable {
-    @Id
-    @GeneratedValue
+public class PaperAbstract {
     private UUID ID;
-
-
-
-
+    private String title;
+    private String theAbstract;
 }
