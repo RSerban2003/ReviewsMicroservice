@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/Track")
 public class TrackController {
-  private final Track repo;
-
+  /*private final Track repo;
+*/
   /**
    * Constructor Method for trackController
    * @param repo of the controller
    */
-  public TrackController(Track repo) {
+  /*public TrackController(Track repo) {
     this.repo = repo;
   }
-
+*/
   /**
    * Method that returns the analytics of the track
    * (papers accepted, papers rejected and papers unknown)
