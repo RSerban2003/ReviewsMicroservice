@@ -38,6 +38,10 @@ public class Track implements Serializable {
 
   }
 
+  /**
+   * Constructor of track
+   * @param biddingDeadLine of the track
+   */
   public Track(Date biddingDeadLine) {
     this.biddingDeadLine = biddingDeadLine;
     currentPhase = Phase.Submitting;
