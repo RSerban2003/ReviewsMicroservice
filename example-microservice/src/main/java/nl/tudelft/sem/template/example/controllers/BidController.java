@@ -4,10 +4,7 @@ import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.Bid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -15,7 +12,8 @@ import java.util.UUID;
  * Controls the bids
  */
 
-@RestController("/bid")
+@RestController
+@RequestMapping("/paper/{paperID}/bid")
 public class BidController {
 
 
@@ -32,25 +30,22 @@ public class BidController {
     }
 
     /**
-     * Gets example by id.
-     *
-     * @return the example found in the database with the given id
+     * Deletes a bid
+     * TODO: add failed deletes
+     * @return OK status if the deletion was successful
      */
-    @DeleteMapping("/deleteBid")
-    public ResponseEntity<Bid> deleteBid(UUID paperId, UUID userId) {
-        return ResponseEntity.ok(new Bid(null, null, null));
+    @DeleteMapping("/delete")
+    public ResponseEntity deleteBid(@PathVariable UUID paperID, @RequestBody UUID userID) {
+        return ResponseEntity.ok().build();
 
     }
 
-    @PutMapping("/bidForPaper")
-    public ResponseEntity<Bid> bidForPaper(UUID paperId, UUID userId, Enum status) {
-        return ResponseEntity.ok(new Bid(null, null, null));
-
+    /**
+     * Creates (or edits) a bid from a user to a paper
+     * @return OK status if the bid was successful
+     */
+    @PutMapping("/create")
+    public ResponseEntity<UUID> bidForPaper(@PathVariable UUID paperID, @RequestBody UUID userID) {
+        return ResponseEntity.ok(UUID.fromString(""));
     }
-
-    @PutMapping("/editAssignment")
-    public ResponseEntity<Bid> editAssignment(UUID paperId, UUID oldUserId, UUID newUserId) {
-        return ResponseEntity.ok(new Bid(null, null, null));
-    }
-
 }

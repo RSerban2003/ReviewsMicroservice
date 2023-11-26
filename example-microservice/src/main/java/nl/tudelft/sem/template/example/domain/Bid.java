@@ -1,5 +1,9 @@
 package nl.tudelft.sem.template.example.domain;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import java.io.Serializable;
@@ -7,6 +11,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Embeddable
+@Getter
+@Setter
+@EqualsAndHashCode
 public class Bid implements Serializable {
     private UUID paperID;
     private UUID userId;
@@ -18,47 +25,12 @@ public class Bid implements Serializable {
         NEUTRAL,
         DONTWANT
     };
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Bid bid = (Bid) o;
-        return paperID.equals(bid.paperID) && userId.equals(bid.userId) && status == bid.status;
+    public Bid() {
+        this.status = Status.NEUTRAL;
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(paperID, userId, status);
-    }
-
-    public UUID getPaperID() {
-        return paperID;
-    }
-
-    public void setPaperID(UUID paperID) {
-        this.paperID = paperID;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    public Bid(UUID paperID, UUID userId, Status status) {
+    public Bid(UUID paperID, UUID userId) {
+        this.status = Status.NEUTRAL;
         this.paperID = paperID;
         this.userId = userId;
-        this.status = status;
     }
 }
