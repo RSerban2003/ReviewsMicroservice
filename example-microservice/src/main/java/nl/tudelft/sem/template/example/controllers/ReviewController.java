@@ -24,13 +24,12 @@ public class ReviewController {
 
 
     /**
-     * Allows specific users(like reviewers) to read the reviews for paper with ID PaperID
+     * Allows specific users to read the reviews for a specific paper.
      * @param UserID the ID for users
      * @param PaperID the ID for the paper
-     * @return nothing
      */
-    @GetMapping("/readReview/{UserID}/{PaperID}")
-    public void readReview(@PathVariable UUID UserID, @PathVariable UUID PaperID) {
+    @GetMapping("/read/{UserID}/{PaperID}")
+    public void read(@PathVariable UUID UserID, @PathVariable UUID PaperID) {
         return;
     }
 
@@ -39,8 +38,8 @@ public class ReviewController {
      * @param review the review object containing the review details
      * @return the saved review object
      */
-    @PostMapping("/submitReview")
-    public ResponseEntity<Review> submitReview(@RequestBody Review review) {
+    @PostMapping("/submit")
+    public ResponseEntity<Review> submit(@RequestBody Review review) {
         return null;
     }
 
