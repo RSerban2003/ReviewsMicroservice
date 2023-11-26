@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController("/confidentialComment")
 public class ConfidentialCommentCntrl {
     private final transient AuthManager authManager;
@@ -22,12 +24,13 @@ public class ConfidentialCommentCntrl {
 
 
     /**
-     * @param PaperID the ID for the paper
-     * @param UserID the ID for the user
+     * @param paperID the ID for the paper
+     * @param userID the ID for the user
+     * @param reviewerID the ID for the reviewer
      * @return the saved review object
      */
-    @PostMapping("/submit/{UserID}/{PaperID}")
-    public ResponseEntity<Review> submitConfidentialComment(@PathVariable String PaperID, @PathVariable String UserID) {
+    @PostMapping("/submit/{paperID}")
+    public ResponseEntity<Review> submitConfidentialComment(@PathVariable String paperID, @RequestBody UUID userID, @RequestBody UUID reviewerID) {
         return null;
     }
 
