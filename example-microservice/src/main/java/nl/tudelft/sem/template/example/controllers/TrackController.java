@@ -7,6 +7,7 @@ import nl.tudelft.sem.template.example.reponses.Analytics;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 @RestController
@@ -19,14 +20,14 @@ public class TrackController {
   }
 
   @GetMapping(path = {"", "/getAnalytics"})
-  public ResponseEntity<Analytics> getAnalytics(@PathVariable("UserId")  UUID UserId,
-                                                @PathVariable("TrackId") UUID TrackID) {
+  public ResponseEntity<Analytics> getAnalytics(@RequestBody  UUID UserId,
+                                                @RequestBody UUID TrackID) {
     return null;
   }
   @GetMapping(path = {"", "/setBiddingDeadLine"})
-  public ResponseEntity<Void> getAnalytics(@PathVariable("UserId")  UUID UserId,
-                                           @PathVariable("TrackId") UUID TrackID,
-                                           @PathVariable("DeadLine") Date DeadLine) {
+  public ResponseEntity<Void> getAnalytics(@RequestBody  UUID UserId,
+                                           @RequestBody UUID TrackID,
+                                           @RequestBody Date DeadLine) {
 
     return null;
   }
