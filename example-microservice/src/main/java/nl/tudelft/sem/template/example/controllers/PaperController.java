@@ -1,15 +1,20 @@
 package nl.tudelft.sem.template.example.controllers;
 
 import nl.tudelft.sem.template.example.authentication.AuthManager;
+import nl.tudelft.sem.template.example.domain.Paper;
+import nl.tudelft.sem.template.example.reponses.PaperAbstract;
+import nl.tudelft.sem.template.example.reponses.WholePaper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controls the papers
  */
-@RestController("/paper")
+@RestController
+@RequestMapping("/paper")
 public class PaperController {
 
     private final transient AuthManager authManager;
@@ -25,14 +30,24 @@ public class PaperController {
     }
 
     /**
-     * Gets example by id.
+     * Gets the paper title and abstract
      *
-     * @return the example found in the database with the given id
+     * @return the paper, its ID and abstract
+     */
+    @GetMapping("/getTitleAndAbstract")
+    public ResponseEntity<PaperAbstract> getTitleAndAbstract() {
+        return ResponseEntity.ok(new PaperAbstract());
+    }
+
+    /**
+     * Returns the whole paper to read
+     *
+     * @return the paper for the reviewers to read
      */
     @GetMapping("/readPaper")
-    public ResponseEntity<Paper> readPaper() {
-        return ResponseEntity.ok("Hello " + authManager.getNetId());
-
+    public ResponseEntity<WholePaper> readPaper() {
+        return ResponseEntity.ok(new WholePaper());
     }
+
 
 }
