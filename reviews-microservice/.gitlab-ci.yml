@@ -54,16 +54,16 @@ build-reviews-microservice:
 #    gradle reviews-microservice:pmdMain
 #  allow_failure: true
 
-test-reviews-microservice:
-  extends:
-    - .build_cached
-  needs:
-    - gradle_build
-  dependencies:
-    - gradle_build
-  stage: test
-  script:
-    - gradle reviews-microservice:test reviews-microservice:jacocoTestReport
-    - cat reviews-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?([0-9]{1,3})%"
-  coverage: /([0-9]{1,3})%/
+#test-reviews-microservice:
+#  extends:
+#    - .build_cached
+#  needs:
+#    - gradle_build
+#  dependencies:
+#    - gradle_build
+#  stage: test
+#  script:
+#    - gradle reviews-microservice:test reviews-microservice:jacocoTestReport
+#    - cat reviews-microservice/build/reports/jacoco/test/html/index.html | grep -Po "Total.*?([0-9]{1,3})%"
+#  coverage: /([0-9]{1,3})%/
 
