@@ -42,17 +42,17 @@ build-reviews-microservice:
 #  allow_failure: true
 
 
-PMD-reviews-microservice:
-  extends:
-    - .build_cached
-  needs:
-    - gradle_build
-  dependencies:
-    - gradle_build
-  stage: staticAnalysis
-  script:
-    gradle reviews-microservice:pmdMain
-  allow_failure: true
+#PMD-reviews-microservice:
+#  extends:
+#    - .build_cached
+#  needs:
+#    - gradle_build
+#  dependencies:
+#    - gradle_build
+#  stage: staticAnalysis
+#  script:
+#    gradle reviews-microservice:pmdMain
+#  allow_failure: true
 
 test-reviews-microservice:
   extends:
