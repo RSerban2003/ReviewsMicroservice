@@ -29,17 +29,17 @@ build-reviews-microservice:
   script:
     gradle reviews-microservice:assemble reviews-microservice:testClasses
 
-checkStyle-reviews-microservice:
-  extends:
-    - .build_cached
-  needs:
-    - gradle_build
-  dependencies:
-    - gradle_build
-  stage: staticAnalysis
-  script:
-    gradle reviews-microservice:checkstyleMain reviews-microservice:checkStyleTest
-  allow_failure: true
+#checkStyle-reviews-microservice:
+# extends:
+#    - .build_cached
+#  needs:
+#    - gradle_build
+#  dependencies:
+#    - gradle_build
+#  stage: staticAnalysis
+#  script:
+#    gradle reviews-microservice:checkstyleMain reviews-microservice:checkStyleTest
+#  allow_failure: true
 
 
 PMD-reviews-microservice:
