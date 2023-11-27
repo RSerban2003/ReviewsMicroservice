@@ -1,4 +1,4 @@
-rootProject.name = 'template'
+rootProject.name = 'easyconf-team08b'
 
-include 'authentication-microservice'
+//include 'authentication-microservice'
 include 'example-microservice'
