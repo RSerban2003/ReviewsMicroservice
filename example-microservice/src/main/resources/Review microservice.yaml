@@ -30,6 +30,23 @@ paths:
         "200":
           description: "OK"
           content:
+            'application/json':
+              schema:
+                $ref: "#/components/schemas/Review"
+  /submit:
+    post:
+      summary: "POST review"
+      operationId: "submit"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Review"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
             '*/*':
               schema:
                 $ref: "#/components/schemas/Review"
