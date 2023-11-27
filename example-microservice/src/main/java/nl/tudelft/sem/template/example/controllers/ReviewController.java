@@ -28,9 +28,10 @@ public class ReviewController {
      * @param UserID the ID for users
      * @param PaperID the ID for the paper
      */
-    @GetMapping("/read/{UserID}/{PaperID}")
-    public void read(@PathVariable UUID UserID, @PathVariable UUID PaperID) {
-        return;
+    @GetMapping("/read/{PaperID}")
+    public ResponseEntity<Review> read(@RequestBody UUID UserID, @PathVariable UUID PaperID) {
+
+        return null;
     }
 
     /**

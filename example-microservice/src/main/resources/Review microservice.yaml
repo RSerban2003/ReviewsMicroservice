@@ -1,0 +1,60 @@
+openapi: "3.0.3"
+info:
+  title: "Review Microservice"
+  description: "Review Microservice is responsible for storing the reviews made by the respective reviewers and storing
+  the recommendation score for each paper.
+  It allows PC Chairs to leave confidential comments to the reviewers and reviewers to leave comments to the author.
+  The knowledge of a reviewer is based on their confidence score. 
+  "
+  version: "1.0.0"
+paths:
+  /read/{PaperID}:
+    get:
+      summary: "GET review"
+      operationId: "read"
+      parameters:
+        - name: "PaperID"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "string"
+              format: "uuid"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Review"
+components:
+  schemas:
+    ConfidentialComment:
+      type: "object"
+      properties:
+        comment:
+          type: "string"
+    Review:
+      type: "object"
+      properties:
+        confidenceScore:
+          type: "string"
+          enum:
+            - "EXPERT"
+            - "KNOWLEDGEABLE"
+            - "BASIC"
+        commentForAuthor:
+          type: "string"
+        recommendationScore:
+          type: "integer"
+          format: "int32"
+        commentForReviewers:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/ConfidentialComment"
