@@ -41,8 +41,8 @@ public class TrackController {
     return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 
-  @Operation(summary = "Get the summary stats of a track",
-          description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
+  @Operation(summary = "Changes the bidding deadline",
+          description = "Changes the bidding deadline to the one provided in the body"
   )
   @ApiResponses(value = {
           @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema())}),
