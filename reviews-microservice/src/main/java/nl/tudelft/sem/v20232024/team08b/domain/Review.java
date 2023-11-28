@@ -9,13 +9,8 @@ import java.util.*;
 @Setter
 public class Review {
 
-    enum Score {
-        EXPERT,
-        KNOWLEDGEABLE,
-        BASIC
-    }
-    private Score confidenceScore;
+    private ConfidenceScore confidenceScore;
     private String commentForAuthor;
-    private int recommendationScore;
+    private RecommendationScore recommendationScore;
     private List<ConfidentialComment> commentForReviewers;
 }

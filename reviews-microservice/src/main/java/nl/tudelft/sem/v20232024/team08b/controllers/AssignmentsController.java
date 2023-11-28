@@ -27,8 +27,8 @@ import java.util.List;
 public class AssignmentsController {
     @Operation(summary = "Manually assign reviewers",
             description = "Manually assigns reviewer to a specific paper." +
-                            "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair" +
-                            "At least 3 reviewers must be assigned to a paper."
+                            " This can only be done by the chair and will respond with a 403 error if requester is not a valid chair." +
+                            " At least 3 reviewers must be assigned to a paper."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewer successfully assigned to the paper.", content = {@Content(schema = @Schema())}),
@@ -44,7 +44,7 @@ public class AssignmentsController {
 
     @Operation(summary = "Automatically assign reviewers",
             description = "Automatically assigns reviewer to a specific paper." +
-                    "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair" +
+                    " This can only be done by the chair and will respond with a 403 error if requester is not a valid chair. " +
                     "At least 3 reviewers must be assigned to a paper."
     )
     @ApiResponses(value = {
@@ -61,7 +61,7 @@ public class AssignmentsController {
 
     @Operation(summary = "Get current assignments",
             description = "Responds with a list of reviewers for a specific paper." +
-                            "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
+                            " This can only be done by the chair and will respond with a 403 error if requester is not a valid chair."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully returned the list of reviewers assigned to this paper.", content = {@Content(schema = @Schema())}),
