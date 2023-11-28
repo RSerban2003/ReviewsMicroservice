@@ -7,6 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ConfidentialComment {
+    @Schema(description = "The ID of the commenter", example = "1")
+    Long commenterID;
+
     @Schema(description = "A confidential comment for other reviewers", example = "Some comment")
     private String comment;
 }
