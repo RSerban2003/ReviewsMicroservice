@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nl.tudelft.sem.v20232024.team08b.domain.ConfidentialComment;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewDTO;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
@@ -12,12 +13,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/papers/{paperID}/reviews/{reviewerID}")
 @Tag(name = "Reviews", description = "Operations to deal with reviews: reading them, submitting, commenting, etc")
 public class ReviewController {
     @Operation(summary = "Gets a review",
-            description = "Responds with the review of a specific paper using userID and reviewerID."
+            description = "Responds with the review of a specific paper (paperID), reviewed by user (userID). " +
+                    "It does NOT contain the confidential comments. They have to be requested separately."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
@@ -49,8 +53,7 @@ public class ReviewController {
 
     @Operation(summary = "Posts a confidential comment",
             description = "Posts a confidential comment for a review of a specific paper using userID and reviewerID." +
-                            " The requester must be a chair of the track that the paper is in." +
-                            " 403 FORBIDDEN error would be given when the requester is not a valid chair"
+                            " The requester must be a chair of the track that the paper is in."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema())}),
@@ -64,6 +67,24 @@ public class ReviewController {
                                                     @PathVariable Long paperID,
                                                     @RequestBody @Schema(description = "Comment", example = "Some comment")
                                                     String comment) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    // TODO: update the response codes
+    @Operation(summary = "Gets the confidential comments",
+            description = "Gets the confidential comments for a paper"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+    })
+    @GetMapping(path = "/confidential-comment", produces = "application/json")
+    public ResponseEntity<List<ConfidentialComment>>
+                    getConfidentialComments(@RequestParam Long requesterID,
+                                            @PathVariable Long reviewerID,
+                                            @PathVariable Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }

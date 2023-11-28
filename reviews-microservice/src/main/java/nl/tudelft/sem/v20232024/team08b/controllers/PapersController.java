@@ -42,8 +42,6 @@ public class PapersController {
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
-
-
     @Operation(summary = "Get the whole paper without the author names",
         description = "Responds all the contents of a paper submission. " +
             "Excludes the names and credentials of the author. " +
