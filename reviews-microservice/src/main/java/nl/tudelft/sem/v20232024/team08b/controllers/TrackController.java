@@ -28,10 +28,10 @@ public class TrackController {
           description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
   )
   @ApiResponses(value = {
-          @ApiResponse(responseCode = "200"),
-          @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+      @ApiResponse(responseCode = "200", description = "Successful retrieval of track summary stats"),
+      @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "404", description = "Not Found. The requested track was not found.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
   })
   @GetMapping(path = "/analytics", produces = "application/json")
   @ResponseBody
@@ -45,10 +45,10 @@ public class TrackController {
           description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
   )
   @ApiResponses(value = {
-          @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+      @ApiResponse(responseCode = "200", description = "Successful set of bidding deadline", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "404", description = "Not Found. The requested track was not found.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
   })
   @PostMapping(path = "/bidding-deadline", produces = "application/json")
   @ResponseBody
