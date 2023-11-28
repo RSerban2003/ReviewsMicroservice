@@ -5,12 +5,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
-import nl.tudelft.sem.v20232024.team08b.dtos.ConfidentialCommentSubmission;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.UUID;
 
 @RestController("/papers/{paperID}/reviews/{reviewerID}")
 public class ReviewController {
@@ -22,7 +20,7 @@ public class ReviewController {
      * @return the review object
      */
     @Operation(summary = "Gets a review",
-            description = "Gets the review of a specific paper using userID and reviewerID."
+            description = "Responds with the review of a specific paper using userID and reviewerID."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
@@ -43,7 +41,8 @@ public class ReviewController {
      * @return a response entity with code 200 if adding  was successful
      */
     @Operation(summary = "Posts a review",
-            description = "Posts the review of a specific paper using userID and reviewerID."
+            description = "Gives a review to a specific paper." +
+                            "The requester must be a valid reviewer and will be identified using userID and reviewerID."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201"),
@@ -64,7 +63,8 @@ public class ReviewController {
      */
     @Operation(summary = "Posts a confidential comment",
             description = "Posts a confidential comment for a review of a specific paper using userID and reviewerID." +
-                            " The requester must be a chair of the track that the paper is in."
+                            " The requester must be a chair of the track that the paper is in." +
+                            " 403 FORBIDDEN error would be given when the requester is not a valid chair"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201"),
@@ -76,7 +76,7 @@ public class ReviewController {
     public ResponseEntity submitConfidentialComment(@RequestParam Long userID,
                                                     @PathVariable Long reviewerID,
                                                     @PathVariable Long paperID,
-                                                    @RequestBody ConfidentialCommentSubmission comment) {
+                                                    @RequestBody String comment) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }
