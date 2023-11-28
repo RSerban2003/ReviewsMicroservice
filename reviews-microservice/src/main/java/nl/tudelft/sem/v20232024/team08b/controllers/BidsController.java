@@ -29,8 +29,8 @@ public class BidsController {
             "reviewers. By default reviewers are NEUTRAL towards a paper, so NEUTRAL \"bids\" " +
             "will not be returned. " +
             "The requester must be a chair of the track that the paper is in. " +
-                    "If no bid is returned for a particular reviewer, it can be assumed that the " +
-                    "reviewer has no preference in regards to this particular paper."
+            "If no bid is returned for a particular reviewer, it can be assumed that the " +
+            "reviewer has no preference in regards to this particular paper."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully accessed the bids for paper"),
@@ -72,7 +72,8 @@ public class BidsController {
     @Operation(summary = "Bid on a paper",
         description = "Saves the preference (based on expertise) of the requester in regards to reviewing the " +
             "given paper. NEUTRAL effectively resets the preference to the default (no preference). " +
-            "The requester must be a reviewer of the track the paper is in."
+            "The requester must be a reviewer of the track the paper is in. Also, the submission deadline " +
+            "has to have passed and the bidding deadline must not have passed."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful bid on the paper"),
