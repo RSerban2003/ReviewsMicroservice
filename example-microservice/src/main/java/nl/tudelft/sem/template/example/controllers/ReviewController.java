@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@RestController("/review")
+@RestController("/papers/{paperID}/reviews/{reviewerID}")
 public class ReviewController {
     private final transient AuthManager authManager;
 
@@ -25,12 +25,15 @@ public class ReviewController {
 
     /**
      * Allows specific users to read the reviews for a specific paper.
-     * @param UserID the ID for users
-     * @param PaperID the ID for the paper
+     * @param userID the ID of the user
+     * @param reviewerID the ID of the reviewer
+     * @param paperID the ID of the paper
+     * @return the review object
      */
-    @GetMapping("/read/{UserID}/{PaperID}")
-    public void read(@PathVariable UUID UserID, @PathVariable UUID PaperID) {
-        return;
+    @GetMapping("")
+    public ResponseEntity<Review> read(@RequestBody UUID userID, @PathVariable UUID reviewerID,
+                                       @PathVariable UUID paperID) {
+        return ResponseEntity.ok(new Review());
     }
 
     /**
