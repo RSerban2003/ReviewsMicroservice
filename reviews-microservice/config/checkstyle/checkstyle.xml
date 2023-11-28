@@ -242,7 +242,7 @@
             <property name="lineWrappingIndentation" value="4"/>
             <property name="arrayInitIndent" value="4"/>
         </module>
-<!--
+        <!--
         Stops us from writing more natural code, intellij cannot format this
 -->
         <!--<module name="AbbreviationAsWordInName">
@@ -280,9 +280,9 @@
                     METHOD_DEF, QUESTION, RESOURCE_SPECIFICATION, SUPER_CTOR_CALL, LAMBDA,
                     RECORD_DEF"/>
         </module>
-        <!--
+<!--
         Useless rule, doesn't add anything to code quality and is unnatural, intellij cannot format this
-        -->
+-->
         <!--<module name="OperatorWrap">
             <property name="option" value="NL"/>
             <property name="tokens"
