@@ -1,57 +1,53 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import java.util.Date;
-import java.util.UUID;
 
-import nl.tudelft.sem.v20232024.team08b.dtos.Analytics;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import nl.tudelft.sem.v20232024.team08b.dtos.TrackAnalytics;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 @RestController
-@RequestMapping("/Track")
+@RequestMapping("/conferences/{conferenceID}/tracks/{trackID}")
 public class TrackController {
-  /*private final Track repo;
-*/
-  /**
-   * Constructor Method for trackController
-   * @param repo of the controller
-   */
-  /*public TrackController(Track repo) {
-    this.repo = repo;
-  }
-*/
-  /**
-   * Method that returns the analytics of the track
-   * (papers accepted, papers rejected and papers unknown)
-   * @param UserId ID of user
-   * @param TrackID ID of track
-   * @return analytics of the track
-   */
-  @GetMapping(path = {"", "/getAnalytics"})
-  public ResponseEntity<Analytics> getAnalytics(@RequestBody  UUID UserId,
-                                                @RequestBody UUID TrackID) {
-    return null;
+
+  @Operation(summary = "Get the summary stats of a track",
+          description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
+  )
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200"),
+          @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+          @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
+          @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+  })
+  @GetMapping("/analytics")
+  @ResponseBody
+  public ResponseEntity<TrackAnalytics> getAnalytics(@RequestParam Long userID,
+                                                @PathVariable Long conferenceID,
+                                                @PathVariable Long trackID) {
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 
-  /**
-   * Method to change deadline of track
-   * @param UserId user id
-   * @param TrackID track id
-   * @param DeadLine new deadline
-   * @return a reponseEntity stating if it is successful or not
-   */
-  @GetMapping(path = {"", "/setBiddingDeadLine"})
-  public ResponseEntity<Void> getAnalytics(@RequestBody  UUID UserId,
-                                           @RequestBody UUID TrackID,
-                                           @RequestBody Date DeadLine) {
-
-    return null;
+  @Operation(summary = "Get the summary stats of a track",
+          description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
+  )
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "201"),
+          @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+          @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
+          @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+  })
+  @PostMapping("/bidding-deadline")
+  @ResponseBody
+  public ResponseEntity setBiddingDeadline(@RequestParam Long userID,
+                                           @PathVariable Long conferenceID,
+                                           @PathVariable Long trackID,
+                                           @RequestBody Date newDeadline) {
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
-
-
-
-
-
 }
