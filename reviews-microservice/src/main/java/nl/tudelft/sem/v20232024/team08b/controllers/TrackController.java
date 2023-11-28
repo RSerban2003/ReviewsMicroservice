@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import nl.tudelft.sem.v20232024.team08b.dtos.TrackAnalytics;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/conferences/{conferenceID}/tracks/{trackID}")
+@Tag(name = "Tracks", description = "Operations for dealing with tracks: getting summaries and setting deadlines")
 public class TrackController {
 
   @Operation(summary = "Get the summary stats of a track",
@@ -25,7 +27,7 @@ public class TrackController {
           @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
           @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
   })
-  @GetMapping("/analytics")
+  @GetMapping(path = "/analytics", produces = "application/json")
   @ResponseBody
   public ResponseEntity<TrackAnalytics> getAnalytics(@RequestParam Long userID,
                                                 @PathVariable Long conferenceID,
@@ -37,12 +39,12 @@ public class TrackController {
           description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
   )
   @ApiResponses(value = {
-          @ApiResponse(responseCode = "201"),
+          @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema())}),
           @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
           @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
           @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
   })
-  @PostMapping("/bidding-deadline")
+  @PostMapping(path = "/bidding-deadline", produces = "application/json")
   @ResponseBody
   public ResponseEntity setBiddingDeadline(@RequestParam Long userID,
                                            @PathVariable Long conferenceID,
