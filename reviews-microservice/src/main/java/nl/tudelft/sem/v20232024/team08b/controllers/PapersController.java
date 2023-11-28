@@ -13,12 +13,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -121,6 +116,24 @@ public class PapersController {
     public ResponseEntity<List<Long>> getReviewers(
         @RequestParam Long requesterID,
         @PathVariable Long paperID
+    ) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Operation(summary = "End the discussion phase for a paper",
+            description = "The requester must be a chair of the track the paper is in"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful retrieval of the list of reviewers"),
+            @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+    })
+    @ResponseBody
+    @PutMapping(path = "/finalize-reviews")
+    public ResponseEntity<Void> finalize(
+            @RequestParam Long requesterID,
+            @PathVariable Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
