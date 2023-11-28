@@ -112,10 +112,16 @@ pmd {
 
 	incrementalAnalysis = true
 	sourceSets = [sourceSets.main]
+	ruleSetFiles("${rootDir}/config/pmd/pmdExclusion.xml")
 
-
-
+	ruleSetConfig = resources.text.fromString("<ruleset name=\"Custom ruleset\">\n" +
+			"    <description>Custom ruleset for PMD</description>\n" +
+			"    <rule ref=\"category/java/errorprone.xml\">\n" +
+			"        <exclude name=\"MissingSerialVersionUID\"/>\n" +
+			"    </rule>\n" +
+			"</ruleset>")
 }
+
 
 
 apply plugin: 'info.solidsoft.pitest'

@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-@SuppressWarnings("PMD.MissingSerialVersionUID")
+
 public class BidByReviewer implements Serializable {
     private Long bidderID;
     private Bid bid;
