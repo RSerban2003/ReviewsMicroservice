@@ -24,7 +24,7 @@ public class AssignmentsController {
                             "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "201"),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
@@ -39,7 +39,7 @@ public class AssignmentsController {
                     "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "201"),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
@@ -54,7 +54,7 @@ public class AssignmentsController {
                             "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "201"),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
@@ -75,7 +75,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/assignments")
-    public ResponseEntity<List<String>> assignments(@PathVariable Long paperID, @RequestBody Long userID) {
+    public ResponseEntity<List<String>> assignments(@PathVariable Long paperID, @RequestParam Long userID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }
