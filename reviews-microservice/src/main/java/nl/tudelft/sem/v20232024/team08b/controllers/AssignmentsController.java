@@ -30,7 +30,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
     @PostMapping("/assign-manual")
-    public ResponseEntity<Void> assignManual(@PathVariable Long paperID, @RequestBody Long userID) {
+    public ResponseEntity<Void> assignManual(@PathVariable Long paperID, @RequestParam Long userID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -45,7 +45,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
     @PostMapping("/assign-auto")
-    public ResponseEntity<Void> assignAuto(@PathVariable Long paperID, @RequestBody Long userID) {
+    public ResponseEntity<Void> assignAuto(@PathVariable Long paperID, @RequestParam Long userID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -60,7 +60,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
     @PostMapping("/finalize")
-    public ResponseEntity<Void> finalize(@PathVariable Long paperID, @RequestBody Long userID) {
+    public ResponseEntity<Void> finalize(@PathVariable Long paperID, @RequestParam Long userID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
