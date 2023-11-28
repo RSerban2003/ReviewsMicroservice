@@ -60,7 +60,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
     @PostMapping("/finalize")
-    public ResponseEntity<Void> finalize(@PathVariable Long paperID, @RequestParam Long userID) {
+    public ResponseEntity<Void> finalAssignment(@PathVariable Long paperID, @RequestParam Long userID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
