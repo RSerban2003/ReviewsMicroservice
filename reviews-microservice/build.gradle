@@ -113,9 +113,7 @@ pmd {
 	incrementalAnalysis = true
 	sourceSets = [sourceSets.main]
 
-	excludes= [
-			'MissingSerialVersionUID'
-	]
+
 
 }
 
