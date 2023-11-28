@@ -23,14 +23,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AssignmentsController {
     @Operation(summary = "Manually assign reviewers",
             description = "Manually assigns reviewer to a specific paper." +
-                            "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair" +
+                "This can only be done by the chair " +
                             "At least 3 reviewers must be assigned to a paper."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewer successfully assigned to the paper.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to assign reviewers.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "409", description = "Conflict. The reviewer has already been assigned to this paper.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "409", description =
+            "Conflict. There is a Conflict of Interest and the reviewer cannot " +
+                "review this paper; or the reviewer has already been assigned to this paper.", content = {
+            @Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "/assign-manual")
@@ -40,8 +43,8 @@ public class AssignmentsController {
 
     @Operation(summary = "Automatically assign reviewers",
             description = "Automatically assigns reviewer to a specific paper." +
-                    "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair" +
-                    "At least 3 reviewers must be assigned to a paper."
+                "At least 3 reviewers must be assigned to each paper, such that each reviewer in the track " +
+                "has a similar amount of reviews assigned to them."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewer successfully assigned to the paper.", content = {@Content(schema = @Schema())}),
