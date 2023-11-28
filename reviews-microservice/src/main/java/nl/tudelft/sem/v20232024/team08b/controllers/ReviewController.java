@@ -1,9 +1,9 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
+import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import nl.tudelft.sem.template.example.reponses.ReviewSubmission;
 import java.util.UUID;
 
 @RestController("/papers/{paperID}/reviews/{reviewerID}")
