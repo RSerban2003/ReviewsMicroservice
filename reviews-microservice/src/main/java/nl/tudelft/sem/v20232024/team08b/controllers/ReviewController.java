@@ -52,7 +52,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
     @PostMapping("")
-    public ResponseEntity submit(@RequestBody ReviewSubmission review, @PathVariable Long reviewerID,
+    public ResponseEntity<Void> submit(@RequestBody ReviewSubmission review, @PathVariable Long reviewerID,
                                  @PathVariable Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -62,10 +62,20 @@ public class ReviewController {
      * @param comment stores the reviewer ID and the comment itself
      * @return the saved review object
      */
+    @Operation(summary = "Posts a confidential comment",
+            description = "Posts a confidential comment for a review of a specific paper using userID and reviewerID." +
+                            " The requester must be a chair of the track that the paper is in."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+    })
     @PostMapping("/confidentialComment")
-    public ResponseEntity submitConfidentialComment(@RequestParam UUID userID,
-                                                    @PathVariable UUID reviewerID,
-                                                    @PathVariable UUID paperID,
+    public ResponseEntity submitConfidentialComment(@RequestParam Long userID,
+                                                    @PathVariable Long reviewerID,
+                                                    @PathVariable Long paperID,
                                                     @RequestBody ConfidentialCommentSubmission comment) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
