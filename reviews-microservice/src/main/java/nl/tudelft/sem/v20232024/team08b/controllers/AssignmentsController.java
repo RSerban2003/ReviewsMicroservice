@@ -87,8 +87,8 @@ public class AssignmentsController {
                     " This can only be done by the chair and will respond with a 403 error if requester is not a valid chair."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully returned the list of reviewers assigned to this paper.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to view the reviewers.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200", description = "Successfully removed the reviewer for this paper.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to remove the reviewers.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
