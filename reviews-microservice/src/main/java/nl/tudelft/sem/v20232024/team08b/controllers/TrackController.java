@@ -28,14 +28,14 @@ public class TrackController {
           description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
   )
   @ApiResponses(value = {
-          @ApiResponse(responseCode = "200"),
-          @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+      @ApiResponse(responseCode = "200", description = "Successful retrieval of track summary stats"),
+      @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "404", description = "Not Found. The requested track was not found.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
   })
   @GetMapping(path = "/analytics", produces = "application/json")
   @ResponseBody
-  public ResponseEntity<TrackAnalytics> getAnalytics(@RequestParam Long userID,
+  public ResponseEntity<TrackAnalytics> getAnalytics(@RequestParam Long requesterID,
                                                 @PathVariable Long conferenceID,
                                                 @PathVariable Long trackID) {
     return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
@@ -45,14 +45,14 @@ public class TrackController {
           description = "Changes the bidding deadline to the one provided in the body"
   )
   @ApiResponses(value = {
-          @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-          @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+      @ApiResponse(responseCode = "200", description = "Successful set of bidding deadline", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "404", description = "Not Found. The requested track was not found.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
   })
-  @PostMapping(path = "/bidding-deadline", produces = "application/json")
+  @PostMapping(path = "/bidding-deadline", consumes = "application/json")
   @ResponseBody
-  public ResponseEntity setBiddingDeadline(@RequestParam Long userID,
+  public ResponseEntity<Void> setBiddingDeadline(@RequestParam Long userID,
                                            @PathVariable Long conferenceID,
                                            @PathVariable Long trackID,
                                            @RequestBody Date newDeadline) {

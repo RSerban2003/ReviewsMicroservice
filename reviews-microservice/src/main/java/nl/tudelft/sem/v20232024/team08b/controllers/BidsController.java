@@ -29,14 +29,14 @@ public class BidsController {
             "reviewers. By default reviewers are NEUTRAL towards a paper, so NEUTRAL \"bids\" " +
             "will not be returned. " +
             "The requester must be a chair of the track that the paper is in. " +
-                    "If no bid is returned for a particular reviewer, it can be assumed that the " +
-                    "reviewer has no preference in regards to this particular paper."
+            "If no bid is returned for a particular reviewer, it can be assumed that the " +
+            "reviewer has no preference in regards to this particular paper."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "200", description = "Successfully accessed the bids for paper"),
+            @ApiResponse(responseCode = "403", description = "Forbidden, you are not allowed to view bids",content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "Not found, the specified paper does not exist",content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.",content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "", produces = "application/json")
     @ResponseBody
@@ -54,10 +54,10 @@ public class BidsController {
                 "of the track the paper is in."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "200", description = "Successfully accessed the bids for paper by given reviewer"),
+            @ApiResponse(responseCode = "403", description = "Forbidden, you are not allowed to view bids",content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "Not found, the specified bid does not exist",content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.",content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "/by-reviewer-id/{reviewerID}", produces = "application/json")
     @ResponseBody
@@ -72,13 +72,14 @@ public class BidsController {
     @Operation(summary = "Bid on a paper",
         description = "Saves the preference (based on expertise) of the requester in regards to reviewing the " +
             "given paper. NEUTRAL effectively resets the preference to the default (no preference). " +
-            "The requester must be a reviewer of the track the paper is in."
+            "The requester must be a reviewer of the track the paper is in. Also, the submission deadline " +
+            "has to have passed and the bidding deadline must not have passed."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+            @ApiResponse(responseCode = "200", description = "Successful bid on the paper"),
+            @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or track was not found.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "", consumes = "application/json")
     @ResponseBody
