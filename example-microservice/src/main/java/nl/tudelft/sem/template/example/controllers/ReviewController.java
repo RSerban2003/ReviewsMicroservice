@@ -2,7 +2,9 @@ package nl.tudelft.sem.template.example.controllers;
 
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.Review;
+import nl.tudelft.sem.template.example.reponses.ReviewSubmission;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,13 +39,15 @@ public class ReviewController {
     }
 
     /**
-     * Submits a review for a specific paper.
-     * @param review the review object containing the review details
-     * @return the saved review object
+     * @param review the review object containing the review details and the submitter ID
+     * @param reviewerID
+     * @param paperID
+     * @return a response entity with code 200 if adding  was successful
      */
-    @PostMapping("/submit")
-    public ResponseEntity<Review> submit(@RequestBody Review review) {
-        return null;
+    @PostMapping("")
+    public ResponseEntity submit(@RequestBody ReviewSubmission review, @PathVariable UUID reviewerID,
+                                 @PathVariable UUID paperID) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
 

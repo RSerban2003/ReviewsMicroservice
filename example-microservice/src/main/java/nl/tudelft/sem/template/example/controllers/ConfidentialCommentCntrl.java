@@ -2,13 +2,15 @@ package nl.tudelft.sem.template.example.controllers;
 
 import nl.tudelft.sem.template.example.authentication.AuthManager;
 import nl.tudelft.sem.template.example.domain.Review;
+import nl.tudelft.sem.template.example.reponses.ConfidentialCommentSubmission;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@RestController("/confidentialComment")
+@RestController("/paper/{paperID}/confidentialComment")
 public class ConfidentialCommentCntrl {
     private final transient AuthManager authManager;
 
@@ -25,13 +27,13 @@ public class ConfidentialCommentCntrl {
 
     /**
      * @param paperID the ID for the paper
-     * @param userID the ID for the user
-     * @param reviewerID the ID for the reviewer
+     * @param comment stores the reviewer ID and the comment itself
      * @return the saved review object
      */
-    @PostMapping("/submit/{paperID}")
-    public ResponseEntity<Review> submitConfidentialComment(@PathVariable String paperID, @RequestBody UUID userID, @RequestBody UUID reviewerID) {
-        return null;
+    @PostMapping("")
+    public ResponseEntity submitConfidentialComment(@PathVariable UUID paperID,
+                                                    @RequestBody ConfidentialCommentSubmission comment) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
 }
