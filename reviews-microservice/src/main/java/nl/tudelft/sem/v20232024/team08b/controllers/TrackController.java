@@ -35,7 +35,7 @@ public class TrackController {
   })
   @GetMapping(path = "/analytics", produces = "application/json")
   @ResponseBody
-  public ResponseEntity<TrackAnalytics> getAnalytics(@RequestParam Long userID,
+  public ResponseEntity<TrackAnalytics> getAnalytics(@RequestParam Long requesterID,
                                                 @PathVariable Long conferenceID,
                                                 @PathVariable Long trackID) {
     return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
@@ -50,9 +50,9 @@ public class TrackController {
           @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
           @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
   })
-  @PostMapping(path = "/bidding-deadline", produces = "application/json")
+  @PostMapping(path = "/bidding-deadline", consumes = "application/json")
   @ResponseBody
-  public ResponseEntity setBiddingDeadline(@RequestParam Long userID,
+  public ResponseEntity<Void> setBiddingDeadline(@RequestParam Long userID,
                                            @PathVariable Long conferenceID,
                                            @PathVariable Long trackID,
                                            @RequestBody Date newDeadline) {
