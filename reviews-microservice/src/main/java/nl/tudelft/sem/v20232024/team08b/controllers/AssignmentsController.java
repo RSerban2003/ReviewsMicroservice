@@ -63,7 +63,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PostMapping(path = "/finalise")
-    public ResponseEntity<Void> finalise(@RequestParam Long chairID, @PathVariable Long paperID, @RequestParam Long reviewerID) {
+    public ResponseEntity<Void> finalise(@RequestParam Long chairID, @PathVariable Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
