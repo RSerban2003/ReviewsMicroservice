@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Date;
+import java.util.List;
 import nl.tudelft.sem.v20232024.team08b.dtos.TrackAnalytics;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,22 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Conference Tracks", description = "Operations for dealing with conference tracks: getting summaries and setting deadlines")
 public class TrackController {
 
+  @Operation(summary = "Get the papers for track",
+      description = "Returns all the papers assigned to the track of a conference."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successful retrieval of papers in given track of given conference"),
+      @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference was not found.", content = {@Content(schema = @Schema())}),
+      @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+  })
+  @ResponseBody
+  @GetMapping(path = "/papers", produces = "application/json")
+  public ResponseEntity<List<Long>> getPapers(@RequestParam Long requesterID,
+                                              @PathVariable Long conferenceID,
+                                              @PathVariable Long trackID){
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+  }
   @Operation(summary = "Get the summary stats of a track",
           description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
   )
@@ -52,7 +69,7 @@ public class TrackController {
   })
   @PostMapping(path = "/bidding-deadline", consumes = "application/json")
   @ResponseBody
-  public ResponseEntity<Void> setBiddingDeadline(@RequestParam Long userID,
+  public ResponseEntity<Void> setBiddingDeadline(@RequestParam Long requesterID,
                                            @PathVariable Long conferenceID,
                                            @PathVariable Long trackID,
                                            @RequestBody Date newDeadline) {
