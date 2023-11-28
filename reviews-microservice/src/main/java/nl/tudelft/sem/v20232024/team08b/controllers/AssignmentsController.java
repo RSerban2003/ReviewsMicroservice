@@ -21,9 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/papers/{paperID}/assign")
 @Tag(name = "Assignments", description = "Operations for assigning reviewers to papers.")
 public class AssignmentsController {
-    @Operation(summary = "Manually assigns reviewer",
+    @Operation(summary = "Manually assign reviewers",
             description = "Manually assigns reviewer to a specific paper." +
-                            "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
+                            "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair" +
+                            "At least 3 reviewers must be assigned to a paper."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewer successfully assigned to the paper.", content = {@Content(schema = @Schema())}),
@@ -37,9 +38,10 @@ public class AssignmentsController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @Operation(summary = "Automatically assigns reviewers",
+    @Operation(summary = "Automatically assign reviewers",
             description = "Automatically assigns reviewer to a specific paper." +
-                    "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
+                    "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair" +
+                    "At least 3 reviewers must be assigned to a paper."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewer successfully assigned to the paper.", content = {@Content(schema = @Schema())}),

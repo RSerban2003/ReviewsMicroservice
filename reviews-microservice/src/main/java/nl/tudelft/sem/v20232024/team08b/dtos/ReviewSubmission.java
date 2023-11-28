@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@Schema(description = "The submission review of a paper")
+@Schema(description = "Review submission of a paper")
 public class ReviewSubmission {
     @Schema(description = "The confidence score of the reviewer", example = "EXPERT")
     private ConfidenceScore confidenceScore;

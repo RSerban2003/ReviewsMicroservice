@@ -9,8 +9,18 @@ import lombok.Setter;
 @Setter
 @Schema(description = "The full contents of a submitted paper. Doesn't include the author names.")
 public class Paper {
-    private PaperSummary paperSummary;
+    @Schema(description = "The title of the paper", example = "Tails of frogs")
+    private String title;
+
+    @Schema(description = "The abstract of the paper", example = "Some sample abstract")
+    private String abstractSection;
+
+    @Schema(description = "Main keywords of the paper", example = "[Animals]")
     private List<String> keywords;
-    private String pdfLink;
+
+    @Schema(description = "The paper itself", example = "Full text of the paper")
+    private String mainText;
+
+    @Schema(description = "The link to replication package", example = "https://localhost/paper")
     private String replicationPackageLink;
 }

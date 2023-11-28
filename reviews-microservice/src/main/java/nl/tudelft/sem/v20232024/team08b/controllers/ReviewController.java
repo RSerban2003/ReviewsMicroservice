@@ -26,10 +26,10 @@ public class ReviewController {
             description = "Responds with the review of a specific paper using userID and reviewerID."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200"),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "200", description = "Successful retrieval of the review"),
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "", produces = "application/json")
     public ResponseEntity<ReviewDTO> read(
@@ -47,10 +47,10 @@ public class ReviewController {
             "begins and reviewers can see each others reviews and write comments on them."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "201", description = "Review successfully submitted"),
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "", consumes = {"application/json"})
     public ResponseEntity<Void> submit(
@@ -67,10 +67,10 @@ public class ReviewController {
                             " 403 FORBIDDEN error would be given when the requester is not a valid chair"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "201", description = "Confidential comment successfully posted"),
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester is not a valid chair.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "/confidential-comment", consumes = "application/json")
     public ResponseEntity<Void> submitConfidentialComment(@RequestParam Long userID,
