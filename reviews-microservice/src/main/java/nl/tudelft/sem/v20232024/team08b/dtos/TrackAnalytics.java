@@ -6,6 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Schema(description = "Counts of accepted, rejected and unknown papers")
 public class TrackAnalytics {
   @Schema(description = "Number of accepted papers", example = "0")
   private int accepted;
