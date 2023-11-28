@@ -6,6 +6,7 @@ import nl.tudelft.sem.template.example.reponses.PaperAbstract;
 import nl.tudelft.sem.template.example.reponses.PaperState;
 import nl.tudelft.sem.template.example.reponses.WholePaper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,7 @@ import java.util.UUID;
  * Controls the papers
  */
 @RestController
-@RequestMapping("/paper")
+@RequestMapping("/paper/{paperID}")
 public class PaperController {
 
     private final transient AuthManager authManager;
@@ -35,9 +36,9 @@ public class PaperController {
      *
      * @return the paper, its ID and abstract
      */
-    @GetMapping("/{paperID}/getTitleAndAbstract")
+    @GetMapping("/titleAndAbstract")
     public ResponseEntity<PaperAbstract> getTitleAndAbstract(@PathVariable UUID paperID) {
-        return ResponseEntity.ok(new PaperAbstract());
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     /**
@@ -45,13 +46,13 @@ public class PaperController {
      *
      * @return the paper for the reviewers to read
      */
-    @GetMapping("/{paperID}/readPaper")
+    @GetMapping("")
     public ResponseEntity<WholePaper> readPaper(@PathVariable UUID paperID) {
-        return ResponseEntity.ok(new WholePaper());
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @GetMapping("/{paperID}/getState")
+    @GetMapping("/state")
     public ResponseEntity<PaperState> getState(@PathVariable UUID paperID) {
-        return ResponseEntity.ok(new PaperState());
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }
