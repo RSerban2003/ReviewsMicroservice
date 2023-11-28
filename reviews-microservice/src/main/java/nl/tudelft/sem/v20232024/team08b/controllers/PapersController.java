@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import nl.tudelft.sem.v20232024.team08b.dtos.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperStatus;
@@ -99,6 +100,26 @@ public class PapersController {
     @ResponseBody
     @GetMapping(path = "/review-phase", produces = "application/json")
     public ResponseEntity<PaperPhase> getPhase(
+        @RequestParam Long requesterID,
+        @PathVariable Long paperID
+    ) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+
+    @Operation(summary = "Get the list of a reviewers for a given paper",
+        description = "Responds with list of reviewers assigned to that paper." +
+            "The requester must be a chair of the track the paper is in"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful retrieval of the list of reviewers"),
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+    })
+    @ResponseBody
+    @GetMapping(path = "/reviewers", produces = "application/json")
+    public ResponseEntity<List<Long>> getReviewers(
         @RequestParam Long requesterID,
         @PathVariable Long paperID
     ) {
