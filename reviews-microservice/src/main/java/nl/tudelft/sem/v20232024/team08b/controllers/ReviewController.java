@@ -1,4 +1,9 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
 import org.springframework.http.HttpStatus;
@@ -15,10 +20,19 @@ public class ReviewController {
      * @param paperID the ID of the paper
      * @return the review object
      */
+    @Operation(summary = "Gets a review",
+            description = "Gets the review of a specific paper using userID and reviewerID."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+    })
     @GetMapping("")
-    public ResponseEntity<Review> read(@RequestBody UUID userID, @PathVariable UUID reviewerID,
-                                       @PathVariable UUID paperID) {
-        return ResponseEntity.ok(new Review());
+    public ResponseEntity<Review> read(@RequestParam Long userID, @PathVariable Long reviewerID,
+                                       @PathVariable Long paperID) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     /**
@@ -27,9 +41,18 @@ public class ReviewController {
      * @param paperID
      * @return a response entity with code 200 if adding  was successful
      */
+    @Operation(summary = "Posts a review",
+            description = "Posts the review of a specific paper using userID and reviewerID."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+    })
     @PostMapping("")
-    public ResponseEntity submit(@RequestBody ReviewSubmission review, @PathVariable UUID reviewerID,
-                                 @PathVariable UUID paperID) {
+    public ResponseEntity submit(@RequestBody ReviewSubmission review, @PathVariable Long reviewerID,
+                                 @PathVariable Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 

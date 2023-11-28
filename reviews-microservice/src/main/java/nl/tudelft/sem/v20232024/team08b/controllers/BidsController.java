@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/papers/{paper_id}/bids")
 @Tag(name = "Bids", description = "Operations for bidding on papers, before the reviews are assigned")
