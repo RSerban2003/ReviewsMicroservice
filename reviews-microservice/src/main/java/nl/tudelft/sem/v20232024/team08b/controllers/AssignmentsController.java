@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController("/papers/{paperID}")
 public class AssignmentsController {
-    @PostMapping("/assign-manual")
+    @PostMapping(path = "/assign-manual", produces = "application/json"zzzzzz)
     public ResponseEntity<Void> assignManual(@PathVariable Long paperID, @RequestBody Long userID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
