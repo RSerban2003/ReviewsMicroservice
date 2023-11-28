@@ -2,7 +2,12 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import java.util.Date;
 
-import nl.tudelft.sem.v20232024.team08b.dtos.Analytics;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import nl.tudelft.sem.v20232024.team08b.dtos.TrackAnalytics;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,33 +16,38 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/conferences/{conferenceID}/tracks/{trackID}")
 public class TrackController {
 
-  /**
-   * Method that returns the analytics of the track (papers accepted,
-   * papers rejected and papers unknown)
-   * @param userID ID of user
-   * @param trackID ID of track
-   * @return analytics of the track
-   */
+  @Operation(summary = "Get the summary stats of a track",
+          description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
+  )
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "200"),
+          @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+          @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
+          @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+  })
   @GetMapping("/analytics")
-  public ResponseEntity<Analytics> getAnalytics(@RequestParam Long userID,
+  @ResponseBody
+  public ResponseEntity<TrackAnalytics> getAnalytics(@RequestParam Long userID,
                                                 @PathVariable Long conferenceID,
                                                 @PathVariable Long trackID) {
     return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 
-  /**
-   * Method to change deadline of track
-   * @param userID user id
-   * @param conferenceID conference id
-   * @param trackID track id
-   * @param newDeadline new deadline
-   * @return a response entity stating if it is successful or not
-   */
+  @Operation(summary = "Get the summary stats of a track",
+          description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
+  )
+  @ApiResponses(value = {
+          @ApiResponse(responseCode = "201"),
+          @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
+          @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
+          @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
+  })
   @PostMapping("/bidding-deadline")
-  public ResponseEntity<Void> setBiddingDeadline(@RequestParam Long userID,
-                                                 @PathVariable Long conferenceID,
-                                                 @PathVariable Long trackID,
-                                                 @RequestBody Date newDeadline) {
+  @ResponseBody
+  public ResponseEntity setBiddingDeadline(@RequestParam Long userID,
+                                           @PathVariable Long conferenceID,
+                                           @PathVariable Long trackID,
+                                           @RequestBody Date newDeadline) {
     return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 }
