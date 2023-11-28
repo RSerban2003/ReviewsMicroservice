@@ -43,7 +43,7 @@ public class ReviewController {
     })
     @PutMapping(path = "", produces = "application/json")
     public ResponseEntity submit(@RequestBody ReviewSubmission review, @PathVariable Long reviewerID,
-                                 @PathVariable Long paperID) {
+                                 @PathVariable Long paperID, @RequestParam Long userID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
