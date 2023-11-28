@@ -16,5 +16,4 @@ public class ReviewSubmission {
     private Score confidenceScore;
     private String commentForAuthor;
     private int recommendationScore;
-    private UUID submitterID;
 }
