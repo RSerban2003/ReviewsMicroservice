@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
+import nl.tudelft.sem.v20232024.team08b.dtos.ReviewDTO;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,8 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "", produces = "application/json")
-    public ResponseEntity<Review> read(@RequestParam Long userID, @PathVariable Long reviewerID,
-                                       @PathVariable Long paperID) {
+    public ResponseEntity<ReviewDTO> read(@RequestParam Long userID, @PathVariable Long reviewerID,
+                                          @PathVariable Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -35,13 +36,13 @@ public class ReviewController {
                             "The requester must be a valid reviewer and will be identified using userID and reviewerID."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201"),
+            @ApiResponse(responseCode = "201", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
-    @PostMapping(path = "", produces = "application/json")
-    public ResponseEntity<Void> submit(@RequestBody ReviewSubmission review, @PathVariable Long reviewerID,
+    @PutMapping(path = "", produces = "application/json")
+    public ResponseEntity submit(@RequestBody ReviewSubmission review, @PathVariable Long reviewerID,
                                  @PathVariable Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -57,7 +58,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
-    @PostMapping(path = "/confidential-comment", produces = "application/json")
+    @PutMapping(path = "/confidential-comment", produces = "application/json")
     public ResponseEntity submitConfidentialComment(@RequestParam Long userID,
                                                     @PathVariable Long reviewerID,
                                                     @PathVariable Long paperID,
