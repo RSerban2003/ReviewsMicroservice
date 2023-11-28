@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
+import nl.tudelft.sem.v20232024.team08b.dtos.ConfidentialCommentSubmission;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,5 +57,16 @@ public class ReviewController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-
+    /**
+     * @param paperID the ID for the paper
+     * @param comment stores the reviewer ID and the comment itself
+     * @return the saved review object
+     */
+    @PostMapping("/confidentialComment")
+    public ResponseEntity submitConfidentialComment(@RequestParam UUID userID,
+                                                    @PathVariable UUID reviewerID,
+                                                    @PathVariable UUID paperID,
+                                                    @RequestBody ConfidentialCommentSubmission comment) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
 }

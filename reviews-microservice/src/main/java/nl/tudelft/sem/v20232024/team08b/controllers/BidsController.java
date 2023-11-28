@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/papers/{paper_id}/bids")
+@RequestMapping("/papers/{paperID}/bids")
 @Tag(name = "Bids", description = "Operations for bidding on papers, before the reviews are assigned")
 public class BidsController {
     @Operation(summary = "Get all bids for a given paper",
@@ -33,8 +33,8 @@ public class BidsController {
     @GetMapping(path = "", produces = "application/json")
     @ResponseBody
     public ResponseEntity<List<BidByReviewer>> getBidsForPaper(
-            @RequestParam Long requester_id,
-            @PathVariable Long paper_id
+            @RequestParam Long requesterID,
+            @PathVariable Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -50,12 +50,12 @@ public class BidsController {
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
-    @GetMapping(path = "/by-reviewer-id/{reviewer_id}", produces = "application/json")
+    @GetMapping(path = "/by-reviewer-id/{reviewerID}", produces = "application/json")
     @ResponseBody
     public ResponseEntity<Bid> getBidsForPaperByReviewer(
-            @RequestParam Long requester_id,
-            @PathVariable Long paper_id,
-            @PathVariable Long reviewer_id
+            @RequestParam Long requesterID,
+            @PathVariable Long paperID,
+            @PathVariable Long reviewerID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -73,8 +73,8 @@ public class BidsController {
     @PutMapping(path = "", consumes = "application/json")
     @ResponseBody
     public ResponseEntity<Void> bid(
-            @RequestParam Long requester_id,
-            @PathVariable Long paper_id,
+            @RequestParam Long requesterID,
+            @PathVariable Long paperID,
             @RequestBody Bid bid
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
@@ -92,8 +92,8 @@ public class BidsController {
     @DeleteMapping(path = "")
     @ResponseBody
     public ResponseEntity<Void> deleteBid(
-            @RequestParam Long requester_id,
-            @PathVariable Long paper_id
+            @RequestParam Long requesterID,
+            @PathVariable Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
