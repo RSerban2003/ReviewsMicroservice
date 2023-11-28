@@ -25,9 +25,10 @@ import java.util.List;
 @RequestMapping("/papers/{paperID}/assign")
 @Tag(name = "Assignments", description = "Operations for assigning reviewers to papers.")
 public class AssignmentsController {
-    @Operation(summary = "Manually assigns reviewer",
+    @Operation(summary = "Manually assign reviewers",
             description = "Manually assigns reviewer to a specific paper." +
-                            "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
+                            "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair" +
+                            "At least 3 reviewers must be assigned to a paper."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewer successfully assigned to the paper.", content = {@Content(schema = @Schema())}),
@@ -41,9 +42,10 @@ public class AssignmentsController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @Operation(summary = "Automatically assigns reviewers",
+    @Operation(summary = "Automatically assign reviewers",
             description = "Automatically assigns reviewer to a specific paper." +
-                    "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
+                    "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair" +
+                    "At least 3 reviewers must be assigned to a paper."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewer successfully assigned to the paper.", content = {@Content(schema = @Schema())}),
@@ -54,21 +56,6 @@ public class AssignmentsController {
     })
     @PutMapping(path="/assign-auto", produces = "application/json")
     public ResponseEntity<Void> assignAuto(@PathVariable Long paperID, @RequestParam Long requesterID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @Operation(summary = "Finalise reviewers",
-            description = "Finalises the assignment of reviewers." +
-                            "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Reviewers has been successfully finalized to this paper.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to finalize the assignments.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
-    })
-    @PostMapping(path="/finalize", produces = "application/json")
-    public ResponseEntity<Void> finalAssignment(@PathVariable Long paperID, @RequestParam Long requesterID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
