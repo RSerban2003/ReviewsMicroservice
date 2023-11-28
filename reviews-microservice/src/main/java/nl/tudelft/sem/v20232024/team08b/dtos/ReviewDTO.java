@@ -3,26 +3,15 @@ package nl.tudelft.sem.v20232024.team08b.dtos;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import nl.tudelft.sem.v20232024.team08b.domain.ConfidenceScore;
 import nl.tudelft.sem.v20232024.team08b.domain.ConfidentialComment;
+import nl.tudelft.sem.v20232024.team08b.domain.RecommendationScore;
 
 import java.util.*;
-
 @Getter
 @Setter
 @Schema(description = "The review of a paper")
 public class ReviewDTO {
-
-    enum ConfidenceScore {
-        EXPERT,
-        KNOWLEDGEABLE,
-        BASIC
-    }
-    enum RecommendationScore {
-        STRONG_REJECT,
-        WEAK_REJECT,
-        WEAK_ACCEPT,
-        STRONG_ACCEPT
-    }
     @Schema(description = "The confidence score of the reviewer", example = "EXPERT")
     private ConfidenceScore confidenceScore;
 
