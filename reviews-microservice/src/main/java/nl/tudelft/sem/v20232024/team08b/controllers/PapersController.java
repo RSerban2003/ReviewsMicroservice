@@ -24,10 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Papers", description = "Operations for viewing papers -- their contents, review status, etc.")
 public class PapersController {
+
+
     @Operation(summary = "Get the title and abstract of a paper",
         description = "Responds with the title and abstract of the given paper. " +
             "The requester must be a reviewer or chair for the track the paper is in."
     )
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),

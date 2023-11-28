@@ -7,4 +7,8 @@ import lombok.Setter;
 @Setter
 public class ConfidentialComment {
     private String comment;
+
+    public ConfidentialComment(String comment) {
+        this.comment = comment;
+    }
 }

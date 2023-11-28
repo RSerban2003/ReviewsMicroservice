@@ -9,7 +9,6 @@ import lombok.Getter;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.UUID;
 import lombok.Setter;
 
@@ -19,17 +18,19 @@ import lombok.Setter;
 @JsonIdentityInfo(scope = Track.class, generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "id")
 @EqualsAndHashCode
+@SuppressWarnings("PMD.MissingSerialVersionUID")
 public class Track implements Serializable {
+
+
   enum Phase {
     SUBMITTING,
     BIDDING,
     REVIEWING,
-    FINAL
+    FINAL;
   }
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private UUID id;
-
+  private UUID trackId;
   @Basic(optional = false)
   private Date biddingDeadLine;
 

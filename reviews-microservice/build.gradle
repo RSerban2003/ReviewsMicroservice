@@ -23,7 +23,7 @@ plugins {
     //id 'checkstyle'
 
 	// PMD
-	//id 'pmd'
+	id 'pmd'
 
 	// PITest
 	id 'info.solidsoft.pitest' version '1.5.2'
@@ -108,11 +108,12 @@ jacocoTestCoverageVerification() {
 	maxWarnings = 0
 }*/
 
-/*pmd {
+pmd {
+
 	incrementalAnalysis = true
 	sourceSets = [sourceSets.main]
-    rulesMinimumPriority = 2
-}*/
+}
+
 
 apply plugin: 'info.solidsoft.pitest'
 pitest {

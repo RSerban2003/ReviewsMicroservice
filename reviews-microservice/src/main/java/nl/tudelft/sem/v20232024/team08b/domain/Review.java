@@ -12,7 +12,7 @@ public class Review {
     enum Score {
         EXPERT,
         KNOWLEDGEABLE,
-        BASIC
+        BASIC;
     }
     private Score confidenceScore;
     private String commentForAuthor;

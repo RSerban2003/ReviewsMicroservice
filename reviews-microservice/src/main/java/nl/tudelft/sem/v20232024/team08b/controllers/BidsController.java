@@ -18,12 +18,15 @@ import java.util.List;
 @RequestMapping("/papers/{paperID}/bids")
 @Tag(name = "Bids", description = "Operations for bidding on papers, before the reviews are assigned")
 public class BidsController {
+
+
     @Operation(summary = "Get all bids for a given paper",
             description = "Responds with a list of bids and the ID's of the corresponding" +
                     "reviewers. The requester must be a chair of the track that the paper is in." +
                     "If no bid is returned for a particular reviewer, it can be assumed that the " +
                     "reviewer has no preference in regards to this particular paper."
     )
+    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
