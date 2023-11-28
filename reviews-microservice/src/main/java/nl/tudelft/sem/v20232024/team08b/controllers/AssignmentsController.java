@@ -31,7 +31,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "/assign-manual")
-    public ResponseEntity<Void> assignManual(@RequestParam Long chairID, @PathVariable Long paperID, @RequestParam Long reviewerID) {
+    public ResponseEntity<Void> assignManual(@RequestParam Long requesterID, @PathVariable Long paperID, @RequestParam Long reviewerID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -48,7 +48,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "/assign-auto")
-    public ResponseEntity<Void> assignAuto(@RequestParam Long chairID, @PathVariable Long paperID, @RequestParam Long reviewerID) {
+    public ResponseEntity<Void> assignAuto(@RequestParam Long requesterID, @PathVariable Long paperID, @RequestParam Long reviewerID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -63,7 +63,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PostMapping(path = "/finalise")
-    public ResponseEntity<Void> finalise(@RequestParam Long chairID, @PathVariable Long paperID) {
+    public ResponseEntity<Void> finalise(@RequestParam Long requesterID, @PathVariable Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -78,7 +78,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "", produces = "application/json")
-    public ResponseEntity<List<Long>> assignments(@PathVariable Long paperID, @RequestParam Long chairID) {
+    public ResponseEntity<List<Long>> assignments(@PathVariable Long paperID, @RequestParam Long requesterID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -93,7 +93,7 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @DeleteMapping(path = "/remove", consumes = {"application/json"})
-    public void remove(@PathVariable Long paperID, @RequestParam Long chairID, @RequestParam Long reviewerID) {
+    public void remove(@PathVariable Long paperID, @RequestParam Long requesterID, @RequestParam Long reviewerID) {
 
     }
 
