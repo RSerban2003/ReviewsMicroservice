@@ -69,7 +69,7 @@ public class TrackController {
   })
   @PostMapping(path = "/bidding-deadline", consumes = "application/json")
   @ResponseBody
-  public ResponseEntity<Void> setBiddingDeadline(@RequestParam Long userID,
+  public ResponseEntity<Void> setBiddingDeadline(@RequestParam Long requesterID,
                                            @PathVariable Long conferenceID,
                                            @PathVariable Long trackID,
                                            @RequestBody Date newDeadline) {
