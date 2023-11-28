@@ -48,7 +48,9 @@ public class ReviewController {
         description = "The requester submits (or resubmits) a review to a specific paper. " +
             "The requester must be a valid reviewer and will be identified using userID and reviewerID. " +
             "Once all the reviewers for a paper have submitted a review for that paper, the Discussion phase for that paper " +
-            "begins and reviewers can see each others reviews and write comments on them."
+            "begins and reviewers can see each others reviews and write comments on them. " +
+            "Once the discussion phase has begun, all of the reviewers have to resubmit their reviews (even if " +
+            "the reviews are exactly the same), in order for the Chair to be able to approve the reviews."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Review successfully submitted"),
