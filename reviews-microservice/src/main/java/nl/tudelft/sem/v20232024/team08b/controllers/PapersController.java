@@ -105,6 +105,7 @@ public class PapersController {
     }
 
 
+    @Tag(name = "Reviews")
     @Operation(summary = "Get the list of a reviewers for a given paper",
         description = "Responds with list of reviewers assigned to that paper." +
             "The requester must be a chair of the track the paper is in"
