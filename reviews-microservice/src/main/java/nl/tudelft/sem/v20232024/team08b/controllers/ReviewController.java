@@ -52,18 +52,12 @@ public class ReviewController {
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
         @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
-<<<<<<< HEAD
-    @PutMapping(path = "", produces = "application/json")
-    public ResponseEntity submit(@RequestBody ReviewSubmission review, @PathVariable Long reviewerID,
-                                 @PathVariable Long paperID, @RequestParam Long userID) {
-=======
     @PutMapping(path = "", consumes = {"application/json"})
     public ResponseEntity<Void> submit(
         @RequestBody ReviewSubmission review,
         @RequestParam Long requesterID,
-        @PathVariable Long paperID
-    ) {
->>>>>>> b2f8f36241917da6b9da6edfa53e4cf92ffca407
+        @PathVariable Long paperID,
+        @PathVariable String reviewerID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
