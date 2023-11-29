@@ -62,7 +62,6 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "404", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", content = {@Content(schema = @Schema())})
     })
-    @SuppressWarnings("PMD.FinalizeOverloaded")
     @PostMapping("/finalize")
     public ResponseEntity<Void> finalize(@PathVariable Long paperID, @RequestBody Long userID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);

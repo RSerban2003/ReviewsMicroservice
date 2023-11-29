@@ -26,7 +26,6 @@ public class BidsController {
                     "If no bid is returned for a particular reviewer, it can be assumed that the " +
                     "reviewer has no preference in regards to this particular paper."
     )
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),

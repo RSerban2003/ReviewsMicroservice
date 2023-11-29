@@ -46,7 +46,7 @@ public class TrackController {
   })
   @PostMapping(path = "/bidding-deadline", produces = "application/json")
   @ResponseBody
-  public ResponseEntity setBiddingDeadline(@RequestParam Long userID, //NOPMD - suppressed LinguisticNaming - returns response entity
+  public ResponseEntity setBiddingDeadline(@RequestParam Long userID,
                                            @PathVariable Long conferenceID,
                                            @PathVariable Long trackID,
                                            @RequestBody Date newDeadline) {

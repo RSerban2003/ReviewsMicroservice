@@ -18,7 +18,6 @@ import lombok.Setter;
 @JsonIdentityInfo(scope = Track.class, generator = ObjectIdGenerators.PropertyGenerator.class,
     property = "id")
 @EqualsAndHashCode
-@SuppressWarnings("PMD.MissingSerialVersionUID")
 public class Track implements Serializable {
 
 

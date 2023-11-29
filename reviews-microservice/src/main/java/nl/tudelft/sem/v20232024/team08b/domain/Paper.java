@@ -14,7 +14,6 @@ import java.util.UUID;
 @Getter
 @JsonIdentityInfo(scope = Paper.class, generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "ID")
-@SuppressWarnings("PMD.MissingSerialVersionUID")
 public class Paper implements Serializable {
     @Id
     @GeneratedValue

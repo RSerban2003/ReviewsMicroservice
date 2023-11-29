@@ -30,7 +30,6 @@ public class PapersController {
         description = "Responds with the title and abstract of the given paper. " +
             "The requester must be a reviewer or chair for the track the paper is in."
     )
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
