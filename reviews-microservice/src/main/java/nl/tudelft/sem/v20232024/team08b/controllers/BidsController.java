@@ -59,7 +59,7 @@ public class BidsController {
             @ApiResponse(responseCode = "404", description = "Not found, the specified bid does not exist",content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.",content = {@Content(schema = @Schema())})
     })
-    @GetMapping(path = "/by-reviewer-id/{reviewerID}", produces = "application/json")
+    @GetMapping(path = "/by-reviewer/{reviewerID}", produces = "application/json")
     @ResponseBody
     public ResponseEntity<Bid> getBidForPaperByReviewer(
             @RequestParam Long requesterID,

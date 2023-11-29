@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/papers/{paperID}/assignments")
+@RequestMapping("/papers/{paperID}/assignees")
 @Tag(name = "Assignments", description = "Operations for assigning reviewers to papers.")
 public class AssignmentsController {
     @Operation(summary = "Manually assign reviewers",
@@ -37,8 +37,12 @@ public class AssignmentsController {
             @Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
-    @PutMapping(path = "/assign-manual")
-    public ResponseEntity<Void> assignManual(@RequestParam Long requesterID, @PathVariable Long paperID, @RequestParam Long reviewerID) {
+    @PostMapping(path = "/{reviewerID}")
+    public ResponseEntity<Void> assignManual(
+        @RequestParam Long requesterID,
+        @PathVariable Long paperID,
+        @PathVariable Long reviewerID
+    ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -54,8 +58,11 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "409", description = "Conflict. The reviewer has already been assigned to this paper.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
-    @PutMapping(path = "/assign-auto")
-    public ResponseEntity<Void> assignAuto(@RequestParam Long requesterID, @PathVariable Long paperID, @RequestParam Long reviewerID) {
+    @PutMapping(path = "/automatic")
+    public ResponseEntity<Void> assignAuto(
+        @RequestParam Long requesterID,
+        @PathVariable Long paperID
+    ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -69,8 +76,8 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
-    @PostMapping(path = "/finalise")
-    public ResponseEntity<Void> finalise(@RequestParam Long requesterID, @PathVariable Long paperID) {
+    @PostMapping(path = "/finalization")
+    public ResponseEntity<Void> finalization(@RequestParam Long requesterID, @PathVariable Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
