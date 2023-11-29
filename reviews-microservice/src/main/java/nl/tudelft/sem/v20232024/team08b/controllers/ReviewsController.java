@@ -7,9 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import nl.tudelft.sem.v20232024.team08b.domain.ConfidentialComment;
+import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.ReviewDTO;
+import nl.tudelft.sem.v20232024.team08b.dtos.Review;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,16 +29,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReviewsController {
     @Operation(summary = "Gets a review",
             description = "Responds with the review of a specific paper (paperID), reviewed by user (userID). " +
-                    "It does NOT contain the confidential comments. They have to be requested separately."
+                "Confidential comments will not be revealed if the requester is the author of the paper."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the review"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a reviewer for this paper, " +
+            "a chair of the track the paper is in, or an author of the paper (in that case, the reviews for the track " +
+            "the paper is in must all be finalized, and only then they can be revealed to authors).", content = {
+            @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
         @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "/reviews/by-reviewer/{reviewerID}", produces = "application/json")
-    public ResponseEntity<ReviewDTO> read(
+    public ResponseEntity<Review> read(
         @RequestParam Long requesterID,
         @PathVariable Long reviewerID,
         @PathVariable Long paperID
@@ -135,18 +138,20 @@ public class ReviewsController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @Operation(summary = "Posts a confidential comment",
-            description = "Posts a confidential comment for a review of a specific paper using userID and reviewerID." +
-                " The requester must be a chair of the track that the paper is in, or a reviewer " +
-                "also assigned to the given paper."
+    @Operation(summary = "Posts a discussion comment",
+        description = "Posts a discussion comment for a review of a specific paper using userID and reviewerID. " +
+            "Discussion comments are comments that can be left on reviews during the Discussion phase. " +
+            "These comments will not be revealed to authors. " +
+            "The requester must be a chair of the track that the paper is in, or a reviewer " +
+            "also assigned to the given paper. Once posted, these comments cannot be edited or deleted."
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Confidential comment successfully posted"),
+        @ApiResponse(responseCode = "201", description = "Success. A discussion comment was appended to the review."),
         @ApiResponse(responseCode = "403", description = "Forbidden. The requester is not a valid chair or reviewer.", content = {@Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
         @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
-    @PostMapping(path = "/reviews/by-reviewer/{reviewerID}/confidential-comments", consumes = "application/json")
+    @PostMapping(path = "/reviews/by-reviewer/{reviewerID}/discussion-comments", consumes = "application/json")
     public ResponseEntity<Void> submitConfidentialComment(@RequestParam Long userID,
                                                     @PathVariable Long reviewerID,
                                                     @PathVariable Long paperID,
@@ -155,17 +160,17 @@ public class ReviewsController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @Operation(summary = "Gets the confidential comments",
-            description = "Gets the confidential comments for a paper, if the user is a chair or a reviewer."
+    @Operation(summary = "Gets the discussion comments",
+        description = "Responds with all the discussion comments for a paper."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Confidential comment successfully posted"),
+        @ApiResponse(responseCode = "201", description = "Success."),
             @ApiResponse(responseCode = "403", description = "Forbidden. The requester is not a valid chair or reviewer.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
-    @GetMapping(path = "/reviews/by-reviewer/{reviewerID}/confidential-comments", produces = "application/json")
-    public ResponseEntity<List<ConfidentialComment>>
+    @GetMapping(path = "/reviews/by-reviewer/{reviewerID}/discussion-comments", produces = "application/json")
+    public ResponseEntity<List<DiscussionComment>>
                     getConfidentialComments(@RequestParam Long requesterID,
                                             @PathVariable Long reviewerID,
                                             @PathVariable Long paperID) {

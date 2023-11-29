@@ -26,11 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class TracksController {
 
     @Operation(summary = "Get the papers for track",
-        description = "Returns all the papers assigned to the track of a conference."
+        description = "Returns all the papers in the given track of a conference."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of papers in given track of given conference"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track or a reviewer in the track.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference was not found.", content = {
             @Content(schema = @Schema())}),
