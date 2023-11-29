@@ -1,21 +1,16 @@
 package nl.tudelft.sem.v20232024.team08b.domain;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.*;
+import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
 
 @Getter
 @Setter
 public class Review {
 
-    enum Score {
-        EXPERT,
-        KNOWLEDGEABLE,
-        BASIC
-    }
-    private Score confidenceScore;
+    private ConfidenceScore confidenceScore;
     private String commentForAuthor;
-    private int recommendationScore;
-    private List<ConfidentialComment> commentForReviewers;
+    private RecommendationScore recommendationScore;
+    private List<DiscussionComment> commentForReviewers;
 }
