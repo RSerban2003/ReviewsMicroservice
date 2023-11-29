@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Paper implements Serializable {
     @Id
     @GeneratedValue
-    private UUID paperID;
+    private UUID ID;
 
 
 

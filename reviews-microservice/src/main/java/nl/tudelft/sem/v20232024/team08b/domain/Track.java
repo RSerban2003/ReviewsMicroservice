@@ -9,6 +9,7 @@ import lombok.Getter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.Setter;
 
@@ -19,17 +20,16 @@ import lombok.Setter;
     property = "id")
 @EqualsAndHashCode
 public class Track implements Serializable {
-
-
   enum Phase {
     SUBMITTING,
     BIDDING,
     REVIEWING,
-    FINAL;
+    FINAL
   }
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  private UUID trackId;
+  private UUID id;
+
   @Basic(optional = false)
   private Date biddingDeadLine;
 

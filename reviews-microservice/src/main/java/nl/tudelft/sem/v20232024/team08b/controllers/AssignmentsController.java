@@ -6,9 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-//import nl.tudelft.sem.v20232024.team08b.domain.Paper;
-//import nl.tudelft.sem.v20232024.team08b.domain.Review;
-//import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
+import nl.tudelft.sem.v20232024.team08b.domain.Paper;
+import nl.tudelft.sem.v20232024.team08b.domain.Review;
+import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +19,10 @@ import java.util.List;
 @RequestMapping("/papers/{paperID}/assign")
 @Tag(name = "Assignments", description = "Operations for assigning reviewers to papers.")
 public class AssignmentsController {
-
-
     @Operation(summary = "Manually assigns reviewer",
             description = "Manually assigns reviewer to a specific paper." +
                             "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair"
     )
-    @SuppressWarnings("PMD.AvoidDuplicateLiterals")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200"),
             @ApiResponse(responseCode = "403", content = {@Content(schema = @Schema())}),
