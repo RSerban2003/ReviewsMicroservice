@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -170,10 +171,11 @@ public class ReviewsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "/reviews/by-reviewer/{reviewerID}/discussion-comments", produces = "application/json")
-    public ResponseEntity<List<DiscussionComment>>
-                    getConfidentialComments(@RequestParam Long requesterID,
-                                            @PathVariable Long reviewerID,
-                                            @PathVariable Long paperID) {
+    public ResponseEntity<List<DiscussionComment>> getConfidentialComments(
+        @RequestParam @Parameter(description = "The ID of the user making the request.") Long requesterID,
+        @PathVariable Long reviewerID,
+        @PathVariable Long paperID
+    ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }
