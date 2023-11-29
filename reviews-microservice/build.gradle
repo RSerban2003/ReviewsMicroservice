@@ -107,19 +107,12 @@ jacocoTestCoverageVerification() {
 	maxErrors = 0
 	maxWarnings = 0
 }*/
-
 pmd {
 
 	incrementalAnalysis = true
 	sourceSets = [sourceSets.main]
-	ruleSetFiles("${rootDir}/config/pmd/pmdExclusion.xml")
-
-	ruleSetConfig = resources.text.fromString("<ruleset name=\"Custom ruleset\">\n" +
-			"    <description>Custom ruleset for PMD</description>\n" +
-			"    <rule ref=\"category/java/errorprone.xml\">\n" +
-			"        <exclude name=\"MissingSerialVersionUID\"/>\n" +
-			"    </rule>\n" +
-			"</ruleset>")
+	ruleSetFiles = files("${rootDir}/config/pmd/errorprone.xml")    // exactly path as in your lib classpath
+	ruleSets = []
 }
 
 
