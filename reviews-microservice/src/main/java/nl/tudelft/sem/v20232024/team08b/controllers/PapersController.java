@@ -13,7 +13,13 @@ import nl.tudelft.sem.v20232024.team08b.dtos.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -102,8 +108,9 @@ public class PapersController {
 
     @Tag(name = "Reviews")
     @Operation(summary = "Get the list of a reviewers for a given paper",
-        description = "Responds with list of reviewers assigned to that paper." +
-            "The requester must be a chair of the track the paper is in"
+        description = "Responds with list of reviewers assigned to that paper. " +
+            "The requester must be a chair of the track that the paper is in, or a reviewer " +
+            "also assigned to the given paper."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the list of reviewers"),

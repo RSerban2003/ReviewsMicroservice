@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import nl.tudelft.sem.v20232024.team08b.domain.ConfidentialComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewDTO;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
@@ -19,12 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/papers/{paperID}/reviews/{reviewerID}")
 @Tag(name = "Reviews", description = "Operations to deal with reviews: reading them, submitting, commenting, etc")
-public class ReviewController {
+public class ReviewsController {
     @Operation(summary = "Gets a review",
             description = "Responds with the review of a specific paper (paperID), reviewed by user (userID). " +
                     "It does NOT contain the confidential comments. They have to be requested separately."
@@ -69,7 +68,8 @@ public class ReviewController {
 
     @Operation(summary = "Posts a confidential comment",
             description = "Posts a confidential comment for a review of a specific paper using userID and reviewerID." +
-                            " The requester must be a chair of the track that the paper is in."
+                " The requester must be a chair of the track that the paper is in, or a reviewer " +
+                "also assigned to the given paper."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Confidential comment successfully posted"),

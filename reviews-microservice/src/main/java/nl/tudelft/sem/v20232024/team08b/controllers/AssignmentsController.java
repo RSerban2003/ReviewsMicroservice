@@ -9,7 +9,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/papers/{paperID}/assignments")
@@ -92,9 +99,13 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
-    @DeleteMapping(path = "/remove", consumes = {"application/json"})
-    public void remove(@PathVariable Long paperID, @RequestParam Long requesterID, @RequestParam Long reviewerID) {
-
+    @DeleteMapping(path = "/{reviewerID}", consumes = {"application/json"})
+    public ResponseEntity<Void> remove(
+        @RequestParam Long requesterID,
+        @PathVariable Long paperID,
+        @PathVariable Long reviewerID
+    ) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
 }
