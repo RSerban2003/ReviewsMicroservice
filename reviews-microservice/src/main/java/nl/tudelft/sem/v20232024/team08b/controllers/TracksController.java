@@ -143,9 +143,9 @@ public class TracksController {
     @GetMapping(path = "/phase", produces = "application/json")
     @ResponseBody
     public ResponseEntity<TrackPhase> getPhase(
-        @RequestParam @Parameter(description = "ID of the user making the request.") Long requesterID,
-        @PathVariable @Parameter(description = "ID of the conference the track is in.") Long conferenceID,
-        @PathVariable @Parameter(description = "ID of the track.") Long trackID
+        @RequestParam @Parameter(description = "The ID of the user making the request.") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of the conference the track is in.") Long conferenceID,
+        @PathVariable @Parameter(description = "The ID of the track.") Long trackID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
