@@ -67,9 +67,8 @@ public class BidsController {
 
     @Operation(summary = "Bid on a paper",
         description = "Saves the preference (based on expertise) of the requester in regards to reviewing the " +
-            "given paper. NEUTRAL effectively resets the preference to the default (no preference). " +
-            "The requester must be a reviewer of the track the paper is in. Also, the submission deadline " +
-            "has to have passed and the bidding deadline must not have passed."
+            "given paper. The requester must be a reviewer of the track the paper is in. " +
+            "Also, the submission deadline has to have passed and the bidding deadline must not have passed."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful bid on the paper"),
