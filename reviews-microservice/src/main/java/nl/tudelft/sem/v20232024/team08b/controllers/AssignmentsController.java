@@ -22,12 +22,10 @@ public class AssignmentsController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewer successfully assigned to the paper.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to assign reviewers.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to assign reviewers. Only chairs for track can do that", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "409", description =
-            "Conflict. There is a Conflict of Interest and the reviewer cannot " +
-                "review this paper; or the reviewer has already been assigned to this paper.", content = {
-            @Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "409", description = "Conflict. There is a Conflict of Interest and the reviewer cannot " +
+                "review this paper; or the reviewer has already been assigned to this paper.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PostMapping(path = "/{reviewerID}")
@@ -40,16 +38,16 @@ public class AssignmentsController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @Operation(summary = "Automatically assign reviewers",
-            description = "Automatically assigns reviewer to a specific paper. " +
+    @Operation(summary = "Automatically assign the reviewers",
+            description = "Automatically assigns a reviewer to a specific paper. " +
                 "At least 3 reviewers must be assigned to each paper, such that each reviewer in the track " +
                 "has a similar amount of reviews assigned to them."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Reviewer successfully assigned to the paper.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to assign reviewers.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "409", description = "Conflict. The reviewer has already been assigned to this paper.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "201", description = "Reviewers successfully assigned to the track.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to assign reviewers. Only the chairs for tracks are allowed.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "Not Found. The specified track or user does not exist.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "409", description = "Conflict. There are no reviewers left to automatically assign", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "/automatic")
@@ -68,7 +66,7 @@ public class AssignmentsController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewers has been successfully finalized to this paper.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to finalize the assignments.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to finalize the assignments. You are either not a chair, or less than 3 reviewers have been assigned to a track", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })

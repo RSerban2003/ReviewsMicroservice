@@ -1,8 +1,13 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+<<<<<<< HEAD
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
+=======
+import io.swagger.v3.oas.annotations.info.Info;
+>>>>>>> 4dddee93da81db1e432921b98045a1bec78eac9b
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,6 +32,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.tags.Param;
 
+@OpenAPIDefinition(info = @Info(title = "EasyConf Reviews Microservice", version = "0.0.1-SNAPSHOT",
+    description = "EasyConf is web-based conference management system, designed to organize and administrate " +
+        "academic conferences, workshops, and events. It offers a platform for authors, reviewers, " +
+        "and organizers (chairs) to handle paper submissions, peer reviews, and program scheduling efficiently. " +
+        "It provides tools for managing the review process, generating program schedules, and handling " +
+        "communication between organizers and participants.\n\n" +
+        "The Reviews Microservice handles the process of reviewing papers before a conference. " +
+        "This microservice is responsible for assigning papers to reviews, allowing reviewers to add their comments, " +
+        "and allowing the PC chairs to finalize the decision about acceptance and rejection of the submitted papers.\n\n" +
+        "The different roles that the users can have are specified in the Users Microservice and the process for " +
+        "submitting papers to conferences is specified in the Submissions Microservice."
+))
 @RestController
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Reviews", description = "Operations to deal with reviews: reading them, submitting, commenting, etc")
@@ -176,7 +193,7 @@ public class ReviewsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "/reviews/by-reviewer/{reviewerID}/discussion-comments", produces = "application/json")
-    public ResponseEntity<List<DiscussionComment>> getConfidentialComments(
+    public ResponseEntity<List<DiscussionComment>> getDiscussionComments(
         @RequestParam @Parameter(description = "The ID of the user making the request.") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a reviewer in charge of this paper") Long reviewerID,
         @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID

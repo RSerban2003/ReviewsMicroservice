@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,45 +27,40 @@ import org.springframework.web.bind.annotation.RestController;
 public class BidsController {
     @Operation(summary = "Get all bids for a given paper",
         description = "Responds with a list of bids and the IDs of the corresponding " +
-            "reviewers. By default reviewers are NEUTRAL towards a paper, so NEUTRAL \"bids\" " +
-            "will not be returned. " +
-            "The requester must be a chair of the track that the paper is in. " +
-            "If no bid is returned for a particular reviewer, it can be assumed that the " +
-            "reviewer has no preference in regards to this particular paper."
+            "reviewers. The requester must be a chair of the track that the paper is in."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully accessed the bids for paper"),
-            @ApiResponse(responseCode = "403", description = "Forbidden, you are not allowed to view bids",content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", description = "Not found, the specified paper does not exist",content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden, you are not allowed to view bids. The requester must be a chair of the track.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "Not found, the specified paper does not exist.",content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.",content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "", produces = "application/json")
     @ResponseBody
     public ResponseEntity<List<BidByReviewer>> getBidsForPaper(
-            @RequestParam Long requesterID,
-            @PathVariable Long paperID
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Operation(summary = "Get the bid of a given reviewer for a given paper",
             description = "Responds with the preference (a bid) of the given reviewer for reviewing " +
-                "the given paper. If the reviewer hasn't indicated a preference, NEUTRAL " +
-                "will be returned. The requester must be the reviewer themselves, or a chair " +
+                "the given paper. The requester must be the reviewer themselves, or a chair " +
                 "of the track the paper is in."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully accessed the bids for paper by given reviewer"),
-            @ApiResponse(responseCode = "403", description = "Forbidden, you are not allowed to view bids",content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", description = "Not found, the specified bid does not exist",content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden, you are not allowed to view bids. Only the chairs of the tracks and the bid submitter are allowed to do that.",content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "Not found, the specified bid does not exist", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.",content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "/by-reviewer/{reviewerID}", produces = "application/json")
     @ResponseBody
     public ResponseEntity<Bid> getBidForPaperByReviewer(
-            @RequestParam Long requesterID,
-            @PathVariable Long paperID,
-            @PathVariable Long reviewerID
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of the paper") Long paperID,
+            @PathVariable @Parameter(description = "The the ID of the reviewer of the paper") Long reviewerID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -77,17 +73,16 @@ public class BidsController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful bid on the paper"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a reviewer in the track the paper is in.", content = {
-            @Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a reviewer in the track the paper is in. Or the bidding deadline has passed. Or the submissions deadline has not passed yet.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or track was not found.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "409", description = "Conflict. The bidding deadline must not have passed.", content = {
-            @Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "409", description = "Conflict. The submission deadline must have passed. The bidding deadline must not have passed.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "", consumes = "application/json")
+    @ResponseBody
     public ResponseEntity<Void> bid(
-            @RequestParam Long requesterID,
-            @PathVariable Long paperID,
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of the paper") Long paperID,
             @RequestBody Bid bid
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
