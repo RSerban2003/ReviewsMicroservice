@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -37,8 +38,8 @@ public class BidsController {
     @GetMapping(path = "", produces = "application/json")
     @ResponseBody
     public ResponseEntity<List<BidByReviewer>> getBidsForPaper(
-            @RequestParam Long requesterID,
-            @PathVariable Long paperID
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -57,9 +58,9 @@ public class BidsController {
     @GetMapping(path = "/by-reviewer/{reviewerID}", produces = "application/json")
     @ResponseBody
     public ResponseEntity<Bid> getBidForPaperByReviewer(
-            @RequestParam Long requesterID,
-            @PathVariable Long paperID,
-            @PathVariable Long reviewerID
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of the paper") Long paperID,
+            @PathVariable @Parameter(description = "The the ID of the reviewer of the paper") Long reviewerID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -78,9 +79,10 @@ public class BidsController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "", consumes = "application/json")
+    @ResponseBody
     public ResponseEntity<Void> bid(
-            @RequestParam Long requesterID,
-            @PathVariable Long paperID,
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of the paper") Long paperID,
             @RequestBody Bid bid
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
