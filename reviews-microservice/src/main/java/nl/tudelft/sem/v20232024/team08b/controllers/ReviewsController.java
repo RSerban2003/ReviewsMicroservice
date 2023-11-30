@@ -3,7 +3,6 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.tags.Param;
 
 @OpenAPIDefinition(info = @Info(title = "EasyConf Reviews Microservice", version = "0.0.1-SNAPSHOT",
     description = "EasyConf is web-based conference management system, designed to organize and administrate " +
@@ -147,7 +145,7 @@ public class ReviewsController {
     })
     @ResponseBody
     @PostMapping(path = "/reviews/finalization")
-    public ResponseEntity<Void> finalize(
+    public ResponseEntity<Void> finalization(
             @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
             @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
