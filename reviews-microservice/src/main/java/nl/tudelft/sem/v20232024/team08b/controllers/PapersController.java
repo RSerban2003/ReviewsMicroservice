@@ -36,7 +36,7 @@ public class PapersController {
     @ResponseBody
     @GetMapping(path = "/title-and-abstract", produces = "application/json")
     public ResponseEntity<PaperSummary> getTitleAndAbstract(
-        @RequestParam @Parameter(description = "The ID of a user making the requests") Long requesterID,
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
@@ -55,7 +55,7 @@ public class PapersController {
     @ResponseBody
     @GetMapping(path = "", produces = "application/json")
     public ResponseEntity<Paper> get(
-        @RequestParam @Parameter(description = "The ID of a user making the requests") Long requesterID,
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
@@ -75,7 +75,7 @@ public class PapersController {
     @ResponseBody
     @GetMapping(path = "/status", produces = "application/json")
     public ResponseEntity<PaperStatus> getState(
-        @RequestParam @Parameter(description = "The ID of a user making the requests") Long requesterID,
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper to check status") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
