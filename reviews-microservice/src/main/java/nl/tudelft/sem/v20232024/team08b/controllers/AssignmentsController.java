@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+
+import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,7 +41,8 @@ public class AssignmentsController {
     public ResponseEntity<Void> assignManual(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a user to assign as a reviewer")Long reviewerID,
-        @PathVariable @Parameter(description = "The ID of a paper to assign") String paperID) {
+        @PathVariable @Parameter(description = "The ID of a paper to assign") String paperID
+    ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -120,4 +123,18 @@ public class AssignmentsController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    @Operation(summary = "Gets all papers a reviewer is assigned to.",
+            description = "Responds with a list of papers a user is assigned to in all tracks. This endpoint can be called by any reviewer."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Success."),
+            @ApiResponse(responseCode = "404", description = "Not Found. Such user does not exist", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+    })
+    @GetMapping(path = "/papers/by-reviewer", produces = "application/json")
+    public ResponseEntity<List<DiscussionComment>> getAssignedPapers(
+            @RequestParam @Parameter(description = "The ID of the user making the request.") Long requesterID
+    ) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
 }
