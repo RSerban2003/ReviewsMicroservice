@@ -12,8 +12,6 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@JsonIdentityInfo(scope = Paper.class, generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "ID")
 public class Paper implements Serializable {
     @Id
     @GeneratedValue
