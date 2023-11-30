@@ -3,6 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterStyle;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,6 +17,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.Review;
 import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.tags.Param;
 
 @OpenAPIDefinition(info = @Info(title = "EasyConf Reviews Microservice", version = "0.0.1-SNAPSHOT",
     description = "EasyConf is web-based conference management system, designed to organize and administrate " +
@@ -57,9 +60,9 @@ public class ReviewsController {
     })
     @GetMapping(path = "/reviews/by-reviewer/{reviewerID}", produces = "application/json")
     public ResponseEntity<Review> read(
-        @RequestParam Long requesterID,
-        @PathVariable Long reviewerID,
-        @PathVariable Long paperID
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of a reviewer in charge of this paper") Long reviewerID,
+        @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -80,9 +83,9 @@ public class ReviewsController {
     })
     @PutMapping(path = "/reviews", consumes = {"application/json"})
     public ResponseEntity<Void> submit(
-        @RequestBody ReviewSubmission review,
-        @RequestParam Long requesterID,
-        @PathVariable Long paperID) {
+        @RequestBody @Parameter(description = "The review that the requester wants to submit") ReviewSubmission review,
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -103,8 +106,8 @@ public class ReviewsController {
     @ResponseBody
     @GetMapping(path = "/reviewers", produces = "application/json")
     public ResponseEntity<List<Long>> getReviewers(
-        @RequestParam Long requesterID,
-        @PathVariable Long paperID
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -126,8 +129,8 @@ public class ReviewsController {
     @ResponseBody
     @GetMapping(path = "/reviews/phase", produces = "application/json")
     public ResponseEntity<PaperPhase> getPhase(
-        @RequestParam Long requesterID,
-        @PathVariable Long paperID
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -147,8 +150,8 @@ public class ReviewsController {
     @ResponseBody
     @PostMapping(path = "/reviews/finalization")
     public ResponseEntity<Void> finalize(
-        @RequestParam Long requesterID,
-        @PathVariable Long paperID
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -167,11 +170,12 @@ public class ReviewsController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PostMapping(path = "/reviews/by-reviewer/{reviewerID}/discussion-comments", consumes = "application/json")
-    public ResponseEntity<Void> submitDiscussionComment(
-        @RequestParam Long userID,
-        @PathVariable Long reviewerID,
-        @PathVariable Long paperID,
-        @RequestBody @Schema(description = "Comment", example = "Some comment") String comment
+    public ResponseEntity<Void> submitConfidentialComment(
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a reviewer in charge of this paper") Long reviewerID,
+            @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID,
+            @RequestBody @Schema(description = "Comment", example = "Some comment")
+            String comment
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -188,8 +192,8 @@ public class ReviewsController {
     @GetMapping(path = "/reviews/by-reviewer/{reviewerID}/discussion-comments", produces = "application/json")
     public ResponseEntity<List<DiscussionComment>> getDiscussionComments(
         @RequestParam @Parameter(description = "The ID of the user making the request.") Long requesterID,
-        @PathVariable Long reviewerID,
-        @PathVariable Long paperID
+        @PathVariable @Parameter(description = "The ID of a reviewer in charge of this paper") Long reviewerID,
+        @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
