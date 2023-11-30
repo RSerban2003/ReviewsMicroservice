@@ -3,11 +3,8 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-<<<<<<< HEAD
 import io.swagger.v3.oas.annotations.enums.ParameterStyle;
-=======
 import io.swagger.v3.oas.annotations.info.Info;
->>>>>>> 4dddee93da81db1e432921b98045a1bec78eac9b
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
