@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,9 +9,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Date;
 import java.util.List;
-
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.TrackAnalytics;
+import nl.tudelft.sem.v20232024.team08b.dtos.TrackPhase;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -116,6 +117,29 @@ public class TracksController {
         @RequestParam Long requesterID,
         @PathVariable Long conferenceID,
         @PathVariable Long trackID
+    ) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @Operation(summary = "Get the review phase",
+        description = "Responds with the review phase of the track. " +
+            "Consult with the documentation of the returned enum for more information."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful pull of the review phase"),
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track, or a reviewer in the track.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference were not found.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
+            @Content(schema = @Schema())})
+    })
+    @GetMapping(path = "/phase", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<TrackPhase> getPhase(
+        @RequestParam @Parameter(description = "ID of the user making the request.") Long requesterID,
+        @PathVariable @Parameter(description = "ID of the conference the track is in.") Long conferenceID,
+        @PathVariable @Parameter(description = "ID of the track.") Long trackID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
