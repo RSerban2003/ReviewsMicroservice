@@ -107,13 +107,13 @@ public class ReviewsController {
     }
 
     @Operation(summary = "Get the review phase of a paper",
-        description = "Responds with how far along a paper is in the review process. " +
-            "The requester must be a chair of the track the paper is in, " +
-            "or a reviewer assigned to that paper."
+        description =
+            "Responds with how far along a paper is in the review process. Each paper whithin a track has its own phase. " +
+                "For more information check the description of the returned enum."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the paper review phase"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track the paper is in, or a reviewer assigned to that paper.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
             @Content(schema = @Schema())}),
