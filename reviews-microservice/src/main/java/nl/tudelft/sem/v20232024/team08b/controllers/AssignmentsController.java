@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
 import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
+import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummaryWithID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,7 +53,7 @@ public class AssignmentsController {
                 "such that each reviewer in the track has a similar amount of reviews assigned to them."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Reviewers successfully assigned to the track.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "200", description = "Reviewers successfully assigned to the track.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to assign reviewers. Only the chairs for tracks are allowed.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified track or user does not exist.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "409", description = "Conflict. There are no reviewers left to automatically assign", content = {@Content(schema = @Schema())}),
@@ -88,7 +89,7 @@ public class AssignmentsController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @Operation(summary = "Get current assignments",
+    @Operation(summary = "Get current assignments for a paper",
         description = "Responds with a list of reviewer IDs for a specific paper."
     )
     @ApiResponses(value = {
@@ -127,12 +128,13 @@ public class AssignmentsController {
             description = "Responds with a list of papers a user is assigned to in all tracks. This endpoint can be called by any reviewer."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Success."),
+            @ApiResponse(responseCode = "200", description = "Success."),
             @ApiResponse(responseCode = "404", description = "Not Found. Such user does not exist", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "/papers/by-reviewer", produces = "application/json")
-    public ResponseEntity<List<DiscussionComment>> getAssignedPapers(
+    @Tag(name = "Reviews")
+    public ResponseEntity<List<PaperSummaryWithID>> getAssignedPapers(
             @RequestParam @Parameter(description = "The ID of the user making the request.") Long requesterID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
