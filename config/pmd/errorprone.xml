@@ -60,7 +60,7 @@ Rules to detect constructs that are either broken, extremely confusing or prone 
     <rule ref="category/java/errorprone.xml/EqualsNull" />
     <rule ref="category/java/errorprone.xml/FinalizeDoesNotCallSuperFinalize" />
     <rule ref="category/java/errorprone.xml/FinalizeOnlyCallsSuperFinalize" />
-<!--    <rule ref="category/java/errorprone.xml/FinalizeOverloaded" />-->
+    <rule ref="category/java/errorprone.xml/FinalizeOverloaded" />
     <rule ref="category/java/errorprone.xml/FinalizeShouldBeProtected" />
     <rule ref="category/java/errorprone.xml/IdempotentOperations" />
     <rule ref="category/java/errorprone.xml/MissingBreakInSwitch" />
