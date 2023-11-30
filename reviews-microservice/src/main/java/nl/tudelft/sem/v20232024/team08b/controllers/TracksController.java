@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Date;
 import java.util.List;
+
+import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.TrackAnalytics;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +41,9 @@ public class TracksController {
     })
     @ResponseBody
     @GetMapping(path = "/papers", produces = "application/json")
-    public ResponseEntity<List<Long>> getPapers(@RequestParam Long requesterID,
-                                                @PathVariable Long conferenceID,
-                                                @PathVariable Long trackID) {
+    public ResponseEntity<List<PaperSummaryWithID>> getPapers(@RequestParam Long requesterID,
+                                                              @PathVariable Long conferenceID,
+                                                              @PathVariable Long trackID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
