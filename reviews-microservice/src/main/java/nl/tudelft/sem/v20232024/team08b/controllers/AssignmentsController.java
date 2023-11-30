@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,8 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Assignments", description = "Operations for assigning reviewers to papers.")
 public class AssignmentsController {
     @Operation(summary = "Manually assign reviewers",
-            description = "Manually assigns reviewer to a specific paper." +
-                    " This can only be done by the chair and will respond with a 403 error if requester is not a valid chair. " +
+            description = "Manually assigns reviewer to a specific paper."+
                     "At least 3 reviewers must be assigned to a paper."
     )
     @ApiResponses(value = {
@@ -30,11 +30,11 @@ public class AssignmentsController {
     })
     @PostMapping(path = "/{reviewerID}")
     public ResponseEntity<Void> assignManual(
-        @RequestParam Long requesterID,
-        @PathVariable Long trackID,
-        @PathVariable Long conferenceID,
-        @PathVariable Long reviewerID,
-        @PathVariable String paperID) {
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of a track assignment belongs to") Long trackID,
+        @PathVariable @Parameter(description = "The ID of a conference assignment belongs to")Long conferenceID,
+        @PathVariable @Parameter(description = "The ID of a user to assign as a reviewer")Long reviewerID,
+        @PathVariable @Parameter(description = "The ID of a paper to assign reviewers") String paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -44,6 +44,7 @@ public class AssignmentsController {
                 "has a similar amount of reviews assigned to them."
     )
     @ApiResponses(value = {
+
             @ApiResponse(responseCode = "201", description = "Reviewers successfully assigned to the track.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to assign reviewers. Only the chairs for tracks are allowed.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified track or user does not exist.", content = {@Content(schema = @Schema())}),
@@ -52,10 +53,10 @@ public class AssignmentsController {
     })
     @PutMapping(path = "/automatic")
     public ResponseEntity<Void> assignAuto(
-            @RequestParam Long requesterID,
-            @PathVariable String conferenceID,
-            @PathVariable String trackID,
-            @PathVariable String paperID) {
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a conference assignment belongs to") String conferenceID,
+            @PathVariable @Parameter(description = "The ID of a track assignment belongs to") String trackID,
+            @PathVariable @Parameter(description = "The ID of a paper to assign reviewers") String paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -72,50 +73,47 @@ public class AssignmentsController {
     })
     @PostMapping(path = "/finalization")
     public ResponseEntity<Void> finalization(
-            @RequestParam Long requesterID,
-            @PathVariable String conferenceID,
-            @PathVariable String trackID,
-            @PathVariable String paperID) {
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a conference assignment belongs to") String conferenceID,
+            @PathVariable @Parameter(description = "The ID of a track assignment belongs to") String trackID,
+            @PathVariable @Parameter(description = "The ID of a paper to finalize the assignments") String paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Operation(summary = "Get current assignments",
-            description = "Responds with a list of reviewers for a specific paper." +
-                    " This can only be done by the chair or a reviewer in this track " +
-                    "and will respond with a 403 error if requester is not a valid requester."
+            description = "Responds with a list of reviewers for a specific paper."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully returned the list of reviewers assigned to this paper.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to view the reviewers.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to view the reviewers. Only a chair or a reviewer in this track can do that", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @GetMapping(path = "", produces = "application/json")
-    public ResponseEntity<List<Long>> assignments(  
-            @RequestParam Long requesterID,
-            @PathVariable String conferenceID,
-            @PathVariable String trackID,
-            @PathVariable Long paperID) {
+    public ResponseEntity<List<Long>> assignments(
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a conference the assignments belong to") String conferenceID,
+            @PathVariable @Parameter(description = "The ID of a track assignments belong to") String trackID,
+            @PathVariable @Parameter(description = "The ID of a paper assignments belong to") Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Operation(summary = "Removes a reviewer from a paper",
-            description = "Removes a reviewer previously assigned to a paper." +
-                    " This can only be done by the chair and will respond with a 403 error if requester is not a valid chair."
+            description = "Removes a reviewer previously assigned to a paper."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully removed the reviewer for this paper.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to remove the reviewers.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to remove a reviewer. Only chairs can do that.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @DeleteMapping(path = "/{reviewerID}", consumes = {"application/json"})
     public ResponseEntity<Void> remove(
-            @RequestParam Long requesterID,
-            @PathVariable Long paperID,
-            @PathVariable Long reviewerID,
-            @PathVariable String conferenceID,
-            @PathVariable String trackID) {
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a paper reviewer belongs to") Long paperID,
+            @PathVariable @Parameter(description = "The ID of a reviewer to remove") Long reviewerID,
+            @PathVariable @Parameter(description = "The ID of a conference reviewer belongs to") String conferenceID,
+            @PathVariable @Parameter(description = "The ID of a track reviewer belongs to") String trackID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
