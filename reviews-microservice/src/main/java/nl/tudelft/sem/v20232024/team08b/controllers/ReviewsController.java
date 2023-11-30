@@ -65,13 +65,13 @@ public class ReviewsController {
 
     @Operation(summary = "Submit (or edit) a review",
         description = "The requester submits (or resubmits) a review to a specific paper. " +
-            "The requester must be a valid reviewer and will be identified using userID and reviewerID. " +
             "Once all the reviewers for a paper have submitted a review for that paper, the Discussion phase for that paper " +
             "begins and reviewers can see each others reviews and write comments on them. "
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Review successfully submitted"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a reviewer assigned to the given paper. ", content = {
+            @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
         @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
