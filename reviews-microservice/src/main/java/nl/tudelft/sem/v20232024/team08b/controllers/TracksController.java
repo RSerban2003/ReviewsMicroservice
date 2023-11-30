@@ -79,7 +79,7 @@ public class TracksController {
             "and the review assignments phase begins."
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Success.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "200", description = "Success.", content = {@Content(schema = @Schema())}),
         @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference were not found.", content = {
