@@ -45,7 +45,8 @@ public class BidsController {
     }
 
     @Operation(summary = "Get the bid of a given reviewer for a given paper",
-            description = "Responds with the preference (a bid) of the given reviewer for reviewing " +
+        description =
+            "Responds with a bid (a preference to review or not review a paper, based on expertise level, submitted by the reviewers) of the given reviewer for reviewing " +
                 "the given paper. The requester must be the reviewer themselves, or a chair " +
                 "of the track the paper is in."
     )

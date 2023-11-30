@@ -86,13 +86,11 @@ public class ReviewsController {
     }
 
     @Operation(summary = "Get the list of a reviewers for a given paper",
-        description = "Responds with list of reviewers assigned to that paper. " +
-            "The requester must be a chair of the track that the paper is in, or a reviewer " +
-            "also assigned to the given paper."
+        description = "Responds with list of reviewers' IDs assigned to that paper."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the list of reviewers"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track that the paper is in, or a reviewer also assigned to the given paper.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
             @Content(schema = @Schema())}),
@@ -109,13 +107,13 @@ public class ReviewsController {
     }
 
     @Operation(summary = "Get the review phase of a paper",
-        description = "Responds with how far along a paper is in the review process. " +
-            "The requester must be a chair of the track the paper is in, " +
-            "or a reviewer assigned to that paper."
+        description =
+            "Responds with how far along a paper is in the review process. Each paper whithin a track has its own phase. " +
+                "For more information check the description of the returned enum."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the paper review phase"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track the paper is in, or a reviewer assigned to that paper.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
             @Content(schema = @Schema())}),
@@ -132,13 +130,18 @@ public class ReviewsController {
     }
 
     @Operation(summary = "End the discussion phase for a paper",
-        description = "The requester must be a chair of the track the paper is in"
+        description = "The paper is now considered reviewed: the reviews cannot be changed. " +
+            "Once all of the papers in a track are reviewed, the track automatically goes to the FINAL phase."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the list of reviewers"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track the paper is in.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "409", description = "Conflict. The paper must be in its Discussion phase, " +
+            "all of the reviewers must have resubmitted their reviews at least once in the Discussion phase of the paper," +
+            "and all of the reviews need to either be positive or negative. Only then can they be finalized.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
@@ -177,7 +180,11 @@ public class ReviewsController {
     }
 
     @Operation(summary = "Gets the discussion comments",
-        description = "Responds with all the discussion comments for a paper."
+        description = "Responds with all the discussion comments for a paper. " +
+            "Discussion comments are comments that can be left on reviews during the Discussion phase. " +
+            "These comments will not be revealed to authors. " +
+            "The requester must be a chair of the track that the paper is in, or a reviewer " +
+            "also assigned to the given paper. Once posted, these comments cannot be edited or deleted."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Success."),
