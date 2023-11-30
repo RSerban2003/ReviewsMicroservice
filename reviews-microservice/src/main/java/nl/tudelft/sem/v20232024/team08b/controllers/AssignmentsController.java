@@ -41,7 +41,8 @@ public class AssignmentsController {
     public ResponseEntity<Void> assignManual(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a user to assign as a reviewer")Long reviewerID,
-        @PathVariable @Parameter(description = "The ID of a paper to assign") String paperID) {
+        @PathVariable @Parameter(description = "The ID of a paper to assign") String paperID
+    ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
