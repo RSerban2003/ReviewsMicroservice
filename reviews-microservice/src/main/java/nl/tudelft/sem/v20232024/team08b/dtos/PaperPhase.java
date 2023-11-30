@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
     "IN_REVIEW: The reviewers all need to submit a review. Once that happens the discussion phase for the paper " +
     "automatically starts.\n\n" +
     "IN_DISCUSSION: The reviewers can now see each others reviews and comment on them. " +
-    "The reviewers need to resubmit their review at least once. Once that is done, if all of the reviews are either positive or negative, " +
+    "If all of the reviews are either positive or negative, " +
     "the chair of the track can finalize the reviews which automatically puts the paper into the REVIEW phase.\n\n" +
     "REVIEWED: The reviews cannot be changed now. Once all of the papers in a track are REVIEWED, the track goes into " +
     "the final phase and the reviews can be viewed by the authors.")

@@ -67,9 +67,7 @@ public class ReviewsController {
         description = "The requester submits (or resubmits) a review to a specific paper. " +
             "The requester must be a valid reviewer and will be identified using userID and reviewerID. " +
             "Once all the reviewers for a paper have submitted a review for that paper, the Discussion phase for that paper " +
-            "begins and reviewers can see each others reviews and write comments on them. " +
-            "Once the discussion phase has begun, all of the reviewers have to resubmit their reviews (even if " +
-            "the reviews are exactly the same), in order for the Chair to be able to approve the reviews."
+            "begins and reviewers can see each others reviews and write comments on them. "
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Review successfully submitted"),
@@ -139,9 +137,8 @@ public class ReviewsController {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "409", description = "Conflict. The paper must be in its Discussion phase, " +
-            "all of the reviewers must have resubmitted their reviews at least once in the Discussion phase of the paper," +
-            "and all of the reviews need to either be positive or negative. Only then can they be finalized.", content = {
+        @ApiResponse(responseCode = "409", description = "Conflict. The paper must be in its Discussion phase and " +
+            "all of the reviews need to either be positive or negative. Only then can they be finalized.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
