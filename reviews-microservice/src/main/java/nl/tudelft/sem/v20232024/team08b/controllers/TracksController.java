@@ -80,14 +80,14 @@ public class TracksController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Success.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference were not found.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "409", description =
             "Conflict. An invalid bidding deadline was given, or the old bidding deadline has already passed." +
-                " The new given bidding deadline, must also not have passed already." +
-                "must not have already passed.", content = {@Content(schema = @Schema())}),
+                " The new given bidding deadline, must also not have passed already.", content = {
+            @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
     })
@@ -108,8 +108,7 @@ public class TracksController {
             "and the review assignments phase begins."
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successful pull of the bidding deadline", content = {
-            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "200", description = "Successful pull of the bidding deadline"),
         @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track, or a reviewer in the track.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference were not found.", content = {

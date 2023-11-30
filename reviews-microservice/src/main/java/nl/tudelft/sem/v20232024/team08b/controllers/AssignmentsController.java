@@ -53,27 +53,29 @@ public class AssignmentsController {
             @ApiResponse(responseCode = "201", description = "Reviewers successfully assigned to the track.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to assign reviewers. Only the chairs for tracks are allowed.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified track or user does not exist.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "409", description = "Conflict. There are no reviewers left to automatically assign", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "409", description = "Conflict. Automatic assignment not possible. There must be at least one reviewer in the track.", content = {
+            @Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PutMapping(path = "/conferences/{conferenceID}/tracks/{trackID}/automatic")
     public ResponseEntity<Void> assignAuto(
-            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
-            @PathVariable @Parameter(description = "The ID of a conference assignment belongs to") String conferenceID,
-            @PathVariable @Parameter(description = "The ID of a track assignment belongs to") String trackID
+        @RequestParam @Parameter(description = "The ID of the user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of the conference the track belongs to") String conferenceID,
+        @PathVariable @Parameter(description = "The ID of the track for which to do the automatic assignment") String trackID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Operation(summary = "Finalise reviewers",
-            description = "Finalises the assignment of reviewers, so they can no longer be changed manually or automatically. " +
-                    "This can only be done by the chair and will respond with a 403 error if requester is not a valid chair " +
-                    "or a reviewer in this track."
+        description = "Finalises the assignment of reviewers, so they can no longer be changed manually or automatically. "
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Reviewers has been successfully finalized to this paper.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to finalize the assignments. You are either not a chair, or less than 3 reviewers have been assigned to a track", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to finalize the assignments. You must be a chair of the track.", content = {
+            @Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "409", description = "Conflict. There must be at least 3 reviewers assigned to each paper to finalize the assignments.", content = {
+            @Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @PostMapping(path = "/conferences/{conferenceID}/tracks/{trackID}/finalization")
