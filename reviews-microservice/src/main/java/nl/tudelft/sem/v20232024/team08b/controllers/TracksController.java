@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/conferences/{conferenceID}/tracks/{trackID}")
-@Tag(name = "Conference Tracks", description = "Operations for dealing with conference tracks: getting summaries and setting deadlines")
+@Tag(name = "Conference Tracks", description = "Operations for dealing with conference tracks: analytics, deadlines and the review phase")
 public class TracksController {
 
     @Operation(summary = "Get the papers for track",
