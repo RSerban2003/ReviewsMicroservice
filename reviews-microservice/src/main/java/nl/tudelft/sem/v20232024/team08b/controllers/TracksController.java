@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -41,9 +42,11 @@ public class TracksController {
     })
     @ResponseBody
     @GetMapping(path = "/papers", produces = "application/json")
-    public ResponseEntity<List<PaperSummaryWithID>> getPapers(@RequestParam Long requesterID,
-                                                              @PathVariable Long conferenceID,
-                                                              @PathVariable Long trackID) {
+    public ResponseEntity<List<PaperSummaryWithID>> getPapers(
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
+            @PathVariable @Parameter(description = "The ID of a track") Long trackID
+    ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -61,9 +64,11 @@ public class TracksController {
     })
     @GetMapping(path = "/analytics", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<TrackAnalytics> getAnalytics(@RequestParam Long requesterID,
-                                                       @PathVariable Long conferenceID,
-                                                       @PathVariable Long trackID) {
+    public ResponseEntity<TrackAnalytics> getAnalytics(
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
+            @PathVariable @Parameter(description = "The ID of a track") Long trackID
+    ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -87,10 +92,12 @@ public class TracksController {
             @Content(schema = @Schema())})
     })
     @PutMapping(path = "/bidding-deadline", consumes = "application/json")
-    public ResponseEntity<Void> setBiddingDeadline(@RequestParam Long requesterID,
-                                                   @PathVariable Long conferenceID,
-                                                   @PathVariable Long trackID,
-                                                   @RequestBody Date newDeadline) {
+    public ResponseEntity<Void> setBiddingDeadline(
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
+            @PathVariable @Parameter(description = "The ID of a track") Long trackID,
+            @RequestBody @Parameter(description = "The date for the deadline of the bid") Date newDeadline
+    ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
@@ -113,9 +120,9 @@ public class TracksController {
     @GetMapping(path = "/bidding-deadline", produces = "application/json")
     @ResponseBody
     public ResponseEntity<Date> getBiddingDeadline(
-        @RequestParam Long requesterID,
-        @PathVariable Long conferenceID,
-        @PathVariable Long trackID
+            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+            @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
+            @PathVariable @Parameter(description = "The ID of a track") Long trackID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
