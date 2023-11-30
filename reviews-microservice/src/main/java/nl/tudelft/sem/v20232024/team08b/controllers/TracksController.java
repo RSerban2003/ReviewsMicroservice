@@ -55,7 +55,7 @@ public class TracksController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of track summary stats"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. The requester has to be a chair of the track.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested track was not found.", content = {
             @Content(schema = @Schema())}),
