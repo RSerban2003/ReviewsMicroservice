@@ -14,10 +14,8 @@ import java.util.List;
 import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.Review;
-import nl.tudelft.sem.v20232024.team08b.dtos.ReviewSubmission;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -83,7 +81,7 @@ public class ReviewsController {
     })
     @PutMapping(path = "/reviews", consumes = {"application/json"})
     public ResponseEntity<Void> submit(
-        @RequestBody @Parameter(description = "The review that the requester wants to submit") ReviewSubmission review,
+        @RequestBody @Parameter(description = "The review that the requester wants to submit") Review review,
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
