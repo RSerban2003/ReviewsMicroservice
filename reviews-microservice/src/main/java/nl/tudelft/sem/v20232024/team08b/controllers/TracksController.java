@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TracksController {
 
     @Operation(summary = "Get the papers for track",
-        description = "Returns all the papers in the given track of a conference."
+        description = "Returns all the papers in the given track of a conference. You can request the full paper from another api point."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of papers in given track of given conference"),
