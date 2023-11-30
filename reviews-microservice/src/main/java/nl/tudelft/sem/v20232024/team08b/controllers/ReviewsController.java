@@ -135,7 +135,7 @@ public class ReviewsController {
         description = "The requester must be a chair of the track the paper is in"
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successful retrieval of the list of reviewers"),
+        @ApiResponse(responseCode = "201", description = "Successful retrieval of the list of reviewers"),
         @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
