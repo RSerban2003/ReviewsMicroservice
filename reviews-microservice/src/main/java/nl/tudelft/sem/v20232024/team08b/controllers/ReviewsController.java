@@ -72,7 +72,7 @@ public class ReviewsController {
             "the reviews are exactly the same), in order for the Chair to be able to approve the reviews."
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Review successfully submitted"),
+        @ApiResponse(responseCode = "200", description = "Review successfully submitted"),
         @ApiResponse(responseCode = "403", description = "Forbidden. The requester lacks necessary permissions.", content = {@Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
         @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
@@ -187,7 +187,7 @@ public class ReviewsController {
             "also assigned to the given paper. Once posted, these comments cannot be edited or deleted."
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Success."),
+        @ApiResponse(responseCode = "200", description = "Success."),
             @ApiResponse(responseCode = "403", description = "Forbidden. The requester is not a valid chair or reviewer.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})

@@ -73,7 +73,7 @@ public class BidsController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful bid on the paper"),
-            @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a reviewer in the track the paper is in. Or the bidding deadline has passed. Or the submissions deadline has not passed yet.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a reviewer in the track the paper is in.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or track was not found.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "409", description = "Conflict. The submission deadline must have passed. The bidding deadline must not have passed.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})

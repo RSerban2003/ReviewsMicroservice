@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/papers/{paperID}")
-@Tag(name = "Papers", description = "Operations for viewing papers -- their contents, review status, etc.")
+@Tag(name = "Papers", description = "Operations for viewing papers: their contents, review status, etc.")
 public class PapersController {
     @Operation(summary = "Get the title and abstract of a paper",
         description = "Responds with the title and abstract of the given paper. "
