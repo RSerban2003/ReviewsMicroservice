@@ -112,7 +112,7 @@ public class AssignmentsController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully removed the reviewer for this paper.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "403", description = "Forbidden. You are not allowed to remove a reviewer. Only chairs can do that.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist.", content = {@Content(schema = @Schema())}),
+            @ApiResponse(responseCode = "404", description = "Not Found. The specified paper or user does not exist, or the user is not assigned to this paper.", content = {@Content(schema = @Schema())}),
             @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
     })
     @DeleteMapping(path = "/papers/{paperID}/assignees/{reviewerID}", consumes = {"application/json"})
