@@ -16,8 +16,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@JsonIdentityInfo(scope = Track.class, generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id")
 @EqualsAndHashCode
 public class Track implements Serializable {
   enum Phase {

@@ -15,7 +15,7 @@ public class Paper {
     @Schema(description = "The abstract of the paper", example = "Some sample abstract")
     private String abstractSection;
 
-    @Schema(description = "Main keywords of the paper", example = "[Animals]")
+    @Schema(description = "Main keywords of the paper")
     private List<String> keywords;
 
     @Schema(description = "The paper itself", example = "Full text of the paper")
