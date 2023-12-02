@@ -36,14 +36,14 @@ import org.springframework.web.bind.annotation.RestController;
         "and allowing the PC chairs to finalize the decision about acceptance and rejection of the submitted papers.\n\n" +
         "The different roles that the users can have are specified in the Users Microservice and the process for " +
         "submitting papers to conferences is specified in the Submissions Microservice."
-))
+    ))
 @RestController
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Reviews", description = "Operations to deal with reviews: reading them, submitting, commenting, etc")
 public class ReviewsController {
     @Operation(summary = "Gets a review",
-            description = "Responds with the review of a specific paper (paperID), reviewed by user (userID). " +
-                "Confidential comments will not be revealed if the requester is the author of the paper."
+        description = "Responds with the review of a specific paper (paperID), reviewed by user (userID). " +
+            "Confidential comments will not be revealed if the requester is the author of the paper."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the review"),
@@ -51,8 +51,12 @@ public class ReviewsController {
             "a chair of the track the paper is in, or an author of the paper (in that case, the reviews for the track " +
             "the paper is in must all be finalized, and only then they can be revealed to authors).", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "404", description = "Not Found. " +
+            "The requested paper or reviewer was not found.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
+            @Content(schema = @Schema())})
     })
     @GetMapping(path = "/reviews/by-reviewer/{reviewerID}", produces = "application/json")
     public ResponseEntity<Review> read(
@@ -65,15 +69,21 @@ public class ReviewsController {
 
     @Operation(summary = "Submit (or edit) a review",
         description = "The requester submits (or resubmits) a review to a specific paper. " +
-            "Once all the reviewers for a paper have submitted a review for that paper, the Discussion phase for that paper " +
+            "Once all the reviewers for a paper have submitted a review for that paper, " +
+            "the Discussion phase for that paper " +
             "begins and reviewers can see each others reviews and write comments on them. "
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Review successfully submitted"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a reviewer assigned to the given paper. ", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be a reviewer assigned to the given paper. ", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "404", description = "Not Found. " +
+            "The requested paper or reviewer was not found.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
+            @Content(schema = @Schema())})
     })
     @PutMapping(path = "/reviews", consumes = {"application/json"})
     public ResponseEntity<Void> submit(
@@ -88,18 +98,21 @@ public class ReviewsController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the list of reviewers"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track that the paper is in, or a reviewer also assigned to the given paper.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be a chair of the track that the paper is in, " +
+            "or a reviewer also assigned to the given paper.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
     })
     @ResponseBody
     @GetMapping(path = "/reviewers", produces = "application/json")
     public ResponseEntity<List<Long>> getReviewers(
-            @RequestParam @Parameter(description = "The ID of the user making the request") Long requesterID,
-            @PathVariable @Parameter(description = "The ID of the paper") Long paperID
+        @RequestParam @Parameter(description = "The ID of the user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of the paper") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -111,18 +124,20 @@ public class ReviewsController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the paper review phase"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track the paper is in, or a reviewer assigned to that paper.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be a chair of the track the paper is in, or a reviewer assigned to that paper.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
     })
     @ResponseBody
     @GetMapping(path = "/reviews/phase", produces = "application/json")
     public ResponseEntity<PaperPhase> getPhase(
-            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
-            @PathVariable @Parameter(description = "The ID of the paper") Long paperID
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of the paper") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -133,21 +148,23 @@ public class ReviewsController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the list of reviewers"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track the paper is in.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be a chair of the track the paper is in.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "409", description = "Conflict. The paper must be in its Discussion phase and " +
             "all of the reviews need to either be positive or negative. Only then can they be finalized.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
     })
     @ResponseBody
     @PostMapping(path = "/reviews/finalization")
     public ResponseEntity<Void> finalization(
-            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
-            @PathVariable @Parameter(description = "The ID of a paper to finalize the reviews for") Long paperID
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of a paper to finalize the reviews for") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -161,17 +178,23 @@ public class ReviewsController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Success. A discussion comment was appended to the review."),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester is not a valid chair or reviewer.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester is not a valid chair or reviewer.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "404", description = "Not Found. " +
+            "The requested paper or reviewer was not found.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
+            @Content(schema = @Schema())})
     })
     @PostMapping(path = "/reviews/by-reviewer/{reviewerID}/discussion-comments", consumes = "application/json")
     public ResponseEntity<Void> submitConfidentialComment(
-            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
-            @PathVariable @Parameter(description = "The ID of a reviewer in charge of this paper") Long reviewerID,
-            @PathVariable @Parameter(description = "The ID of a paper to which to add the comment to") Long paperID,
-            @RequestBody @Schema(description = "Comment", example = "Some comment")
-            String comment
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of a reviewer in charge of this paper") Long reviewerID,
+        @PathVariable @Parameter(description = "The ID of a paper to which to add the comment to") Long paperID,
+        @RequestBody @Schema(description = "Comment", example = "Some comment")
+        String comment
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -185,9 +208,15 @@ public class ReviewsController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Success."),
-            @ApiResponse(responseCode = "403", description = "Forbidden. The requester is not a valid chair or reviewer.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "404", description = "Not Found. The requested paper or reviewer was not found.", content = {@Content(schema = @Schema())}),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester is not a valid chair or reviewer.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "404", description = "Not Found. " +
+            "The requested paper or reviewer was not found.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
+            @Content(schema = @Schema())})
     })
     @GetMapping(path = "/reviews/by-reviewer/{reviewerID}/discussion-comments", produces = "application/json")
     public ResponseEntity<List<DiscussionComment>> getDiscussionComments(
