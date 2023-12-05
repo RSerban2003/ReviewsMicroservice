@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -30,6 +31,9 @@ public class Track implements Serializable {
     private Date biddingDeadLine;
     @Basic(optional = false)
     private Phase currentPhase;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Conference conference;
 
     enum Phase {
         SUBMITTING,

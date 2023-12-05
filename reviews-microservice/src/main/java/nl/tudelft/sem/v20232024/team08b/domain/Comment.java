@@ -11,5 +11,5 @@ public class Comment {
     @ManyToOne(cascade = CascadeType.ALL)
     private User userID;
 
-    private String comment;
+    private String text;
 }
