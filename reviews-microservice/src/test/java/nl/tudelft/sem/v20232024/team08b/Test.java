@@ -10,6 +10,6 @@ public class Test { //NOPMD - suppressed AtLeastOneConstructor - Test Class
         This is a temporary dummy test that is required for Jacoco
         to generate the report file.
         */
-        assertThat (5 == 5);
+        assertThat(5 == 5);
     }
 }

@@ -25,49 +25,57 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/conferences/{conferenceID}/tracks/{trackID}")
-@Tag(name = "Conference Tracks", description = "Operations for dealing with conference tracks: analytics, deadlines and the review phase")
+@Tag(name = "Conference Tracks", description = "Operations for dealing with conference tracks: analytics, " +
+    "deadlines and the review phase")
 public class TracksController {
 
     @Operation(summary = "Get the papers for track",
-        description = "Returns all the papers in the given track of a conference. You can request the full paper from another api point."
+        description = "Returns all the papers in the given track of a conference. " +
+            "You can request the full paper from another api point."
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successful retrieval of papers in given track of given conference"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track or a reviewer in the track.", content = {
+        @ApiResponse(responseCode = "200", description = "Successful retrieval of papers " +
+            "in given track of given conference"),
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be a chair of the track or a reviewer in the track.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference was not found.", content = {
+        @ApiResponse(responseCode = "404", description = "Not Found. " +
+            "The requested track or conference was not found.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
     })
     @ResponseBody
     @GetMapping(path = "/papers", produces = "application/json")
     public ResponseEntity<List<PaperSummaryWithID>> getPapers(
-            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
-            @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
-            @PathVariable @Parameter(description = "The ID of a track") Long trackID
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
+        @PathVariable @Parameter(description = "The ID of a track") Long trackID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @Operation(summary = "Get the summary stats of a track",
-          description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
+        description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of track summary stats"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester has to be a chair of the track.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester has to be a chair of the track.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "404", description = "Not Found. The requested track was not found.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
     })
     @GetMapping(path = "/analytics", produces = "application/json")
     @ResponseBody
     public ResponseEntity<TrackAnalytics> getAnalytics(
-            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
-            @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
-            @PathVariable @Parameter(description = "The ID of a track") Long trackID
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
+        @PathVariable @Parameter(description = "The ID of a track") Long trackID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -80,23 +88,26 @@ public class TracksController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Success.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be a chair of the track.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference were not found.", content = {
+        @ApiResponse(responseCode = "404", description = "Not Found. " +
+            "The requested track or conference were not found.", content = {
             @Content(schema = @Schema())}),
         @ApiResponse(responseCode = "409", description =
             "Conflict. An invalid bidding deadline was given, or the old bidding deadline has already passed." +
                 " The new given bidding deadline, must also not have passed already.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
     })
     @PutMapping(path = "/bidding-deadline", consumes = "application/json")
     public ResponseEntity<Void> setBiddingDeadline(
-            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
-            @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
-            @PathVariable @Parameter(description = "The ID of a track") Long trackID,
-            @RequestBody @Parameter(description = "The date for the deadline of the bid") Date newDeadline
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
+        @PathVariable @Parameter(description = "The ID of a track") Long trackID,
+        @RequestBody @Parameter(description = "The date for the deadline of the bid") Date newDeadline
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -109,19 +120,22 @@ public class TracksController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful pull of the bidding deadline"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track, or a reviewer in the track.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be a chair of the track, or a reviewer in the track.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference were not found.", content = {
+        @ApiResponse(responseCode = "404", description = "Not Found. " +
+            "The requested track or conference were not found.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
     })
     @GetMapping(path = "/bidding-deadline", produces = "application/json")
     @ResponseBody
     public ResponseEntity<Date> getBiddingDeadline(
-            @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
-            @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
-            @PathVariable @Parameter(description = "The ID of a track") Long trackID
+        @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
+        @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
+        @PathVariable @Parameter(description = "The ID of a track") Long trackID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -132,11 +146,14 @@ public class TracksController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful pull of the review phase"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a chair of the track, or a reviewer in the track.", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be a chair of the track, or a reviewer in the track.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested track or conference were not found.", content = {
+        @ApiResponse(responseCode = "404", description = "Not Found. " +
+            "The requested track or conference were not found.", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
             @Content(schema = @Schema())})
     })
     @GetMapping(path = "/phase", produces = "application/json")

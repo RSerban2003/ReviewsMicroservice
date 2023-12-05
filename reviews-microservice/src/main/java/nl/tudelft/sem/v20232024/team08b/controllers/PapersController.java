@@ -29,9 +29,14 @@ public class PapersController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of paper title and abstract"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be a reviewer or chair for the track the paper is in.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be a reviewer or chair for the track the paper is in.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
+            @Content(schema = @Schema())})
     })
     @ResponseBody
     @GetMapping(path = "/title-and-abstract", produces = "application/json")
@@ -41,16 +46,23 @@ public class PapersController {
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
+
     @Operation(summary = "Get the whole paper without the author names",
         description = "Responds all the contents of a paper submission. " +
             "Excludes the names and credentials of the author. "
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the complete paper"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be: a chair of the track the paper is in; or a reviewer who has been assigned to the given paper (the review phase for the paper must have started).", content = {
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be: a chair of the track the paper is in; " +
+            "or a reviewer who has been assigned to the given paper " +
+            "(the review phase for the paper must have started).", content = {
             @Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
+            @Content(schema = @Schema())})
     })
     @ResponseBody
     @GetMapping(path = "", produces = "application/json")
@@ -67,9 +79,15 @@ public class PapersController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful retrieval of the paper review status"),
-        @ApiResponse(responseCode = "403", description = "Forbidden. The requester must be an author of the paper, a chair of the paper's track, or a reviewer assigned to the paper.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error. An unexpected server error occurred.", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "403", description = "Forbidden. " +
+            "The requester must be an author of the paper, a chair of the paper's track, " +
+            "or a reviewer assigned to the paper.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "404", description = "Not Found. The requested paper was not found.", content = {
+            @Content(schema = @Schema())}),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error. " +
+            "An unexpected server error occurred.", content = {
+            @Content(schema = @Schema())})
     })
     @ResponseBody
     @GetMapping(path = "/status", produces = "application/json")
