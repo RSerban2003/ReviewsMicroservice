@@ -18,6 +18,7 @@ import javax.persistence.OneToMany;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import nl.tudelft.sem.v20232024.team08b.dtos.TrackPhase;
 
 @Getter
 @Setter
@@ -30,18 +31,32 @@ public class Track implements Serializable {
     @Basic(optional = false)
     private Date biddingDeadLine;
     @Basic(optional = false)
-    private Phase currentPhase;
+    private TrackPhase currentPhase;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Paper> papers;
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Conference conference;
 
-    enum Phase {
-        SUBMITTING,
-        BIDDING,
-        REVIEWING,
-        FINAL
+
+    /**
+     * Construction for track.
+     *
+     * @param biddingDeadLine bidding deadline for track
+     * @param currentPhase current phase of a track
+     * @param conference conference to which trac belongs
+     * @param papers papers that belong to this track
+     */
+    public Track(Date biddingDeadLine, TrackPhase currentPhase, Conference conference, List<Paper> papers) {
+        this.biddingDeadLine = biddingDeadLine;
+        this.currentPhase = currentPhase;
+        this.conference = conference;
+        this.papers = papers;
     }
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Paper> papers;
+    public Track(){}
+
+
+
 }

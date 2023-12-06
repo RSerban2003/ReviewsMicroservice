@@ -12,4 +12,11 @@ public class Comment {
     private User userID;
 
     private String text;
+
+    public Comment(User userID, String text) {
+        this.userID = userID;
+        this.text = text;
+    }
+
+    public Comment(){}
 }

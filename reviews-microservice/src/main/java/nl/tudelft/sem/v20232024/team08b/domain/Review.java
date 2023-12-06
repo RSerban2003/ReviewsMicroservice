@@ -27,4 +27,26 @@ public class Review {
     private RecommendationScore recommendationScore;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Comment> commentForReviewers;
+
+    /**
+     * Constructor for review.
+     *
+     * @param paper paper to which the review belongs to
+     * @param user user that wrote the review
+     * @param confidenceScore confidence score of a review
+     * @param commentForAuthor comment for the author
+     * @param recommendationScore recommendation score of review
+     * @param commentForReviewers comment for reviewers
+     */
+    public Review(Paper paper, User user, ConfidenceScore confidenceScore, String commentForAuthor,
+                  RecommendationScore recommendationScore, List<Comment> commentForReviewers) {
+        this.paper = paper;
+        this.user = user;
+        this.confidenceScore = confidenceScore;
+        this.commentForAuthor = commentForAuthor;
+        this.recommendationScore = recommendationScore;
+        this.commentForReviewers = commentForReviewers;
+    }
+
+    public Review(){}
 }

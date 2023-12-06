@@ -5,13 +5,23 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Entity
 public class Bid {
+
     @Id
     @ManyToOne(cascade = CascadeType.ALL)
     private Paper paperID;
     @Id
     @ManyToOne(cascade = CascadeType.ALL)
     private User userID;
+
+    public Bid(Paper paper, User user) {
+        paperID = paper;
+        userID = user;
+    }
+
+    public Bid() {}
+
 }
