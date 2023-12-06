@@ -24,4 +24,19 @@ public class Bid {
 
     public Bid() {}
 
+    public Paper getPaperID() {
+        return paperID;
+    }
+
+    public void setPaperID(Paper paperID) {
+        this.paperID = paperID;
+    }
+
+    public User getUserID() {
+        return userID;
+    }
+
+    public void setUserID(User userID) {
+        this.userID = userID;
+    }
 }
