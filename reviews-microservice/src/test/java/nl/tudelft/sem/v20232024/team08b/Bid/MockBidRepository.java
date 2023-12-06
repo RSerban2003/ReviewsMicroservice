@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
-import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class TestBidRepository implements BidRepository {
+public class MockBidRepository implements BidRepository {
     public final List<Bid> bids = new ArrayList<>();
     public final List<String> calledMethods = new ArrayList<>();
 

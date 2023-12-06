@@ -3,7 +3,6 @@ package nl.tudelft.sem.v20232024.team08b.Review;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.data.domain.Example;
@@ -11,7 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class TestReviewRepository implements ReviewRepository {
+public class MockReviewRepository implements ReviewRepository {
     public final List<Review> reviews = new ArrayList<>();
     public final List<String> calledMethods = new ArrayList<>();
 

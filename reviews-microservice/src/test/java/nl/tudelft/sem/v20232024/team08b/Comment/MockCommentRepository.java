@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import nl.tudelft.sem.v20232024.team08b.domain.Comment;
-import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.repos.CommentRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class TestCommentRepository implements CommentRepository {
+public class MockCommentRepository implements CommentRepository {
     public final List<Comment> comments = new ArrayList<>();
     public final List<String> calledMethods = new ArrayList<>();
 

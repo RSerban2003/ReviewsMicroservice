@@ -3,7 +3,6 @@ package nl.tudelft.sem.v20232024.team08b.Track;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.data.domain.Example;
@@ -11,7 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class TestTrackRepository implements TrackRepository {
+public class MockTrackRepository implements TrackRepository {
     public final List<Track> tracks = new ArrayList<>();
     public final List<String> calledMethods = new ArrayList<>();
 
