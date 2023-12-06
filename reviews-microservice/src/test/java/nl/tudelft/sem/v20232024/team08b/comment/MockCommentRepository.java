@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.Comment;
+package nl.tudelft.sem.v20232024.team08b.comment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,7 @@ public class MockCommentRepository implements CommentRepository {
     private void call(String name) {
         calledMethods.add(name);
     }
+
     @Override
     public List<Comment> findAll() {
         return null;

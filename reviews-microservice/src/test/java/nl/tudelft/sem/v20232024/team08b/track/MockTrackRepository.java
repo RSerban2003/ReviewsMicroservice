@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.Track;
+package nl.tudelft.sem.v20232024.team08b.track;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,7 @@ public class MockTrackRepository implements TrackRepository {
     private void call(String name) {
         calledMethods.add(name);
     }
+
     @Override
     public List<Track> findAll() {
         return null;

@@ -1,39 +1,40 @@
-package nl.tudelft.sem.v20232024.team08b.Review;
+package nl.tudelft.sem.v20232024.team08b.paper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import nl.tudelft.sem.v20232024.team08b.domain.Review;
-import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
+import nl.tudelft.sem.v20232024.team08b.domain.Paper;
+import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class MockReviewRepository implements ReviewRepository {
-    public final List<Review> reviews = new ArrayList<>();
+public class MockPaperRepository implements PaperRepository {
+    public final List<Paper> papers = new ArrayList<>();
     public final List<String> calledMethods = new ArrayList<>();
 
     private void call(String name) {
         calledMethods.add(name);
     }
+
     @Override
-    public List<Review> findAll() {
+    public List<Paper> findAll() {
         return null;
     }
 
     @Override
-    public List<Review> findAll(Sort sort) {
+    public List<Paper> findAll(Sort sort) {
         return null;
     }
 
     @Override
-    public Page<Review> findAll(Pageable pageable) {
+    public Page<Paper> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
-    public List<Review> findAllById(Iterable<Long> longs) {
+    public List<Paper> findAllById(Iterable<Long> longs) {
         return null;
     }
 
@@ -48,12 +49,12 @@ public class MockReviewRepository implements ReviewRepository {
     }
 
     @Override
-    public void delete(Review entity) {
+    public void delete(Paper entity) {
 
     }
 
     @Override
-    public void deleteAll(Iterable<? extends Review> entities) {
+    public void deleteAll(Iterable<? extends Paper> entities) {
 
     }
 
@@ -63,17 +64,17 @@ public class MockReviewRepository implements ReviewRepository {
     }
 
     @Override
-    public <S extends Review> S save(S entity) {
+    public <S extends Paper> S save(S entity) {
         return null;
     }
 
     @Override
-    public <S extends Review> List<S> saveAll(Iterable<S> entities) {
+    public <S extends Paper> List<S> saveAll(Iterable<S> entities) {
         return null;
     }
 
     @Override
-    public Optional<Review> findById(Long aLong) {
+    public Optional<Paper> findById(Long aLong) {
         return Optional.empty();
     }
 
@@ -88,12 +89,12 @@ public class MockReviewRepository implements ReviewRepository {
     }
 
     @Override
-    public <S extends Review> S saveAndFlush(S entity) {
+    public <S extends Paper> S saveAndFlush(S entity) {
         return null;
     }
 
     @Override
-    public void deleteInBatch(Iterable<Review> entities) {
+    public void deleteInBatch(Iterable<Paper> entities) {
 
     }
 
@@ -103,37 +104,37 @@ public class MockReviewRepository implements ReviewRepository {
     }
 
     @Override
-    public Review getOne(Long aLong) {
+    public Paper getOne(Long aLong) {
         return null;
     }
 
     @Override
-    public <S extends Review> Optional<S> findOne(Example<S> example) {
+    public <S extends Paper> Optional<S> findOne(Example<S> example) {
         return Optional.empty();
     }
 
     @Override
-    public <S extends Review> List<S> findAll(Example<S> example) {
+    public <S extends Paper> List<S> findAll(Example<S> example) {
         return null;
     }
 
     @Override
-    public <S extends Review> List<S> findAll(Example<S> example, Sort sort) {
+    public <S extends Paper> List<S> findAll(Example<S> example, Sort sort) {
         return null;
     }
 
     @Override
-    public <S extends Review> Page<S> findAll(Example<S> example, Pageable pageable) {
+    public <S extends Paper> Page<S> findAll(Example<S> example, Pageable pageable) {
         return null;
     }
 
     @Override
-    public <S extends Review> long count(Example<S> example) {
+    public <S extends Paper> long count(Example<S> example) {
         return 0;
     }
 
     @Override
-    public <S extends Review> boolean exists(Example<S> example) {
+    public <S extends Paper> boolean exists(Example<S> example) {
         return false;
     }
 }

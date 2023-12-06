@@ -1,39 +1,40 @@
-package nl.tudelft.sem.v20232024.team08b.Bid;
+package nl.tudelft.sem.v20232024.team08b.review;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import nl.tudelft.sem.v20232024.team08b.domain.Bid;
-import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
+import nl.tudelft.sem.v20232024.team08b.domain.Review;
+import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class MockBidRepository implements BidRepository {
-    public final List<Bid> bids = new ArrayList<>();
+public class MockReviewRepository implements ReviewRepository {
+    public final List<Review> reviews = new ArrayList<>();
     public final List<String> calledMethods = new ArrayList<>();
 
     private void call(String name) {
         calledMethods.add(name);
     }
+
     @Override
-    public List<Bid> findAll() {
+    public List<Review> findAll() {
         return null;
     }
 
     @Override
-    public List<Bid> findAll(Sort sort) {
+    public List<Review> findAll(Sort sort) {
         return null;
     }
 
     @Override
-    public Page<Bid> findAll(Pageable pageable) {
+    public Page<Review> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
-    public List<Bid> findAllById(Iterable<Long> longs) {
+    public List<Review> findAllById(Iterable<Long> longs) {
         return null;
     }
 
@@ -48,12 +49,12 @@ public class MockBidRepository implements BidRepository {
     }
 
     @Override
-    public void delete(Bid entity) {
+    public void delete(Review entity) {
 
     }
 
     @Override
-    public void deleteAll(Iterable<? extends Bid> entities) {
+    public void deleteAll(Iterable<? extends Review> entities) {
 
     }
 
@@ -63,17 +64,17 @@ public class MockBidRepository implements BidRepository {
     }
 
     @Override
-    public <S extends Bid> S save(S entity) {
+    public <S extends Review> S save(S entity) {
         return null;
     }
 
     @Override
-    public <S extends Bid> List<S> saveAll(Iterable<S> entities) {
+    public <S extends Review> List<S> saveAll(Iterable<S> entities) {
         return null;
     }
 
     @Override
-    public Optional<Bid> findById(Long aLong) {
+    public Optional<Review> findById(Long aLong) {
         return Optional.empty();
     }
 
@@ -88,12 +89,12 @@ public class MockBidRepository implements BidRepository {
     }
 
     @Override
-    public <S extends Bid> S saveAndFlush(S entity) {
+    public <S extends Review> S saveAndFlush(S entity) {
         return null;
     }
 
     @Override
-    public void deleteInBatch(Iterable<Bid> entities) {
+    public void deleteInBatch(Iterable<Review> entities) {
 
     }
 
@@ -103,37 +104,37 @@ public class MockBidRepository implements BidRepository {
     }
 
     @Override
-    public Bid getOne(Long aLong) {
+    public Review getOne(Long aLong) {
         return null;
     }
 
     @Override
-    public <S extends Bid> Optional<S> findOne(Example<S> example) {
+    public <S extends Review> Optional<S> findOne(Example<S> example) {
         return Optional.empty();
     }
 
     @Override
-    public <S extends Bid> List<S> findAll(Example<S> example) {
+    public <S extends Review> List<S> findAll(Example<S> example) {
         return null;
     }
 
     @Override
-    public <S extends Bid> List<S> findAll(Example<S> example, Sort sort) {
+    public <S extends Review> List<S> findAll(Example<S> example, Sort sort) {
         return null;
     }
 
     @Override
-    public <S extends Bid> Page<S> findAll(Example<S> example, Pageable pageable) {
+    public <S extends Review> Page<S> findAll(Example<S> example, Pageable pageable) {
         return null;
     }
 
     @Override
-    public <S extends Bid> long count(Example<S> example) {
+    public <S extends Review> long count(Example<S> example) {
         return 0;
     }
 
     @Override
-    public <S extends Bid> boolean exists(Example<S> example) {
+    public <S extends Review> boolean exists(Example<S> example) {
         return false;
     }
 }

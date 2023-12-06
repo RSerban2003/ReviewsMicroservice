@@ -1,17 +1,17 @@
-package nl.tudelft.sem.v20232024.team08b.Paper;
+package nl.tudelft.sem.v20232024.team08b.bid;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import nl.tudelft.sem.v20232024.team08b.domain.Paper;
-import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
+import nl.tudelft.sem.v20232024.team08b.domain.Bid;
+import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public class MockPaperRepository implements PaperRepository {
-    public final List<Paper> papers = new ArrayList<>();
+public class MockBidRepository implements BidRepository {
+    public final List<Bid> bids = new ArrayList<>();
     public final List<String> calledMethods = new ArrayList<>();
 
     private void call(String name) {
@@ -19,22 +19,22 @@ public class MockPaperRepository implements PaperRepository {
     }
 
     @Override
-    public List<Paper> findAll() {
+    public List<Bid> findAll() {
         return null;
     }
 
     @Override
-    public List<Paper> findAll(Sort sort) {
+    public List<Bid> findAll(Sort sort) {
         return null;
     }
 
     @Override
-    public Page<Paper> findAll(Pageable pageable) {
+    public Page<Bid> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
-    public List<Paper> findAllById(Iterable<Long> longs) {
+    public List<Bid> findAllById(Iterable<Long> longs) {
         return null;
     }
 
@@ -49,12 +49,12 @@ public class MockPaperRepository implements PaperRepository {
     }
 
     @Override
-    public void delete(Paper entity) {
+    public void delete(Bid entity) {
 
     }
 
     @Override
-    public void deleteAll(Iterable<? extends Paper> entities) {
+    public void deleteAll(Iterable<? extends Bid> entities) {
 
     }
 
@@ -64,17 +64,17 @@ public class MockPaperRepository implements PaperRepository {
     }
 
     @Override
-    public <S extends Paper> S save(S entity) {
+    public <S extends Bid> S save(S entity) {
         return null;
     }
 
     @Override
-    public <S extends Paper> List<S> saveAll(Iterable<S> entities) {
+    public <S extends Bid> List<S> saveAll(Iterable<S> entities) {
         return null;
     }
 
     @Override
-    public Optional<Paper> findById(Long aLong) {
+    public Optional<Bid> findById(Long aLong) {
         return Optional.empty();
     }
 
@@ -89,12 +89,12 @@ public class MockPaperRepository implements PaperRepository {
     }
 
     @Override
-    public <S extends Paper> S saveAndFlush(S entity) {
+    public <S extends Bid> S saveAndFlush(S entity) {
         return null;
     }
 
     @Override
-    public void deleteInBatch(Iterable<Paper> entities) {
+    public void deleteInBatch(Iterable<Bid> entities) {
 
     }
 
@@ -104,37 +104,37 @@ public class MockPaperRepository implements PaperRepository {
     }
 
     @Override
-    public Paper getOne(Long aLong) {
+    public Bid getOne(Long aLong) {
         return null;
     }
 
     @Override
-    public <S extends Paper> Optional<S> findOne(Example<S> example) {
+    public <S extends Bid> Optional<S> findOne(Example<S> example) {
         return Optional.empty();
     }
 
     @Override
-    public <S extends Paper> List<S> findAll(Example<S> example) {
+    public <S extends Bid> List<S> findAll(Example<S> example) {
         return null;
     }
 
     @Override
-    public <S extends Paper> List<S> findAll(Example<S> example, Sort sort) {
+    public <S extends Bid> List<S> findAll(Example<S> example, Sort sort) {
         return null;
     }
 
     @Override
-    public <S extends Paper> Page<S> findAll(Example<S> example, Pageable pageable) {
+    public <S extends Bid> Page<S> findAll(Example<S> example, Pageable pageable) {
         return null;
     }
 
     @Override
-    public <S extends Paper> long count(Example<S> example) {
+    public <S extends Bid> long count(Example<S> example) {
         return 0;
     }
 
     @Override
-    public <S extends Paper> boolean exists(Example<S> example) {
+    public <S extends Bid> boolean exists(Example<S> example) {
         return false;
     }
 }
