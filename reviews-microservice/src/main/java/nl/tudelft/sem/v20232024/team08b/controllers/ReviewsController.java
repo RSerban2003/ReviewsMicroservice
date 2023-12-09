@@ -35,7 +35,9 @@ import org.springframework.web.bind.annotation.RestController;
         "This microservice is responsible for assigning papers to reviews, allowing reviewers to add their comments, " +
         "and allowing the PC chairs to finalize the decision about acceptance and rejection of the submitted papers.\n\n" +
         "The different roles that the users can have are specified in the Users Microservice and the process for " +
-        "submitting papers to conferences is specified in the Submissions Microservice."
+        "submitting papers to conferences is specified in the Submissions Microservice.\n\n" +
+        "TECHNICAL NOTE: in every endpoint, we require the requesting user to provide their ID. I.e., the requesterID parameter " +
+        "must be provided. It is used for authentication in order to check if the user is allowed to perform certain actions."
     ))
 @RestController
 @RequestMapping("/papers/{paperID}")
