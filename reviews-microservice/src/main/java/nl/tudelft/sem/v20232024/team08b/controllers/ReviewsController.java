@@ -147,7 +147,7 @@ public class ReviewsController {
             "Once all of the papers in a track are reviewed, the track automatically goes to the FINAL phase."
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successful retrieval of the list of reviewers"),
+        @ApiResponse(responseCode = "200", description = "Successful finalization of the discussion phase"),
         @ApiResponse(responseCode = "403", description = "Forbidden. " +
             "The requester must be a chair of the track the paper is in.", content = {
             @Content(schema = @Schema())}),
