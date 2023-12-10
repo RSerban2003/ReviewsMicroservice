@@ -17,7 +17,7 @@ public class BidsService {
      */
     @Autowired
     public BidsService(BidRepository bidRepository,
-                              ReviewRepository reviewRepository) {
+                       ReviewRepository reviewRepository) {
         this.bidRepository = bidRepository;
         this.reviewRepository = reviewRepository;
     }

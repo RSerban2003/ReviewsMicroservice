@@ -17,7 +17,7 @@ public class PapersService {
      */
     @Autowired
     public PapersService(PaperRepository paperRepository,
-                       ReviewRepository reviewRepository) {
+                         ReviewRepository reviewRepository) {
         this.paperRepository = paperRepository;
         this.reviewRepository = reviewRepository;
     }
