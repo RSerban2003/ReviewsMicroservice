@@ -1,12 +1,15 @@
 package nl.tudelft.sem.v20232024.team08b.domain;
 
+import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import lombok.Data;
 
 @Entity
-public class Comment {
+@Data
+public class Comment implements Serializable {
     @Id
     @ManyToOne(cascade = CascadeType.ALL)
     private User userID;
@@ -20,19 +23,4 @@ public class Comment {
 
     public Comment(){}
 
-    public User getUserID() {
-        return userID;
-    }
-
-    public void setUserID(User userID) {
-        this.userID = userID;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
 }

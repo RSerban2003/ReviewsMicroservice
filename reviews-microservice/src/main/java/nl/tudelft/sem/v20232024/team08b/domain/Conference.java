@@ -6,8 +6,10 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import lombok.Data;
 
 @Entity
+@Data
 public class Conference implements Serializable {
     @Id
     private Long id;
@@ -21,19 +23,4 @@ public class Conference implements Serializable {
 
     public Conference(){}
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public List<Track> getTrack() {
-        return track;
-    }
-
-    public void setTrack(List<Track> track) {
-        this.track = track;
-    }
 }

@@ -15,13 +15,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import nl.tudelft.sem.v20232024.team08b.dtos.TrackPhase;
 
-@Getter
-@Setter
+@Data
 @Entity
 @EqualsAndHashCode
 public class Track implements Serializable {
