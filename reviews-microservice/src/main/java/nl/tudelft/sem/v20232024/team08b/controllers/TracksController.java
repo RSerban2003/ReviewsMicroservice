@@ -9,9 +9,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Date;
 import java.util.List;
+
+import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
+import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.TrackPhase;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +32,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Conference Tracks", description = "Operations for dealing with conference tracks: analytics, " +
     "deadlines and the review phase")
 public class TracksController {
+    private final TracksService tracksService;
+
+    /**
+     * Default constructor for the controller
+     * @param tracksService the respective service to inject
+     */
+    @Autowired
+    public TracksController(TracksService tracksService) {
+        this.tracksService = tracksService;
+    }
 
     @Operation(summary = "Get the papers for track",
         description = "Returns all the papers in the given track of a conference. " +

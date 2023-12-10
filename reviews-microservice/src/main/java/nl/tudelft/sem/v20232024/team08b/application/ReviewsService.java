@@ -14,7 +14,7 @@ public class ReviewsService {
 
     /**
      * Default constructor for the service
-     * @param reviewRepository repository storing the bids
+     * @param reviewRepository repository storing the reviews
      * @param commentRepository repository storing the comments
      * @param paperRepository repository storing the papers
      */
