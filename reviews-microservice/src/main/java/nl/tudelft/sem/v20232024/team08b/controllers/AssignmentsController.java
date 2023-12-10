@@ -49,7 +49,7 @@ public class AssignmentsController {
     public ResponseEntity<Void> assignManual(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a user to assign as a reviewer") Long reviewerID,
-        @PathVariable @Parameter(description = "The ID of a paper to assign") String paperID
+        @PathVariable @Parameter(description = "The ID of a paper to assign") Long paperID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -78,8 +78,8 @@ public class AssignmentsController {
     @PutMapping(path = "/conferences/{conferenceID}/tracks/{trackID}/automatic")
     public ResponseEntity<Void> assignAuto(
         @RequestParam @Parameter(description = "The ID of the user making the request") Long requesterID,
-        @PathVariable @Parameter(description = "The ID of the conference the track belongs to") String conferenceID,
-        @PathVariable @Parameter(description = "The ID of the track for which to do the automatic assignment") String trackID
+        @PathVariable @Parameter(description = "The ID of the conference the track belongs to") Long conferenceID,
+        @PathVariable @Parameter(description = "The ID of the track for which to do the automatic assignment") Long trackID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -107,9 +107,9 @@ public class AssignmentsController {
     @PostMapping(path = "/conferences/{conferenceID}/tracks/{trackID}/finalization")
     public ResponseEntity<Void> finalization(
         @RequestParam @Parameter(description = "The ID of the user making the request") Long requesterID,
-        @PathVariable @Parameter(description = "The ID of the conference the track belongs to") String conferenceID,
+        @PathVariable @Parameter(description = "The ID of the conference the track belongs to") Long conferenceID,
         @PathVariable @Parameter(description = "The ID of the track for which the assignments should be finalized")
-        String trackID
+        Long trackID
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
