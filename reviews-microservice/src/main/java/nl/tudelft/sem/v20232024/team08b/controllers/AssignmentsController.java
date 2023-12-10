@@ -31,7 +31,7 @@ public class AssignmentsController {
 
     /**
      * Default constructor for the controller
-     * @param assignmentsService the service to inject
+     * @param assignmentsService the respective service to inject
      */
     @Autowired
     public AssignmentsController(AssignmentsService assignmentsService) {
