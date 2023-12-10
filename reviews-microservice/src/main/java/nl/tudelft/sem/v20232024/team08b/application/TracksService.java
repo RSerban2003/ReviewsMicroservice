@@ -11,7 +11,8 @@ public class TracksService {
     private final TrackRepository trackRepository;
 
     /**
-     * Default constructor for the service
+     * Default constructor for the service.
+     *
      * @param paperRepository repository storing the papers
      * @param trackRepository repository storing the tracks
      */

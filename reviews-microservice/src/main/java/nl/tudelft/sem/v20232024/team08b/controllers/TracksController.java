@@ -35,7 +35,8 @@ public class TracksController {
     private final TracksService tracksService;
 
     /**
-     * Default constructor for the controller
+     * Default constructor for the controller.
+     *
      * @param tracksService the respective service to inject
      */
     @Autowired

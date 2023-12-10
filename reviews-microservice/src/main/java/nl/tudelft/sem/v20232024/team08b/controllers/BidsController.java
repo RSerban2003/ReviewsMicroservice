@@ -32,13 +32,15 @@ public class BidsController {
     private final BidsService bidsService;
 
     /**
-     * Default constructor for the controller
+     * Default constructor for the controller.
+     *
      * @param bidsService the respective service to inject
      */
     @Autowired
     public BidsController(BidsService bidsService) {
         this.bidsService = bidsService;
     }
+
     @Operation(summary = "Get all bids for a given paper",
         description = "Responds with a list of bids and the IDs of the corresponding " +
             "reviewers. The requester must be a chair of the track that the paper is in."

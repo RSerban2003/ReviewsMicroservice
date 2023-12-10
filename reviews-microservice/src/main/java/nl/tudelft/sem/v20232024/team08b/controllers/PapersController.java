@@ -30,13 +30,15 @@ public class PapersController {
     private final PapersService papersService;
 
     /**
-     * Default constructor for the controller
+     * Default constructor for the controller.
+     *
      * @param papersService the respective service to inject
      */
     @Autowired
     public PapersController(PapersService papersService) {
         this.papersService = papersService;
     }
+
     @Operation(summary = "Get the title and abstract of a paper",
         description = "Responds with the title and abstract of the given paper. "
     )

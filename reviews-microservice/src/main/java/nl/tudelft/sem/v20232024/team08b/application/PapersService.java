@@ -11,7 +11,8 @@ public class PapersService {
     private final ReviewRepository reviewRepository;
 
     /**
-     * Default constructor for the service
+     * Default constructor for the service.
+     *
      * @param paperRepository repository storing the papers
      * @param reviewRepository repository storing the reviews
      */

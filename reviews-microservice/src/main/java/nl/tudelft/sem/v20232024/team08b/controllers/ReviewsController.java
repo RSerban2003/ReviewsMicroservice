@@ -51,13 +51,15 @@ public class ReviewsController {
     private final ReviewsService reviewsService;
 
     /**
-     * Default constructor for the controller
+     * Default constructor for the controller.
+     *
      * @param reviewsService the respective service to inject
      */
     @Autowired
     public ReviewsController(ReviewsService reviewsService) {
         this.reviewsService = reviewsService;
     }
+
     @Operation(summary = "Gets a review",
         description = "Responds with the review of a specific paper (paperID), reviewed by user (userID). " +
             "Confidential comments will not be revealed if the requester is the author of the paper."

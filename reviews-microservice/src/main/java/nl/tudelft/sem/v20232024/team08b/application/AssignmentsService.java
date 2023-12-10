@@ -11,7 +11,8 @@ public class AssignmentsService {
     private final BidRepository bidRepository;
 
     /**
-     * Default constructor for the service
+     * Default constructor for the service.
+     *
      * @param bidRepository repository storing the bids
      * @param reviewRepository repository storing the reviews
      */
