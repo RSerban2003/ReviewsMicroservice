@@ -5,13 +5,9 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
 
 @Entity
 @Data

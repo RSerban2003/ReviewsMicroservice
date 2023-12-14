@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Review;
 import org.springframework.stereotype.Repository;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -14,6 +13,7 @@ import java.net.http.HttpResponse;
 public class ExternalRepository {
     private ObjectMapper objectMapper;
     private HttpClient httpClient;
+
     /**
      * Empty constructor.
      */
