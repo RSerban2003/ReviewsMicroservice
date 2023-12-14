@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ExternalRepository {
     /**
-     * Empty constructor
+     * Empty constructor.
      */
     public ExternalRepository() {
     }
