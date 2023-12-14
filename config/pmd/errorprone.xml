@@ -27,7 +27,7 @@ Rules to detect constructs that are either broken, extremely confusing or prone 
     <rule ref="category/java/errorprone.xml/AvoidLosingExceptionInformation" />
     <rule ref="category/java/errorprone.xml/AvoidMultipleUnaryOperators" />
     <rule ref="category/java/errorprone.xml/AvoidUsingOctalValues" />
-    <rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize" />
+<!--    <rule ref="category/java/errorprone.xml/BeanMembersShouldSerialize" />-->
     <rule ref="category/java/errorprone.xml/BrokenNullCheck" />
     <rule ref="category/java/errorprone.xml/CallSuperFirst" />
     <rule ref="category/java/errorprone.xml/CallSuperLast" />
@@ -107,6 +107,5 @@ Rules to detect constructs that are either broken, extremely confusing or prone 
     <rule ref="category/java/errorprone.xml/DoNotCallSystemExit" />
     <rule ref="category/java/errorprone.xml/ImportFromSamePackage" />
     <rule ref="category/java/errorprone.xml/LoggerIsNotStaticFinal" />
-    <rule ref="category/java/errorprone.xml/ReturnEmptyArrayRatherThanNull" />
 
 </ruleset>
