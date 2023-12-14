@@ -1,0 +1,810 @@
+openapi: 3.0.0
+info:
+  title: EasyConf User
+  description: User authentication service for easyConf
+  version: 1.0.1
+servers:
+- url: http://localhost:8080
+  description: server url
+paths:
+  /track/{eventId}/{trackId}:
+    get:
+      tags:
+        - track
+      summary: Get a track by ID
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Id of the event we want to retreive, part of the composite key
+          schema:
+            type: integer
+            format: int64
+        - in: path
+          name: trackId
+          required: true
+          description: Id of the track we want to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/track"
+        '404':
+          description: Track not found
+    delete:
+      tags:
+        - track
+      summary: Delete a track by ID
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          description: Id of the event we want to retreive, part of the composite key
+          schema:
+            type: integer
+            format: int64
+        - in: path
+          name: trackId
+          required: true
+          description: Id of the track we want to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Track deleted successfully
+        '400':
+          description: Error deleting track
+    put:
+      tags:
+        - track
+      summary: Update a track by Event ID and Track ID
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: "#/components/schemas/track"
+      responses:
+        '200':
+          description: Track updated successfully
+        '400':
+          description: Error updating track
+  /track/{eventId}:
+    post:
+      tags:
+        - track
+      summary: Create a new track
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/track"
+      responses:
+        '200':
+          description: Track created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/track"
+        '400':
+          description: Error creating track
+  /paper/assignSection/{eventId}/{trackId}/{userIdR}/{userIdS}:
+    get:
+      tags:
+        - paper
+      description: >-
+        returns true iff user has permission to assign a section of the paper to
+        a sub-reviewer
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId of the event containing the paper
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: trackId of the event containing the paper
+        - name: userIdR
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: userId of the Reviewer
+        - name: userIdS
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: userId of the Sub-Reviewer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: boolean
+                example: true
+        '404':
+          description: User not found
+  /paper/access/{eventId}/{trackId}/{userId}:
+    get:
+      tags:
+        - paper
+      description: returns true iff user has permission to view the paper
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId of the event containing the paper
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: trackId of the event containing the paper
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: userId of the User to check
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: boolean
+                example: true
+        '404':
+          description: User not found
+  /paper/edit/{eventId}/{trackId}/{userId}:
+    get:
+      tags:
+        - paper
+      description: returns true iff user has permission to edit the paper
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId of the event containing the paper
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: trackId of the event containing the paper
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: userId of the User to check
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: boolean
+                example: true
+        '404':
+          description: User not found
+  /paper/review/{eventId}/{trackId}/{userId}:
+    get:
+      tags:
+        - paper
+      description: returns true iff user has permission to review the paper
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId of the event containing the paper
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: trackId of the event containing the paper
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: userId of the User to check
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: boolean
+                example: true
+        '404':
+          description: User not found
+  /event:
+    post:
+      tags:
+        - event
+      summary: creates event
+      description: creates event, assigns the user(s) in the body as a general chair and returns event with id filled in
+      requestBody:
+        description: Post body containing name, description, a list of track id's. eventId can be left blank
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/event"
+      responses:
+        '200':
+          description: Event successfully created.
+        '400':
+          description: Bad request.
+        '500':
+          description: Internal server error.
+  /event/{eventId}:
+    put:
+      tags:
+        - event
+      summary: modifies event
+      description: modifies event given id and the event as a parameter
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId of the event
+      requestBody:
+        description: stuff event needs idk
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/event"
+      responses:
+        '200':
+          description: Successfully updated event
+        '400':
+          description: Bad request.
+        '500':
+          description: Internal server error.
+    get:
+      tags:
+        - event
+      summary: gets event
+      description: gets event and it's tracks given an id as parameter
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId of the event
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/event"
+        '400':
+          description: Bad request.
+        '500':
+          description: Internal server error.
+    delete:
+      tags:
+        - event
+      description: deletes event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId of the event
+      responses:
+        '200':
+          description: Event deleted successfully
+        '400':
+          description: Bad request.
+        '500':
+          description: Internal server error.
+  /user:
+    post:
+      tags: 
+        - User
+      summary: Register a new user
+      description: Registers a new user with the given information. The values name, surname, email and password are required
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+        '400':
+          description: Bad request. Invalid input or missing required fields
+        '500':
+          description: Internal server error.
+  /user/{userId}:
+    put:
+      tags: 
+        - User
+      summary: Update user details
+      description: update a users details with a specified body
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: userId of the user to change
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/user"
+      responses:
+        '200':
+          description: User updated successfully
+        '400':
+          description: Invalid request payload
+        '404':
+          description: User not found
+    get:
+      tags: 
+        - User
+      summary: Get user details
+      description: get all information about a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+        '404':
+          description: User not found
+    delete:
+      tags: 
+        - User
+      summary: Delete user
+      description: Deletes the given user from the database
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+  /event/{eventId}/{trackId}/role/{userId}:
+    put:
+      tags:
+        - Role
+      summary: Assign a user to role within a track
+      description: >-
+        Assign a User to role within a track. the Assignee should have the Role of
+        an PC chair to be able to perform this action
+      operationId: assignRole
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: EventId for where the User is being assigned a role to
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: trackId for where the User is being assigned a role to
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: userId of the person who will be assigned to the role
+        - name: Assignee
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: userId of the person who assigns the role
+        - name: roleType
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: >-
+            String containing the role being given to the User, valid roles are
+            "PCmember", "PCchair", "Sub-reviewer", "Author"
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: User is not allowed to assign these roles
+        '404':
+          description: Track not found
+    delete:
+      tags:
+        - Role
+      summary: Removes the specified role of an User
+      description: >-
+        Removes the specified role of an User, given that the remover has the
+        right permissions
+      operationId: unassignRole
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId for where the User is being assigned a role to
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: trackId for where the User their role being removed from
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: userId of the person from which the role is unassigned
+        - name: Remover
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: userId of the person removing the role
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: User does not have this role/role does not exist
+        '401':
+          description: User is not allowed to unassign roles
+        '404':
+          description: Track not found
+  /event/{eventId}/{trackId}/{userId}/concludeSubmission:
+    get:
+      tags:
+        - Permissions
+      summary: Returns whether a user can conclude a submission or not
+      operationId: canConcludeSubmission
+      description: >-
+        Returns whether a user can conclude a submission or not, this is tied to
+        the role assigned to a track.
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId from which you want to check the Users permission
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: trackId from which you want to check the Users permission
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: userId of the User to check
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: boolean
+                example: true
+        '404':
+          description: User not found
+  /event/{eventId}/{trackId}/{userId}/AccessReviewProgress:
+    get:
+      tags:
+        - Permissions
+      summary: Returns whether a user can conclude a submission or not
+      operationId: canAccessReviewProgress
+      description: >-
+        Returns whether a user can conclude a submission or not, this is tied to
+        the role assigned to a track.
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: eventId from which you want to check the Users permission
+        - name: trackId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: trackId from which you want to check the Users permission
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: userId of the User to check
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: boolean
+                example: true
+        '404':
+          description: User not found
+  /user/{userId}/tracks:
+    get:
+      tags: 
+        - User
+      summary: Gets all the tracks this user is inside of
+      description: Given the Id of a User, return a list of all tracks they are part of.
+      parameters: 
+        - name: userId
+          in: path
+          description: userId of the user we want to look up their tracks for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tracksOfUser"
+        "404":
+          description: User not found
+  /user/{userId}/tracks/role:
+    get:
+      tags: 
+        - User
+      summary: Gets all the roles of this User
+      description: Given the Id of a User, return a map of all Tracks they are part of, with the role they have there.
+      parameters: 
+        - name: userId
+          in: path
+          description: userId of the user we want to look up their roles for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/rolesOfUser"
+        "404":
+          description: User not found
+  /invite/{eventId}/{trackId}/:
+    get:
+      tags: 
+        - Invitation
+      summary: Invite a user to a track
+      description: Invite a user to the specified track as PC member. Sends an Email to the user's email address containing a link which will assign the role when clicked. Only a PC chair or general chair can invite user's. 
+      parameters: 
+        - name: eventId
+          in: path
+          description: eventId we want to invite the user to
+          required: true
+          schema:
+            type: integer
+        - name: trackId
+          in: path
+          description: trackId we want to invite the user to
+          required: true
+          schema:
+            type: integer
+        - name: inviter
+          in: query
+          description: userId of the user sending the invite
+          required: true
+          schema:
+            type: integer
+        - name: email adress
+          in: query
+          description: email adress of the user to invite
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+        '400':
+          description: User does not have this role/role does not exist
+        '401':
+          description: User is not allowed to invite people
+components:
+  schemas:
+    event:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: id of event
+        name:
+          type: string
+          description: name of the event
+        description:
+          type: string
+          description: short description of the event
+        tracks:
+          description: array containing id's of tracks in the event
+          type: array
+          items:
+            type: integer
+        generalChairs:
+          description: array containing id's of the general chairs of the event
+          type: array
+          items:
+            type: integer
+    track:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: id of track
+        name:
+          type: string
+          description: name of the track
+        maxLength:
+          type: integer
+          description: max length a paper can have in this track
+        description:
+          type: string
+          description: short description of the track
+        deadline:
+          type: integer
+          description: The deadline of a track in the UNIX timestamp format in milliseconds
+        users:
+          description: array containing users and their roles
+          type: array
+          items:
+            type: object
+            properties:
+              userId:
+                type: string
+              role:
+                type: string
+    tracksOfUser:
+      type: object
+      properties:
+        tracks:
+          type: array
+          items:
+            type: object
+            properties:
+              eventId:
+                type: integer
+              trackId:
+                type: integer
+      example:
+        - eventId: 0
+          trackId: 0
+        - eventId: 0
+          trackId: 1
+        - eventId: 1
+          trackId: 2
+    rolesOfUser:
+      type: object
+      properties:
+        tracks:
+          type: array
+          items:
+            type: object
+            properties:
+              eventId:
+                type: integer
+              trackId:
+                type: integer
+              RoleName:
+                type: string
+      example:
+        - eventId: 0
+          trackId: 0
+          RoleName: "PC Member"
+        - eventId: 0
+          trackId: 1
+          RoleName: "PC Chair"
+        - eventId: 1
+          trackId: 2
+          RoleName: "Sub-reviewer"
+    user:
+      type: object
+      properties:
+        Id:
+          type: integer
+        name:
+          type: string
+        surname:
+          type: string
+        affiliation:
+          type: string
+        email:
+          type: string
+        website:
+          type: string
+        communicationMedium:
+          type: string
