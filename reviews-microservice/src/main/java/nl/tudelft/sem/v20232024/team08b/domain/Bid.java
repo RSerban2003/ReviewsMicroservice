@@ -15,15 +15,10 @@ public class Bid implements Serializable {
 
     @Id
     @ManyToOne(cascade = CascadeType.ALL)
-    private Paper paperID;
+    private Paper paper;
     @Id
     @ManyToOne(cascade = CascadeType.ALL)
-    private User userID;
-
-    public Bid(Paper paper, User user) {
-        paperID = paper;
-        userID = user;
-    }
+    private User bidder;
 
     public Bid() {}
 

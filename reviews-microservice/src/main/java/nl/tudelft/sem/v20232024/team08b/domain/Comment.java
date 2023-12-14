@@ -12,14 +12,9 @@ import lombok.Data;
 public class Comment implements Serializable {
     @Id
     @ManyToOne(cascade = CascadeType.ALL)
-    private User userID;
+    private User author;
 
     private String text;
-
-    public Comment(User userID, String text) {
-        this.userID = userID;
-        this.text = text;
-    }
 
     public Comment(){}
 

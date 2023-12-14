@@ -16,10 +16,6 @@ public class Conference implements Serializable {
     @OneToMany(cascade = CascadeType.ALL)
     private List<Track> track;
 
-    public Conference(Long id, List<Track> track) {
-        this.id = id;
-        this.track = track;
-    }
 
     public Conference(){}
 
