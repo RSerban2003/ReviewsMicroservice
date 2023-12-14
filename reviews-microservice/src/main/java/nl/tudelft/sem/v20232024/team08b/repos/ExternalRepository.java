@@ -29,8 +29,8 @@ public class ExternalRepository {
      * @return the response in JSON format
      */
     private String sendGetRequest(String url) {
-        HttpRequest request = null;
-        String response = null;
+        HttpRequest request;
+        String response;
         try {
             request = HttpRequest.newBuilder()
                 .uri(new URI(url))
@@ -40,7 +40,7 @@ public class ExternalRepository {
             response = httpClient.send(
                     request, HttpResponse.BodyHandlers.ofString()).body();
         } catch (Exception e) {
-
+            throw new RuntimeException(e);
         }
         return response;
     }
