@@ -2,9 +2,9 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import nl.tudelft.sem.v20232024.team08b.api.ReviewsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
-import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
-import nl.tudelft.sem.v20232024.team08b.dtos.PaperPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.Review;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Review;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

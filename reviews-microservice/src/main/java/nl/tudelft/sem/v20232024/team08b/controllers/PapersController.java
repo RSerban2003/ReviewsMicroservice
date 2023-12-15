@@ -2,9 +2,9 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import nl.tudelft.sem.v20232024.team08b.api.PapersAPI;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
-import nl.tudelft.sem.v20232024.team08b.dtos.Paper;
-import nl.tudelft.sem.v20232024.team08b.dtos.PaperStatus;
-import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummary;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

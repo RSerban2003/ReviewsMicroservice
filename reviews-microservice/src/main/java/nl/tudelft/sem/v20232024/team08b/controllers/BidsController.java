@@ -2,8 +2,8 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import nl.tudelft.sem.v20232024.team08b.api.BidsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.BidsService;
-import nl.tudelft.sem.v20232024.team08b.dtos.Bid;
-import nl.tudelft.sem.v20232024.team08b.dtos.BidByReviewer;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Bid;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

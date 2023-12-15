@@ -11,10 +11,6 @@ public class User implements Serializable {
     @Id
     private Long id;
 
-    public User(Long id) {
-        this.id = id;
-    }
-
     public User(){}
 
 }

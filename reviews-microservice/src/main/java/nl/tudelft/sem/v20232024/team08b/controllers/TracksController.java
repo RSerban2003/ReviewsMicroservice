@@ -2,9 +2,9 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import nl.tudelft.sem.v20232024.team08b.api.TracksAPI;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
-import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.dtos.TrackAnalytics;
-import nl.tudelft.sem.v20232024.team08b.dtos.TrackPhase;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
