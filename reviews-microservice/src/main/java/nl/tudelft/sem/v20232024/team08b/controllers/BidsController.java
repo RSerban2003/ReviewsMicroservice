@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import nl.tudelft.sem.v20232024.team08b.application.BidsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.BidByReviewer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/papers/{paperID}/bids")
 @Tag(name = "Bids", description = "Operations for bidding on papers, before the reviews are assigned")
 public class BidsController {
+    private final BidsService bidsService;
+
+    /**
+     * Default constructor for the controller.
+     *
+     * @param bidsService the respective service to inject
+     */
+    @Autowired
+    public BidsController(BidsService bidsService) {
+        this.bidsService = bidsService;
+    }
+
     @Operation(summary = "Get all bids for a given paper",
         description = "Responds with a list of bids and the IDs of the corresponding " +
             "reviewers. The requester must be a chair of the track that the paper is in."

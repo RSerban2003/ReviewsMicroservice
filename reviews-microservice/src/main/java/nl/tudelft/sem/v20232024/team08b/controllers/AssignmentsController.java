@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummaryWithID;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +26,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("")
 @Tag(name = "Assignments", description = "Operations for assigning reviewers to papers.")
 public class AssignmentsController {
+    private final AssignmentsService assignmentsService;
+
+    /**
+     * Default constructor for the controller.
+     *
+     * @param assignmentsService the respective service to inject
+     */
+    @Autowired
+    public AssignmentsController(AssignmentsService assignmentsService) {
+        this.assignmentsService = assignmentsService;
+    }
+
     @Operation(summary = "Manually assign reviewers",
         description = "Manually assigns reviewer to a specific paper." +
             "At least 3 reviewers must be assigned to a paper."

@@ -7,9 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.dtos.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +26,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Papers", description = "Operations for viewing papers: their contents, review status, etc.")
 public class PapersController {
+    private final PapersService papersService;
+
+    /**
+     * Default constructor for the controller.
+     *
+     * @param papersService the respective service to inject
+     */
+    @Autowired
+    public PapersController(PapersService papersService) {
+        this.papersService = papersService;
+    }
+
     @Operation(summary = "Get the title and abstract of a paper",
         description = "Responds with the title and abstract of the given paper. "
     )

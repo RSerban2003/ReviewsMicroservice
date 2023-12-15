@@ -10,9 +10,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.Review;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +46,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Reviews", description = "Operations to deal with reviews: reading them, submitting, commenting, etc")
 public class ReviewsController {
+    private final ReviewsService reviewsService;
+
+    /**
+     * Default constructor for the controller.
+     *
+     * @param reviewsService the respective service to inject
+     */
+    @Autowired
+    public ReviewsController(ReviewsService reviewsService) {
+        this.reviewsService = reviewsService;
+    }
+
     @Operation(summary = "Gets a review",
         description = "Responds with the review of a specific paper (paperID), reviewed by user (userID). " +
             "Confidential comments will not be revealed if the requester is the author of the paper."
