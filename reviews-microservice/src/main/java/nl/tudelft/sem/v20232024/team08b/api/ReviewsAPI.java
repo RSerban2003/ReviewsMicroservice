@@ -10,9 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
-import nl.tudelft.sem.v20232024.team08b.dtos.PaperPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.Review;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Review;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 @OpenAPIDefinition(info = @Info(title = "EasyConf Reviews Microservice", version = "0.0.1-SNAPSHOT",
     description = "EasyConf is web-based conference management system, designed to organize and administrate " +
