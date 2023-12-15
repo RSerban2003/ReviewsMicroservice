@@ -25,18 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("")
 @Tag(name = "Assignments", description = "Operations for assigning reviewers to papers.")
 public interface AssignmentsAPI {
-    private final AssignmentsService assignmentsService;
-
-    /**
-     * Default constructor for the controller.
-     *
-     * @param assignmentsService the respective service to inject
-     */
-    @Autowired
-    public AssignmentsController(AssignmentsService assignmentsService) {
-        this.assignmentsService = assignmentsService;
-    }
-
     @Operation(summary = "Manually assign reviewers",
         description = "Manually assigns reviewer to a specific paper." +
             "At least 3 reviewers must be assigned to a paper."

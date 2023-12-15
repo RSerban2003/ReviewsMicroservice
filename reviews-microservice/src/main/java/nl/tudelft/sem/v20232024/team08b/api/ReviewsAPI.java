@@ -45,18 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Reviews", description = "Operations to deal with reviews: reading them, submitting, commenting, etc")
 public interface ReviewsAPI {
-    private final ReviewsService reviewsService;
-
-    /**
-     * Default constructor for the controller.
-     *
-     * @param reviewsService the respective service to inject
-     */
-    @Autowired
-    public ReviewsController(ReviewsService reviewsService) {
-        this.reviewsService = reviewsService;
-    }
-
     @Operation(summary = "Gets a review",
         description = "Responds with the review of a specific paper (paperID), reviewed by user (userID). " +
             "Confidential comments will not be revealed if the requester is the author of the paper."

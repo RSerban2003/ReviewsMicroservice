@@ -26,18 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/papers/{paperID}/bids")
 @Tag(name = "Bids", description = "Operations for bidding on papers, before the reviews are assigned")
 public interface BidsAPI {
-    private final BidsService bidsService;
-
-    /**
-     * Default constructor for the controller.
-     *
-     * @param bidsService the respective service to inject
-     */
-    @Autowired
-    public BidsController(BidsService bidsService) {
-        this.bidsService = bidsService;
-    }
-
     @Operation(summary = "Get all bids for a given paper",
         description = "Responds with a list of bids and the IDs of the corresponding " +
             "reviewers. The requester must be a chair of the track that the paper is in."

@@ -29,18 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Conference Tracks", description = "Operations for dealing with conference tracks: analytics, " +
     "deadlines and the review phase")
 public interface TracksAPI {
-    private final TracksService tracksService;
-
-    /**
-     * Default constructor for the controller.
-     *
-     * @param tracksService the respective service to inject
-     */
-    @Autowired
-    public TracksController(TracksService tracksService) {
-        this.tracksService = tracksService;
-    }
-
     @Operation(summary = "Get the papers for track",
         description = "Returns all the papers in the given track of a conference. " +
             "You can request the full paper from another api point."

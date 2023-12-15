@@ -25,18 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Papers", description = "Operations for viewing papers: their contents, review status, etc.")
 public interface PapersAPI {
-    private final PapersService papersService;
-
-    /**
-     * Default constructor for the controller.
-     *
-     * @param papersService the respective service to inject
-     */
-    @Autowired
-    public PapersController(PapersService papersService) {
-        this.papersService = papersService;
-    }
-
     @Operation(summary = "Get the title and abstract of a paper",
         description = "Responds with the title and abstract of the given paper. "
     )
