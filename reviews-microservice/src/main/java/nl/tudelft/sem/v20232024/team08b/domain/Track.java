@@ -17,7 +17,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 
 @Data
 @Entity
-@EqualsAndHashCode
 public class Track implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,21 +32,6 @@ public class Track implements Serializable {
     @ManyToOne(cascade = CascadeType.ALL)
     private Conference conference;
 
-
-    /**
-     * Construction for track.
-     *
-     * @param biddingDeadLine bidding deadline for track
-     * @param currentPhase current phase of a track
-     * @param conference conference to which trac belongs
-     * @param papers papers that belong to this track
-     */
-    public Track(Date biddingDeadLine, TrackPhase currentPhase, Conference conference, List<Paper> papers) {
-        this.biddingDeadLine = biddingDeadLine;
-        this.currentPhase = currentPhase;
-        this.conference = conference;
-        this.papers = papers;
-    }
 
     public Track(){}
 

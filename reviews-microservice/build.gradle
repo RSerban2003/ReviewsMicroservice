@@ -52,6 +52,13 @@ dependencies {
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 
+//	testImplementation "org.wiremock:wiremock:3.3.1"
+//	testImplementation 'com.maciejwalkowiak.spring:wiremock-spring-boot:2.0.0'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+
+
 	// SpringDoc OpenAPI Generation
 	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
 
