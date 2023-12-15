@@ -10,10 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -33,15 +32,17 @@ public class Tests {
                 .param("requesterID", "456")) // Add requesterID as a query parameter
             .andExpect(MockMvcResultMatchers.status().isNotImplemented());
     }
+
     @Test
     public void testPostEndpoints() throws Exception {
         String paperID = "123";
         String reviewerID = "123";
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/papers/{paperID}/assignees/{reviewerID}", paperID,reviewerID)
+                .post("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
                 .param("requesterID", "456")) // Add requesterID as a query parameter
             .andExpect(MockMvcResultMatchers.status().isNotImplemented());
     }
+
     @Test
     public void remove() throws Exception {
         String paperID = "123";
@@ -53,12 +54,13 @@ public class Tests {
                 .contentType(MediaType.APPLICATION_JSON))  // Set content type to JSON
             .andExpect(MockMvcResultMatchers.status().isNotImplemented());
     }
+
     @Test
     public void put() throws Exception {
         String conferenceID = "125";
         String trackID = "126";
         mockMvc.perform(MockMvcRequestBuilders
-                .put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID,trackID)
+                .put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
                 .param("requesterID", "456"))  // Add requesterID as a query parameter
             .andExpect(MockMvcResultMatchers.status().isNotImplemented());
     }
