@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.controllers;
+package nl.tudelft.sem.v20232024.team08b.api;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,7 +15,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.Review;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Reviews", description = "Operations to deal with reviews: reading them, submitting, commenting, etc")
-public class ReviewsController {
+public interface ReviewsAPI {
     private final ReviewsService reviewsService;
 
     /**
@@ -80,9 +79,7 @@ public class ReviewsController {
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a reviewer in charge of this paper") Long reviewerID,
         @PathVariable @Parameter(description = "The ID of the paper") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Submit (or edit) a review",
         description = "The requester submits (or resubmits) a review to a specific paper. " +
@@ -106,9 +103,7 @@ public class ReviewsController {
     public ResponseEntity<Void> submit(
         @RequestBody @Parameter(description = "The review that the requester wants to submit") Review review,
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
-        @PathVariable @Parameter(description = "The ID of a paper that the review is submitted for") Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+        @PathVariable @Parameter(description = "The ID of a paper that the review is submitted for") Long paperID);
 
     @Operation(summary = "Get the list of a reviewers for a given paper",
         description = "Responds with list of reviewers' IDs assigned to that paper."
@@ -130,9 +125,7 @@ public class ReviewsController {
     public ResponseEntity<List<Long>> getReviewers(
         @RequestParam @Parameter(description = "The ID of the user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of the paper") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Get the review phase of a paper",
         description =
@@ -155,9 +148,7 @@ public class ReviewsController {
     public ResponseEntity<PaperPhase> getPhase(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of the paper") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "End the discussion phase for a paper",
         description = "The paper is now considered reviewed: the reviews cannot be changed. " +
@@ -182,9 +173,7 @@ public class ReviewsController {
     public ResponseEntity<Void> finalization(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper to finalize the reviews for") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Posts a discussion comment",
         description = "Posts a discussion comment for a review of a specific paper using userID and reviewerID. " +
@@ -212,9 +201,7 @@ public class ReviewsController {
         @PathVariable @Parameter(description = "The ID of a paper to which to add the comment to") Long paperID,
         @RequestBody @Schema(description = "Comment", example = "Some comment")
         String comment
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Gets the discussion comments",
         description = "Responds with all the discussion comments for a paper. " +
@@ -240,7 +227,5 @@ public class ReviewsController {
         @RequestParam @Parameter(description = "The ID of the user making the request.") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a reviewer in charge of this paper") Long reviewerID,
         @PathVariable @Parameter(description = "The ID of a paper to get the comments from") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 }

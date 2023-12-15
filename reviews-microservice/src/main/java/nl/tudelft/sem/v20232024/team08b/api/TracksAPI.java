@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.controllers;
+package nl.tudelft.sem.v20232024.team08b.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,7 +14,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.TrackPhase;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/conferences/{conferenceID}/tracks/{trackID}")
 @Tag(name = "Conference Tracks", description = "Operations for dealing with conference tracks: analytics, " +
     "deadlines and the review phase")
-public class TracksController {
+public interface TracksAPI {
     private final TracksService tracksService;
 
     /**
@@ -65,9 +64,7 @@ public class TracksController {
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
         @PathVariable @Parameter(description = "The ID of a track") Long trackID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Get the summary stats of a track",
         description = "Returns the numbers of accepted, rejected and not-yet-decided papers."
@@ -89,9 +86,7 @@ public class TracksController {
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
         @PathVariable @Parameter(description = "The ID of a track") Long trackID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Changes the bidding deadline",
         description = "Changes the bidding deadline to the one provided in the body. If the deadline isn't set, " +
@@ -121,9 +116,7 @@ public class TracksController {
         @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
         @PathVariable @Parameter(description = "The ID of a track") Long trackID,
         @RequestBody @Parameter(description = "The date for the deadline of the bid") Date newDeadline
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Get the bidding deadline",
         description = "Responds with the bidding deadline for the given track. If the deadline hasn't been set, " +
@@ -149,9 +142,7 @@ public class TracksController {
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a conference") Long conferenceID,
         @PathVariable @Parameter(description = "The ID of a track") Long trackID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Get the review phase",
         description = "Responds with the review phase of the track. " +
@@ -175,7 +166,5 @@ public class TracksController {
         @RequestParam @Parameter(description = "The ID of the user making the request.") Long requesterID,
         @PathVariable @Parameter(description = "The ID of the conference the track is in.") Long conferenceID,
         @PathVariable @Parameter(description = "The ID of the track.") Long trackID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 }

@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.controllers;
+package nl.tudelft.sem.v20232024.team08b.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,7 +12,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummary;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Papers", description = "Operations for viewing papers: their contents, review status, etc.")
-public class PapersController {
+public interface PapersAPI {
     private final PapersService papersService;
 
     /**
@@ -57,9 +56,7 @@ public class PapersController {
     public ResponseEntity<PaperSummary> getTitleAndAbstract(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Get the whole paper without the author names",
         description = "Responds all the contents of a paper submission. " +
@@ -83,9 +80,7 @@ public class PapersController {
     public ResponseEntity<Paper> get(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Get the review status of a paper",
         description = "Responds with whether the paper has been accepted or rejected, " +
@@ -108,9 +103,7 @@ public class PapersController {
     public ResponseEntity<PaperStatus> getState(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper to check status") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
 
 }

@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.controllers;
+package nl.tudelft.sem.v20232024.team08b.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,7 +12,6 @@ import nl.tudelft.sem.v20232024.team08b.application.BidsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.BidByReviewer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/papers/{paperID}/bids")
 @Tag(name = "Bids", description = "Operations for bidding on papers, before the reviews are assigned")
-public class BidsController {
+public interface BidsAPI {
     private final BidsService bidsService;
 
     /**
@@ -59,9 +58,7 @@ public class BidsController {
     public ResponseEntity<List<BidByReviewer>> getBidsForPaper(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper to return") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Get the bid of a given reviewer for a given paper",
         description =
@@ -87,9 +84,7 @@ public class BidsController {
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of the paper") Long paperID,
         @PathVariable @Parameter(description = "The the ID of the reviewer of the paper") Long reviewerID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Bid on a paper",
         description = "Saves the preference (based on expertise) of the requester in regards to reviewing the " +
@@ -117,7 +112,5 @@ public class BidsController {
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of the paper") Long paperID,
         @RequestBody Bid bid
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 }

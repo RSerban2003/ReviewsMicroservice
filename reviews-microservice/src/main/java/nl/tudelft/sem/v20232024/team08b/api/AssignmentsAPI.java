@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.controllers;
+package nl.tudelft.sem.v20232024.team08b.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,7 +11,6 @@ import java.util.List;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummaryWithID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("")
 @Tag(name = "Assignments", description = "Operations for assigning reviewers to papers.")
-public class AssignmentsController {
+public interface AssignmentsAPI {
     private final AssignmentsService assignmentsService;
 
     /**
@@ -64,9 +63,7 @@ public class AssignmentsController {
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a user to assign as a reviewer") Long reviewerID,
         @PathVariable @Parameter(description = "The ID of a paper to assign") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Automatically assign the reviewers",
         description = "Automatically assigns a reviewer to a specific paper. " +
@@ -94,9 +91,7 @@ public class AssignmentsController {
         @RequestParam @Parameter(description = "The ID of the user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of the conference the track belongs to") Long conferenceID,
         @PathVariable @Parameter(description = "The ID of the track for which to do the automatic assignment") Long trackID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Finalise reviewers",
         description = "Finalises the assignment of reviewers, so they can no longer be changed manually or automatically. "
@@ -124,9 +119,7 @@ public class AssignmentsController {
         @PathVariable @Parameter(description = "The ID of the conference the track belongs to") Long conferenceID,
         @PathVariable @Parameter(description = "The ID of the track for which the assignments should be finalized")
         Long trackID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Get current assignments for a paper",
         description = "Responds with a list of reviewer IDs for a specific paper."
@@ -149,9 +142,7 @@ public class AssignmentsController {
     public ResponseEntity<List<Long>> assignments(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper assignments belong to") Long paperID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Removes a reviewer from a paper",
         description = "Removes a reviewer previously assigned to a paper."
@@ -174,9 +165,7 @@ public class AssignmentsController {
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a paper reviewer belongs to") Long paperID,
         @PathVariable @Parameter(description = "The ID of a reviewer to remove") Long reviewerID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 
     @Operation(summary = "Gets all papers a reviewer (the requester) is assigned to.",
         description = "Responds with a list of papers a user is assigned to in all tracks. " +
@@ -194,7 +183,5 @@ public class AssignmentsController {
     @Tag(name = "Reviews")
     public ResponseEntity<List<PaperSummaryWithID>> getAssignedPapers(
         @RequestParam @Parameter(description = "The ID of the user making the request.") Long requesterID
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
+    );
 }
