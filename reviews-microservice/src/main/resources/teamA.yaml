@@ -1,0 +1,1344 @@
+openapi: 3.0.3
+
+info:
+  title: EasyConf Submission Microservice
+  description: These are the endpoints for the EasyConf Submission Microservice. The EasyConf Submission Microservice is one of the microservices in the EasyConf application, as it works together with the EasyConf User Microservice and the EasyConf Review Microservice. The main functionalities provided by this API are handling paper submissions, passing on submissions that are eligible for review and providing authors with information about their submissions.
+  version: 1.0.0
+tags:
+  - name: Submission
+    description: Includes all endpoints with regards to submissions
+  - name: Review
+    description: Includes all endpoints with regards to reviews
+  - name: Statistics
+    description: Includes all endpoints with regards to submission statistics
+servers:
+  - url: https://localhost:8081
+paths:
+  /submission/{userId}:
+    post:
+      tags:
+        - Submission
+      summary: Create a new submission
+      description: Creates and stores a new submission
+      operationId: createSubmission
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Submission'
+        required: true
+      responses:
+        '200':
+          description: The created submission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+        '405':
+          description: Invalid input
+        '460':
+          description: Deadline has passed, cannot submit for review.
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+    get:
+      tags:
+        - Submission
+      summary: Get all submissions authored by user.
+      description: A user can get all the submissions in which they are authors.
+      operationId: getSubmissionList
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user that wants his submissions.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: All submissions authored by this user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '400':
+          description: Could not find userId
+        '404':
+          description: No submissions found that are authored by this user
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+
+  /submission/{submissionId}/{userId}:
+    get:
+      tags:
+        - Submission
+      summary: Returns a submission by ID
+      operationId: getSubmission
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission to return.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The requested submission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+        '400':
+          description: The specified submission ID is invalid (not a number).
+        '404':
+          description: A submission with the specified ID was not found.
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+        default:
+          description: Unexpected error
+
+    put:
+      tags:
+        - Submission
+      summary: Update an existing submission by ID
+      description: Update the specific submission
+      operationId: updateSubmission
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission to return.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Submission'
+        required: true
+      responses:
+        '200':
+          description: The updated submission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+        '404':
+          description: A submission with the specified ID was not found.
+        '405':
+          description: Invalid input
+        '460':
+          description: Deadline has passed, cannot submit for review.
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+
+  /submission/{submissionId}/conflictOfInterest/{userId}:
+    put:
+      tags:
+        - Submission
+      summary: Update the conflicts of interest of an existing submission by ID
+      description: Updates the conflicts of interest for the given submission
+      operationId: updateConflictsOfInterest
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission which needs to be updated
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+        required: true
+
+      responses:
+        '200':
+          description: The updated conflicts of interest
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: The specified submission ID is invalid (not a number).
+        '404':
+          description: A submission with the specified ID was not found.
+        '405':
+          description: Invalid input
+        '460':
+          description: Deadline has passed, cannot submit for review.
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+        default:
+          description: Unexpected error
+  /submission/{submissionId}/keywords/{userId}:
+    put:
+      tags:
+        - Submission
+      summary: Update the keywords of an existing submission by ID
+      description: Updates the keywords for the given submission
+      operationId: updateKeywords
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission which needs to be updated
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+              example: ['Software Engineering Methods', 'Software testing']
+        required: true
+
+      responses:
+        '200':
+          description: The updated keywords
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ['Software Engineering Methods', 'Software testing']
+        '400':
+          description: The specified submission ID is invalid (not a number).
+        '401':
+          description: Unauthorized request
+        '404':
+          description: A submission with the specified ID was not found.
+        '405':
+          description: Invalid input
+        '460':
+          description: Deadline has passed, cannot submit for review.
+        '500':
+          description: Internal Server Error
+        default:
+          description: Unexpected error
+  /submission/{submissionId}/linkToReplicationPackage/{userId}:
+    put:
+      tags:
+        - Submission
+      summary: Update the link to replication package of an existing submission by ID
+      description: Updates the link to replication package for the given submission
+      operationId: updateLinkToReplicationPackage
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission which needs to be updated
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example: 'https://github.com/tudelft'
+        required: true
+
+      responses:
+        '200':
+          description: The updated link to replication package
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'https://github.com/tudelft'
+        '400':
+          description: The specified submission ID is invalid (not a number).
+        '401':
+          description: Unauthorized request
+        '404':
+          description: A submission with the specified ID was not found.
+        '405':
+          description: Invalid input
+        '460':
+          description: Deadline has passed, cannot submit for review.
+        '500':
+          description: Internal Server Error
+        default:
+          description: Unexpected error
+  /submission/{submissionId}/title/{userId}:
+    put:
+      tags:
+        - Submission
+      summary: Update the title of an existing submission by ID
+      description: Updates the title for the given submission
+      operationId: updateTitle
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission which needs to be updated
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example: New title
+        required: true
+
+      responses:
+        '200':
+          description: The updated title
+          content:
+            application/json:
+              schema:
+                type: string
+                example: New title
+        '400':
+          description: The specified submission ID is invalid (not a number).
+        '401':
+          description: Unauthorized request
+        '404':
+          description: A submission with the specified ID was not found.
+        '405':
+          description: Invalid input
+        '460':
+          description: Deadline has passed, cannot submit for review.
+        '500':
+          description: Internal Server Error
+        default:
+          description: Unexpected error
+
+  /submission/{submissionId}/authors/{userId}:
+    put:
+      tags:
+        - Submission
+      summary: Update authors of an existing submission by ID
+      operationId: updateAuthors
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The submissionId of the submission to update authors
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: The updated list of authors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: The specified submission ID is invalid (not a number).
+        '401':
+          description: Unauthorized request
+        '404':
+          description: A submission with the specified ID was not found.
+        '405':
+          description: Invalid input
+        '460':
+          description: Deadline has passed, cannot submit for review.
+        '500':
+          description: Internal Server Error
+        default:
+          description: Unexpected error
+
+  /submission/{submissionId}/abstract/{userId}:
+    put:
+      tags:
+        - Submission
+      summary: Update the abstract of an existing submission by ID
+      description: Updates the abstract for the given submission
+      operationId: updateAbstract
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission which needs to be updated
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example: This is an example of an abstract to a submission. I can't be bothered to write for too long, so just pretend this is longer, please. Thank you.
+        required: true
+      responses:
+        '200':
+          description: The updated abstract
+          content:
+            application/json:
+              schema:
+                type: string
+                example: This is an example of an abstract to a submission. I can't be bothered to write for too long, so just pretend this is longer, please. Thank you.
+        '400':
+          description: The specified submission ID is invalid (not a number).
+        '401':
+          description: Unauthorized request
+        '404':
+          description: A submission with the specified ID was not found.
+        '405':
+          description: Invalid input
+        '460':
+          description: Deadline has passed, cannot submit for review.
+        '500':
+          description: Internal Server Error
+        default:
+          description: Unexpected error
+
+  /submission/{submissionId}/paper/{userId}:
+    put:
+      tags:
+        - Submission
+      summary: Change the .txt file for the paper of an existing submission by ID
+      operationId: putPaper
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission for which the paper is to be updated
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: byte #base64 encoded
+              description: A base64 encoding of a text file
+      responses:
+        '200':
+          description: The updated txt file (base64 encoded)
+          content:
+            application/json:
+              schema:
+                type: string
+                format: byte #base64 encoded
+                description: A base64 encoding of a text file
+        '400':
+          description: The specified submission ID is invalid (not a number).
+        '401':
+          description: Unauthorized request
+        '404':
+          description: A submission with the specified ID was not found.
+        '405':
+          description: Invalid input
+        '460':
+          description: Deadline has passed, cannot submit for review.
+        '500':
+          description: Internal Server Error
+        default:
+          description: Unexpected error
+
+  /submission/{submissionId}/submissionstatus/{userId}:
+    get:
+      tags:
+        - Submission
+      summary: Get the status of the submission
+      description: Gets the status object for the given submission
+      operationId: getSubmissionStatus
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission of which the status needs to be retrieved
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The status of the requested submission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionStatus'
+        '400':
+          description: Could not find submissionId
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+
+  /review/{submissionId}/reviewstatus/{userId}:
+    put:
+      tags:
+        - Review
+      summary: Updates the review status of the submission
+      description: Updates the review status of the submission. This is the endpoint the Track Chair must use to send the acceptance/rejection notification.
+      operationId: updateReviewStatusBySubmissionID
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission of which the review needs to be updated
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user (only valid iff this user is the track chair of the submission)
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              enum: [under review, accepted, rejected]
+        required: true
+      responses:
+        '200':
+          description: The updated reviewstatus of the submission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewStatus'
+        '405':
+          description: Invalid input
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+
+    get:
+      tags:
+        - Review
+      summary: Gets the review status of the submission
+      description: Gets the review status of the submission
+      operationId: getReviewStatusBySubmissionID
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission of which the review needs to be retrieved
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The requested reviewstatus
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewStatus'
+        '400':
+          description: Could not find submissionId
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+  /review/{userId}:
+    get:
+      tags:
+        - Review
+      summary: Get all reviews associated to user
+      description: A user can get all the reviews of submissions in which they are authors.
+      operationId: getReviewList
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user that wants his reviews.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The requested reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '400':
+          description: Could not find userId
+        '401':
+          description: Unauthorized request
+        '404':
+          description: No reviews found that are authored by this user
+        '500':
+          description: Internal Server Error
+
+  /review/{submissionId}/{userId}:
+    get:
+      tags:
+        - Review
+      summary: Gets the review of the submission
+      description: Gets the review of the submission
+      operationId: getReviewBySubmissionID
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          description: The ID of the submission of which the review needs to be retrieved
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the submitting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The requested review of the submission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '401':
+          description: Unauthorized request
+        '404':
+          description: Could not find submissionId
+        '500':
+          description: Internal Server Error
+
+  /submission/event/{eventId}/{userId}:
+    get:
+      tags:
+        - Submission
+      summary: Gets submissions belonging to the specified event
+      description: Gets submissions belonging to the specified event
+      operationId: getSubmissionsOfEvent
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: The ID of the event for which the submissions are requested
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The requested submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '401':
+          description: Unauthorized request
+        '404':
+          description: Could not find eventId
+        '500':
+          description: Internal Server Error
+
+  /submission/event/{eventId}/track/{trackId}/{userId}:
+    get:
+      tags:
+        - Submission
+      summary: Gets submissions belonging to the specified track
+      description: Gets submissions belonging to the specified track
+      operationId: getSubmissionsOfTrack
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: The ID of the event for which the submissions are requested
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: trackId
+          in: path
+          required: true
+          description: The ID of the track for which the submissions are requested
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The requested submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '401':
+          description: Unauthorized request
+        '404':
+          description: Could not find eventId or trackId
+        '500':
+          description: Internal Server Error
+
+  /review/submissionsForReview:
+    get:
+      tags:
+        - Review
+      summary: Gets submissions eligible for review
+      description: Gets submissions eligible for review
+      operationId: getSubmissionsEligibleForReview
+      responses:
+        '200':
+          description: All submissions that are eligible for review
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '400':
+          description: An error occurred
+        '500':
+          description: Internal Server Error
+
+  /review/event/{eventId}/submissionsForReview:
+    get:
+      tags:
+        - Review
+      summary: Gets submissions of event eligible for review
+      description: Gets submissions of event eligible for review
+      operationId: getSubmissionsOfEventEligibleForReview
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: the ID of the event for which the eligible reviews need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: All submissions of the specified event that are eligible for review
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '404':
+          description: Could not find eventId
+        '400':
+          description: An error occurred
+        '500':
+          description: Internal Server Error
+
+  /review/event/{eventId}/track/{trackId}/submissionsForReview:
+    get:
+      tags:
+        - Review
+      summary: Gets submissions of track eligible for review
+      description: Gets submissions of track eligible for review
+      operationId: getSubmissionsOfTrackEligibleForReview
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: the ID of the event for which the eligible reviews need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: trackId
+          in: path
+          required: true
+          description: the ID of the track for which the eligible reviews need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: All submissions of the track eligible for review
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+        '404':
+          description: Could not find eventId or trackId
+        '400':
+          description: An error occurred
+        '500':
+          description: Internal Server Error
+
+  /statistics/{eventId}/{trackId}/numberofsubmissions/{userId}:
+    get:
+      tags:
+        - Statistics
+      summary: Gets the number of submissions of the track
+      description: Gets the number of submissions of the track
+      operationId: getNumberOfSubmissionsOfTrack
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: The ID of the event for which the statistics need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: trackId
+          in: path
+          required: true
+          description: The ID of the track for which the statistics need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The number of submissions of this track
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                example: 100
+        '400':
+          description: An error occurred
+        '500':
+          description: Internal Server Error
+  /statistics/{eventId}/numberofsubmissions/{userId}:
+    get:
+      tags:
+        - Statistics
+      summary: Gets the number of submissions of the event
+      description: Gets the number of submissions of the event
+      operationId: getNumberOfSubmissionsOfEvent
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: The ID of the event for which the statistics need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The number of submissions of this event
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                example: 100
+        '400':
+          description: An error occurred
+        '500':
+          description: Internal Server Error
+  /statistics/{eventId}/{trackId}/topkeyword/{userId}:
+    get:
+      tags:
+        - Statistics
+      summary: Gets the most common keyword of the track
+      description: Gets the most common keyword of the track
+      operationId: getTopTrackKeyword
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: The ID of the event for which the statistics need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: trackId
+          in: path
+          required: true
+          description: The ID of the track for which the statistics need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The most common keyword in submissions of this track
+          content:
+            application/json:
+              schema:
+                type: string
+                example: technology
+        '400':
+          description: An error occurred
+        '500':
+          description: Internal Server Error
+
+  /statistics/{eventId}/topkeyword/{userId}:
+    get:
+      tags:
+        - Statistics
+      summary: Gets the most common keyword of the event
+      description: Gets the most common keyword of the event
+      operationId: getTopEventKeyword
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: The ID of the event for which the statistics need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The most common keyword in submissions of this event
+          content:
+            application/json:
+              schema:
+                type: string
+                example: technology
+        '400':
+          description: An error occurred
+        '500':
+          description: Internal Server Error
+  /statistics/{eventId}/authorAvg/{userId}:
+    get:
+      tags:
+        - Statistics
+      summary: Gets average number of authors on a submission for the specified event
+      description: Gets average number of authors on a submission per event
+      operationId: getSubmissionAuthorAvgByEvent
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: The ID of the event for which the statistics need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The average number of authors per submission for the specified event
+          content:
+            application/json:
+              schema:
+                type: number
+                format: float
+                example: 1.5
+        '400':
+          description: An error occurred
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+
+  /statistics/{eventId}/{trackId}/authorAvg/{userId}:
+    get:
+      tags:
+        - Statistics
+      summary: Gets average number of authors on a submission for the specified track
+      description: Gets average number of authors on a submission per track
+      operationId: getSubmissionAuthorAvgByTrack
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: The ID of the event for which the statistics need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: trackId
+          in: path
+          required: true
+          description: The ID of the track for which the statistics need to be returned
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: userId
+          in: path
+          required: true
+          description: the user id of the requesting user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: The average number of authors per submission for the specificed track
+          content:
+            application/json:
+              schema:
+                type: number
+                format: float
+                example: 1.5
+        '400':
+          description: An error occurred
+        '401':
+          description: Unauthorized request
+        '500':
+          description: Internal Server Error
+
+
+components:
+  schemas:
+    Submission:
+      type: object
+      properties:
+        submissionId:
+          type: integer
+          format: int64
+          example: 1234
+        title:
+          type: string
+          example: review of yaml
+        abstract:
+          type: string
+          example: This is an example of an abstract to a submission. I can't be bothered to write for too long, so just pretend this is longer, please. Thank you.
+        keywords:
+          type: array
+          items:
+            type: string
+          example: ['Software testing', 'Software Engineering Methods', 'Software architecture']
+        linkToReplicationPackage:
+          type: string
+          example: https://github.com/tudelft
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        conflictsOfInterest:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        paper:
+          type: string
+          format: byte #base64 encoded
+          description: A base64 encoding of a text file
+        isSubmissionValid:
+          type: boolean
+          example: false
+        invalidFields:
+          type: array
+          items:
+            type: string
+          example: [ 'authors', 'paper' ]
+        trackId:
+          type: integer
+          format: int64
+          example: 1234
+        eventId:
+          type: integer
+          format: int64
+          example: 1234
+
+
+
+
+    User:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+          example: 1234
+        name:
+          type: string
+          example: John
+        surname:
+          type: string
+          example: Doe
+        email:
+          type: string
+          example: johndoe@gmail.com
+
+
+    Event:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          format: int64
+          example: 1234
+        trackIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+            example: 1234
+        generalChairId:
+          type: integer
+          format: int64
+          example: 1234
+
+    Track:
+      type: object
+      properties:
+        trackId:
+          type: integer
+          format: int64
+          example: 1234
+        parentEventId:
+          type: integer
+          format: int64
+          example: 1234
+        pcChairId:
+          type: integer
+          format: int64
+          example: 1234
+        deadline:
+          type: string
+          format: date
+          example:  '27-11-2023'
+        maximumNumberOfWords:
+          type: integer
+          format: int64
+          example: 1234
+
+    SubmissionStatus:
+      type: object
+      properties:
+        submissionId:
+          type: integer
+          format: int64
+          example: 1234
+        isSubmissionValid:
+          type: boolean
+          example: false
+        invalidFields:
+          type: array
+          items:
+            type: string
+          example: ['authors', 'paper']
+
+    Review:
+      type: object
+      properties:
+        submissionId:
+          type: integer
+          format: int64
+          example: 1234
+        status:
+          type: string
+          enum: [ under review, accepted, rejected ]
+          example: under review
+        reviewComments:
+          type: array
+          items:
+            type: string
+          example: ['This paper is well-written, but there are some issues', 'Another comment']
+
+    ReviewStatus:
+      type: object
+      properties:
+        submissionId:
+          type: integer
+          format: int64
+          example: 1234
+        status:
+          type: string
+          enum: [under review, accepted, rejected]
+          example: under review
