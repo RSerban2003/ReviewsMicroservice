@@ -8,7 +8,6 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.ManyToOne;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Entity
 @Data
