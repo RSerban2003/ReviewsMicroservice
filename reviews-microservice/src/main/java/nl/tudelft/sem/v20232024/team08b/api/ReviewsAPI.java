@@ -10,11 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.Review;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
         "parameter must be provided. It is used for authentication in order to check if the user is allowed to perform " +
         "certain actions."
     ))
-@RestController
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Reviews", description = "Operations to deal with reviews: reading them, submitting, commenting, etc")
 public interface ReviewsAPI {

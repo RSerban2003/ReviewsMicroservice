@@ -7,21 +7,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.dtos.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.PaperSummary;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 
-@RestController
 @RequestMapping("/papers/{paperID}")
 @Tag(name = "Papers", description = "Operations for viewing papers: their contents, review status, etc.")
 public interface PapersAPI {
