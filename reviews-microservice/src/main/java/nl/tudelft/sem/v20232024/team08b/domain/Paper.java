@@ -20,8 +20,7 @@ public class Paper implements Serializable {
     @GeneratedValue
     private Long id;
 
-    @OneToMany(mappedBy = "paper", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Review> listOfReviews;
 
     @ManyToOne(cascade = CascadeType.ALL)
