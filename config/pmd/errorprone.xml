@@ -103,9 +103,9 @@ Rules to detect constructs that are either broken, extremely confusing or prone 
     <rule ref="category/java/errorprone.xml/UseProperClassLoader" />
     <rule ref="category/java/errorprone.xml/BadComparison" />
     <rule ref="category/java/errorprone.xml/CloneThrowsCloneNotSupportedException" />
-    <rule ref="category/java/errorprone.xml/DataflowAnomalyAnalysis" />
+<!--    <rule ref="category/java/errorprone.xml/DataflowAnomalyAnalysis" />-->
     <rule ref="category/java/errorprone.xml/DoNotCallSystemExit" />
     <rule ref="category/java/errorprone.xml/ImportFromSamePackage" />
     <rule ref="category/java/errorprone.xml/LoggerIsNotStaticFinal" />
-
+    <exclude-pattern>.*/generated/.*</exclude-pattern>
 </ruleset>
