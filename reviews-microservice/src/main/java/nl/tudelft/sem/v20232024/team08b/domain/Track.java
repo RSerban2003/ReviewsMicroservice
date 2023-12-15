@@ -23,7 +23,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.TrackPhase;
 
 @Data
 @Entity
-@EqualsAndHashCode
 public class Track implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
