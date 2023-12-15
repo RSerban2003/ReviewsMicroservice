@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * The H2 config.
  */
 @Configuration
-@EnableJpaRepositories("nl.tudelft.sem.v20232024.team08b.domain")
+@EnableJpaRepositories("nl.tudelft.sem.v20232024.team08b.repos")
 @PropertySource("classpath:application-dev.properties")
 @EnableTransactionManagement
 public class H2Config {
