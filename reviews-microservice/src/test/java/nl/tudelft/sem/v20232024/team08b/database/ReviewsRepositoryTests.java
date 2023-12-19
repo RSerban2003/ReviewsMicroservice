@@ -1,7 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.database;
 
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
-import nl.tudelft.sem.v20232024.team08b.domain.ReviewId;
+import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,12 +21,12 @@ public class ReviewsRepositoryTests {
     @Test
     public void test() {
         Review review = new Review();
-        ReviewId reviewId = new ReviewId(10L, 2L);
-        review.setReviewId(reviewId);
+        ReviewID reviewId = new ReviewID(10L, 2L);
+        review.setReviewID(reviewId);
         reviewRepository.save(review);
 
         Optional<Review> got = reviewRepository.findById(reviewId);
         assertThat(got).isNotEmpty();
-        assertThat(got.get().getReviewId()).isEqualTo(reviewId);
+        assertThat(got.get().getReviewID()).isEqualTo(reviewId);
     }
 }
