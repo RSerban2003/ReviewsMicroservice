@@ -50,19 +50,13 @@ public class HttpRequestSender {
                     request, HttpResponse.BodyHandlers.ofString());
 
             HttpStatus status = HttpStatus.valueOf(response.statusCode());
-            System.out.println("------------hera------------");
 
             switch (status) {
                 case OK, CREATED:
-                    System.out.println("------------herb------------");
-
                     return (String) response.body();
                 case NOT_FOUND:
-                    System.out.println("------------herc------------");
-
                     throw new NotFoundException("404, not found");
                 default:
-                    System.out.println("------------her------------");
                     throw new RuntimeException("Failed to parse status.");
             }
         } catch (URISyntaxException | InterruptedException | IOException e) {
