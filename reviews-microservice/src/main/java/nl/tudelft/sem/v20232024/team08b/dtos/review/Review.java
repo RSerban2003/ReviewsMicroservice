@@ -1,13 +1,15 @@
 package nl.tudelft.sem.v20232024.team08b.dtos.review;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import nl.tudelft.sem.v20232024.team08b.domain.ConfidenceScore;
 import nl.tudelft.sem.v20232024.team08b.domain.RecommendationScore;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Schema(description = "The review of a paper. It does not contain the confidential comments")
 public class Review {
     @Schema(description = "The confidence score of the reviewer", example = "EXPERT")
