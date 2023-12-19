@@ -37,9 +37,8 @@ public class VerificationServiceTests {
         List<RolesOfUserTracksInner> listOfTracks = new ArrayList<>();
         listOfTracks.add(inner);
 
-        fakeRolesOfUser.setTracks(listOfTracks);
         fakeRolesOfUser = new RolesOfUser();
-
+        fakeRolesOfUser.setTracks(listOfTracks);
     }
 
     @Test
