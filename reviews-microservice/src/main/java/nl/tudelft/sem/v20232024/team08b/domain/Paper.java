@@ -1,6 +1,8 @@
 package nl.tudelft.sem.v20232024.team08b.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import java.io.Serializable;
@@ -14,6 +16,8 @@ import javax.persistence.OneToMany;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Paper implements Serializable {
     @Id
     @GeneratedValue
@@ -28,6 +32,4 @@ public class Paper implements Serializable {
     private PaperStatus status;
 
     private PaperPhase phase;
-
-    public Paper(){}
 }

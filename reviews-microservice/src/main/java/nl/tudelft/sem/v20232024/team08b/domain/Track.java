@@ -11,12 +11,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Track implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,8 +36,5 @@ public class Track implements Serializable {
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Conference conference;
-
-
-    public Track(){}
 
 }
