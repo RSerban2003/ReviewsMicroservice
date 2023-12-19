@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.unit;
+package nl.tudelft.sem.v20232024.team08b.unit.services;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
@@ -18,9 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
 import java.util.Optional;
-
 import static org.mockito.Mockito.*;
 
 public class ReviewsServiceTests {
@@ -35,11 +33,11 @@ public class ReviewsServiceTests {
     @MockBean
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     ReviewsService reviewsService = new ReviewsService(
-      reviewRepository,
-      commentRepository,
-      paperRepository,
-      verificationService,
-      externalRepository
+            reviewRepository,
+            commentRepository,
+            paperRepository,
+            verificationService,
+            externalRepository
     );
 
     private nl.tudelft.sem.v20232024.team08b.dtos.review.Review reviewDTO;
@@ -60,6 +58,7 @@ public class ReviewsServiceTests {
         fakeSubmission.setTrackId(3L);
         fakeSubmission.setEventId(4L);
     }
+
     @Test
     void submitReviewNoSuchPaper() {
         when(verificationService.verifyPaper(2L)).thenReturn(false);
@@ -67,6 +66,7 @@ public class ReviewsServiceTests {
             reviewsService.submitReview(reviewDTO, 1L, 2L);
         });
     }
+
     @Test
     void submitReviewNoSuchUser() throws NotFoundException {
         // Assume first IF works
@@ -82,7 +82,7 @@ public class ReviewsServiceTests {
         Assert.assertThrows(IllegalCallerException.class, () -> {
             reviewsService.submitReview(reviewDTO, 1L, 2L);
         });
-     }
+    }
 
     @Test
     void submitReviewNotAReviewer() throws NotFoundException {
