@@ -62,7 +62,19 @@ public class ReviewsController implements ReviewsAPI {
     public ResponseEntity<Void> submit(Review review,
                                        Long requesterID,
                                        Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            reviewsService.submitReview(review, requesterID, paperID);
+        } catch (IllegalCallerException | IllegalArgumentException e) {
+            // The requested paper or reviewer was not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            // The requester must be a reviewer assigned to the given paper
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            // Some other problems have occurred
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
