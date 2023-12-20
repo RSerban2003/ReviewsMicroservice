@@ -54,11 +54,13 @@ public class ReviewsControllerTests {
 
         // Send the request to respective endpoint
         mockMvc.perform(
-            MockMvcRequestBuilders.put("/papers/{paperID}/reviews", paperID.toString())
-                .param("requesterID", requesterID.toString())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(fakeReviewDTOJson)
-        ).andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+                MockMvcRequestBuilders.put("/papers/{paperID}/reviews", paperID.toString())
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(fakeReviewDTOJson)
+                )
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
 
         // Make sure the required call to the service was made
         verify(reviewsService).submitReview(fakeReviewDTO, requesterID, paperID);

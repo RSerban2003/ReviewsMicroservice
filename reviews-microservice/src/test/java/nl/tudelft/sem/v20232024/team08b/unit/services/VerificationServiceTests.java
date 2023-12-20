@@ -29,13 +29,13 @@ public class VerificationServiceTests {
         fakeSubmission = new Submission();
         fakeSubmission.setTrackId(3L);
 
-        RolesOfUserTracksInner inner = new RolesOfUserTracksInner();
-        inner.setRoleName("PC Member");
-        inner.setTrackId(2);
-        inner.setEventId(4);
+        RolesOfUserTracksInner innerReviewer = new RolesOfUserTracksInner();
+        innerReviewer.setRoleName("PC Member");
+        innerReviewer.setTrackId(2);
+        innerReviewer.setEventId(4);
 
         List<RolesOfUserTracksInner> listOfTracks = new ArrayList<>();
-        listOfTracks.add(inner);
+        listOfTracks.add(innerReviewer);
 
         fakeRolesOfUser = new RolesOfUser();
         fakeRolesOfUser.setTracks(listOfTracks);
@@ -62,6 +62,27 @@ public class VerificationServiceTests {
     @Test
     void verifyUserExistsButInDifferentConference() throws NotFoundException {
         // This user IS a reviewer in a track with the same ID, but in a different conference
+        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        assertThat(verificationService.verifyUser(1L, 3L, 2L, UserRole.REVIEWER)).isEqualTo(false);
+    }
+
+    @Test
+    void verifyUserExistsButBadRole() throws NotFoundException {
+        // This user is in the same conference and track, but is not a reviewer
+
+        // Construct a user in the same track, but he is a chair
+        RolesOfUserTracksInner innerChair = new RolesOfUserTracksInner();
+        innerChair.setRoleName("PC Chair");
+        innerChair.setTrackId(2);
+        innerChair.setEventId(3);
+
+        // Add the user to the DTO
+        List<RolesOfUserTracksInner> listOfTracks = new ArrayList<>();
+        listOfTracks.add(innerChair);
+        fakeRolesOfUser = new RolesOfUser();
+        fakeRolesOfUser.setTracks(listOfTracks);
+
+        // Mock the return
         when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
         assertThat(verificationService.verifyUser(1L, 3L, 2L, UserRole.REVIEWER)).isEqualTo(false);
     }
