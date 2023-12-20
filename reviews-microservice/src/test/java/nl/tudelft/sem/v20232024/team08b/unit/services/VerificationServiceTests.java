@@ -67,6 +67,13 @@ public class VerificationServiceTests {
     }
 
     @Test
+    void verifyUserExistsButInDifferentEvent() throws NotFoundException {
+        // This user IS a reviewer in a track with the same ID, but in a different track
+        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        assertThat(verificationService.verifyUser(1L, 4L, 1L, UserRole.REVIEWER)).isEqualTo(false);
+    }
+
+    @Test
     void verifyUserExistsButBadRole() throws NotFoundException {
         // This user is in the same conference and track, but is not a reviewer
 
@@ -74,7 +81,7 @@ public class VerificationServiceTests {
         RolesOfUserTracksInner innerChair = new RolesOfUserTracksInner();
         innerChair.setRoleName("PC Chair");
         innerChair.setTrackId(2);
-        innerChair.setEventId(3);
+        innerChair.setEventId(4);
 
         // Add the user to the DTO
         List<RolesOfUserTracksInner> listOfTracks = new ArrayList<>();
@@ -91,5 +98,38 @@ public class VerificationServiceTests {
     void verifyUserDoesNotExist() throws NotFoundException {
         when(externalRepository.getRolesOfUser(1L)).thenThrow(new NotFoundException(""));
         assertThat(verificationService.verifyUser(1L, 4L, 2L, UserRole.REVIEWER)).isEqualTo(false);
+    }
+
+    @Test
+    void verifyUser2UsersOneExists() throws NotFoundException {
+        // Construct a user in the same track, but he is a chair
+        RolesOfUserTracksInner innerChair = new RolesOfUserTracksInner();
+        innerChair.setRoleName("PC Chair");
+        innerChair.setTrackId(2);
+        innerChair.setEventId(4);
+
+        // Add the user to the DTO
+        fakeRolesOfUser.getTracks().add(innerChair);
+        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        assertThat(verificationService.verifyUser(1L, 4L, 2L, UserRole.REVIEWER))
+                .isEqualTo(true);
+    }
+
+    @Test
+    void verifyUser2UsersNoneExist() throws NotFoundException {
+        // Construct a user in the same track, but he is a chair
+        RolesOfUserTracksInner innerChair = new RolesOfUserTracksInner();
+        innerChair.setRoleName("PC Chair");
+        innerChair.setTrackId(2);
+        innerChair.setEventId(4);
+
+        // Add the user to the DTO
+        fakeRolesOfUser.getTracks().clear();
+        fakeRolesOfUser.getTracks().add(innerChair);
+        fakeRolesOfUser.getTracks().add(innerChair);
+
+        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        assertThat(verificationService.verifyUser(1L, 4L, 2L, UserRole.REVIEWER))
+                .isEqualTo(false);
     }
 }
