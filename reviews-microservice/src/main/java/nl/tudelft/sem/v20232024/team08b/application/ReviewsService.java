@@ -1,5 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
+import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
@@ -55,6 +56,37 @@ public class ReviewsService {
     }
 
     /**
+     * Verifies if a requester is allowed to access paper.
+     *
+     * @param requesterID the ID of the requesting user
+     * @param paperID the ID of the paper that is accessed
+     * @throws NotFoundException if such paper is not found
+     * @throws IllegalAccessException if the user is not allowed to access the paper
+     * @throws IllegalCallerException if such user does not exist
+     */
+    public void verifyUserIsAllowedToAccessPaper(Long requesterID,
+                                                 Long paperID) throws NotFoundException,
+                                                                      IllegalAccessException,
+                                                                      IllegalCallerException {
+        // Check if such paper exists
+        if (!verificationService.verifyPaper(paperID)) {
+            throw new NotFoundException("No such paper exists");
+        }
+
+        // Check if such user exists and has correct privileges
+        Long containingTrackID = externalRepository.getSubmission(paperID).getTrackId();
+        Long containingConferenceID = externalRepository.getSubmission(paperID).getEventId();
+        if (!verificationService.verifyUser(requesterID, containingConferenceID,
+                containingTrackID, UserRole.REVIEWER)) {
+            throw new IllegalCallerException("No such user exists");
+        }
+
+        // Check if the user is allowed to review this paper
+        if (!isReviewerForPaper(requesterID, paperID)) {
+            throw new IllegalAccessException("The user is not a reviewer for this paper.");
+        }
+    }
+    /**
      * Adds or updates a review by a user for a specific paper.
      *
      * @param reviewDTO the review object that was given by the user
@@ -65,23 +97,7 @@ public class ReviewsService {
                              Long requesterID,
                              Long paperID) throws Exception {
 
-        // Check if such paper exists
-        if (!verificationService.verifyPaper(paperID)) {
-            throw new IllegalArgumentException("No such paper exists");
-        }
-
-        // Check if such user exists and has correct privileges
-        Long containingTrackID = externalRepository.getSubmission(paperID).getTrackId();
-        Long containingConferenceID = externalRepository.getSubmission(paperID).getEventId();
-        if (!verificationService.verifyUser(requesterID, containingConferenceID,
-                                            containingTrackID, UserRole.REVIEWER)) {
-            throw new IllegalCallerException("No such user exists");
-        }
-
-        // Check if the user is allowed to review this paper
-        if (!isReviewerForPaper(requesterID, paperID)) {
-            throw new IllegalAccessException("The user is not a reviewer for this paper.");
-        }
+        verifyUserIsAllowedToAccessPaper(requesterID, paperID);
 
         ReviewID reviewId = new ReviewID(paperID, requesterID);
         Review review = new Review(reviewDTO, reviewId);
