@@ -62,7 +62,7 @@ public class ReviewsServiceTests {
     @Test
     void submitReviewNoSuchPaper() {
         when(verificationService.verifyPaper(2L)).thenReturn(false);
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
+        Assert.assertThrows(NotFoundException.class, () -> {
             reviewsService.submitReview(reviewDTO, 1L, 2L);
         });
     }

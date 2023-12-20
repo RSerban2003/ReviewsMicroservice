@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.controllers.ReviewsController;
 import nl.tudelft.sem.v20232024.team08b.domain.ConfidenceScore;
@@ -103,7 +104,7 @@ public class ReviewsControllerTests {
 
     @Test
     void testSubmitReviewNoSuchPaper() throws Exception {
-        submitReviewWithException(new IllegalArgumentException(""), 404);
+        submitReviewWithException(new NotFoundException(""), 404);
     }
 
     @Test
