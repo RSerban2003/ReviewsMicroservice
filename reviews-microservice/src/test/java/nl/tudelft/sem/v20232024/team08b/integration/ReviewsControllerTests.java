@@ -98,22 +98,95 @@ public class ReviewsControllerTests {
     }
 
     @Test
-    void testSubmitReviewNoSuchUser() throws Exception {
+    void testSubmit_ReviewNoSuchUser() throws Exception {
         submitReviewWithException(new IllegalCallerException(""), 404);
     }
 
     @Test
-    void testSubmitReviewNoSuchPaper() throws Exception {
+    void testSubmit_ReviewNoSuchPaper() throws Exception {
         submitReviewWithException(new NotFoundException(""), 404);
     }
 
     @Test
-    void testSubmitReviewUserNotReviewer() throws Exception {
+    void testSubmit_ReviewUserNotReviewer() throws Exception {
         submitReviewWithException(new IllegalAccessException(""), 403);
     }
 
     @Test
-    void testSubmitReviewInternalError() throws Exception {
+    void testSubmit_ReviewInternalError() throws Exception {
         submitReviewWithException(new RuntimeException(""), 500);
+    }
+
+    /**
+     * Simulates an exception inside getReview function and checks if
+     * correct status code was returned.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    public void getReviewWithException(Exception exception, int expected) throws Exception {
+        Long requesterID = 1L;
+        Long reviewerID = 2L;
+        Long paperID = 3L;
+
+        // Make sure nothing is done when the respective call to service is called
+        doThrow(exception).when(reviewsService).getReview(requesterID, reviewerID, paperID);
+
+        // Send the request to respective endpoint
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/{paperID}/reviews/by-reviewer/{reviewerID}",
+                                paperID.toString(), reviewerID.toString())
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        // Make sure the required call to the service was made
+        verify(reviewsService).getReview(requesterID, reviewerID, paperID);
+    }
+
+    @Test
+    void getReview_NoSuchRequester() throws Exception {
+        getReviewWithException(new IllegalCallerException(""), 404);
+    }
+
+    @Test
+    void getReview_NoSuchReview() throws Exception {
+        getReviewWithException(new NotFoundException(""), 404);
+    }
+
+    @Test
+    void getReview_IllegalAccess() throws Exception {
+        getReviewWithException(new IllegalAccessException(""), 403);
+    }
+
+    @Test
+    void getReview_OtherProblems() throws Exception {
+        getReviewWithException(new RuntimeException(""), 500);
+    }
+
+    @Test
+    public void getReview_Successful() throws Exception {
+        Long requesterID = 1L;
+        Long reviewerID = 2L;
+        Long paperID = 3L;
+
+        // Make sure some fake review is returned from the service
+        when(reviewsService.getReview(requesterID, reviewerID, paperID)).thenReturn(fakeReviewDTO);
+
+        // Convert that fake review to json
+        String expectedJSON = objectMapper.writeValueAsString(fakeReviewDTO);
+
+        // Send the request to respective endpoint
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/{paperID}/reviews/by-reviewer/{reviewerID}",
+                                paperID.toString(), reviewerID.toString())
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(MockMvcResultMatchers.status().is(200))
+        .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
+
+        // Make sure the required call to the service was made
+        verify(reviewsService).getReview(requesterID, reviewerID, paperID);
     }
 }
