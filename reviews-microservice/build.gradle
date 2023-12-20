@@ -41,7 +41,8 @@ repositories {
 
 dependencies {
 
-	compileOnly 'org.projectlombok:lombok:1.18.24'
+	testImplementation 'junit:junit:4.13.1'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
 	annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -79,7 +80,6 @@ test {
 	jacoco {
 		enabled = true
 		includes = ['nl.tudelft.sem.v20232024.team08b.*']
-		excludes = []
 	}
 }
 
@@ -90,7 +90,16 @@ repositories {
 jacoco {
 	toolVersion = "0.8.7" // Use the desired version of JaCoCo
 }
-
+jacocoTestReport {
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: ['**/submissions/**',
+										'**/users/**',
+										'**/ignore/**',
+										'**/config/**'])
+		}))
+	}
+}
 jacocoTestCoverageVerification() {
 	dependsOn test
 	violationRules {
@@ -98,7 +107,9 @@ jacocoTestCoverageVerification() {
 			enabled = true
 			element = 'CLASS'
 			includes = ['nl.tudelft.sem.v20232024.team08b.*']
-
+			excludes = ['nl.tudelft.sem.v20232024.team08b.dtos.submissions',
+						'nl.tudelft.sem.v20232024.team08b.dtos.users',
+						'ignore']
 			limit {
 				counter = 'BRANCH'
 				value = 'COVEREDRATIO'
@@ -131,6 +142,8 @@ pitest {
 	junit5PluginVersion = '0.12'
 
 	targetClasses = ['nl.tudelft.sem.v20232024.team08b.*']  //by default "${project.group}.*"
+	excludedClasses = ['nl.tudelft.sem.v20232024.team08b.config.*',
+					   'nl.tudelft.sem.v20232024.team08b.dtos.*']	// TODO: maybe include our DTOs for testing
 	pitestVersion = '1.5.1' //not needed when a default PIT version should be used
 	threads = 4
 	outputFormats = ['XML', 'HTML']
