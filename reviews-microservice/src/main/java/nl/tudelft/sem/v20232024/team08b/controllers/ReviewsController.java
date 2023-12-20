@@ -3,6 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.ReviewsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
@@ -43,7 +44,19 @@ public class ReviewsController implements ReviewsAPI {
     public ResponseEntity<Review> read(Long requesterID,
                                        Long reviewerID,
                                        Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            Review review = reviewsService.getReview(requesterID, reviewerID, paperID);
+            return ResponseEntity.ok(review);
+        } catch (IllegalCallerException | NotFoundException e) {
+            // The requested paper or reviewer was not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            // The requester must be a reviewer assigned to the given paper
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            // Some other problems have occurred
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -65,7 +78,7 @@ public class ReviewsController implements ReviewsAPI {
                                        Long paperID) {
         try {
             reviewsService.submitReview(review, requesterID, paperID);
-        } catch (IllegalCallerException | IllegalArgumentException e) {
+        } catch (IllegalCallerException | NotFoundException e) {
             // The requested paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
@@ -75,7 +88,10 @@ public class ReviewsController implements ReviewsAPI {
             // Some other problems have occurred
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .build();
     }
 
     /**
