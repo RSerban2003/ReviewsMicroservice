@@ -6,6 +6,7 @@ buildscript {
 	}
 	dependencies {
 		classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
+		classpath "org.openapitools:openapi-generator-gradle-plugin:6.6.0"
 	}
 }
 
@@ -134,4 +135,45 @@ pitest {
 	threads = 4
 	outputFormats = ['XML', 'HTML']
 	timestampedReports = false
+}
+
+apply plugin: 'org.openapi.generator'
+task generateSubmissions(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+	generatorName.set("spring")
+	inputSpec.set("$rootDir/reviews-microservice/src/main/resources/teamA.yaml")
+	outputDir.set("$buildDir/generated")
+	modelPackage.set("nl.tudelft.sem.v20232024.team08b.dtos.submissions")
+	apiPackage.set("ignore")
+	configOptions.set([
+			dateLibrary: "java15"
+	])
+	configOptions = [
+			interfaceOnly: 'true',
+			openApiNullable: 'false'
+	]
+}
+task generateUsers(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+	generatorName.set("spring")
+	inputSpec.set("$rootDir/reviews-microservice/src/main/resources/teamC.yaml")
+	outputDir.set("$buildDir/generated")
+	modelPackage.set("nl.tudelft.sem.v20232024.team08b.dtos.users")
+	apiPackage.set("ignore")
+	configOptions.set([
+			dateLibrary: "java15"
+	])
+	configOptions = [
+			interfaceOnly: 'true',
+			openApiNullable: 'false'
+	]
+}
+
+compileJava.dependsOn tasks.named("generateSubmissions")
+compileJava.dependsOn tasks.named("generateUsers")
+
+sourceSets {
+	getByName("main") {
+		java {
+			srcDir("$buildDir/generated/src/main/java")
+		}
+	}
 }
