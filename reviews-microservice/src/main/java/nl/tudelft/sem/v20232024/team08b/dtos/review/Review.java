@@ -24,4 +24,16 @@ public class Review {
 
     @Schema(description = "Then recommendation score for the paper")
     private RecommendationScore recommendationScore;
+
+    /**
+     * Constructor that maps from domain object to this DTO object.
+     *
+     * @param reviewDomain the domain object, storing review information
+     */
+    public Review(nl.tudelft.sem.v20232024.team08b.domain.Review reviewDomain) {
+        this.confidenceScore = reviewDomain.getConfidenceScore();
+        this.commentForAuthor = reviewDomain.getCommentForAuthor();
+        this.confidentialComment = reviewDomain.getCommentForReviewers();
+        this.recommendationScore = reviewDomain.getRecommendationScore();
+    }
 }
