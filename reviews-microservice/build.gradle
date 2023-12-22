@@ -27,7 +27,7 @@ plugins {
 	id 'pmd'
 
 	// PITest
-	id 'info.solidsoft.pitest' version '1.5.2'
+	id 'info.solidsoft.pitest' version '1.15.0'
 }
 
 group = 'nl.tudelft.cse.sem.v20232024.team08b'
@@ -139,12 +139,12 @@ pmd {
 apply plugin: 'info.solidsoft.pitest'
 pitest {
 	//adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
-	junit5PluginVersion = '0.12'
+	junit5PluginVersion = '1.2.1'
 
 	targetClasses = ['nl.tudelft.sem.v20232024.team08b.*']  //by default "${project.group}.*"
 	excludedClasses = ['nl.tudelft.sem.v20232024.team08b.config.*',
 					   'nl.tudelft.sem.v20232024.team08b.dtos.*']	// TODO: maybe include our DTOs for testing
-	pitestVersion = '1.5.1' //not needed when a default PIT version should be used
+	pitestVersion = '1.15.2'
 	threads = 4
 	outputFormats = ['XML', 'HTML']
 	timestampedReports = false
