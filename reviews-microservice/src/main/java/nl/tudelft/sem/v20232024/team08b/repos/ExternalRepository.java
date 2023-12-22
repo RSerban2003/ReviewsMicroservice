@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ExternalRepository {
     private final int ourID = -1;
-
     private ObjectMapper objectMapper;
-
     private HttpRequestSender httpRequestSender;
+    private String submissionsURL = "https://localhost:8081";
+    private String usersURL = "https://localhost:8080";
 
     /**
      * Default constructor.
@@ -46,7 +46,7 @@ public class ExternalRepository {
      */
     public RolesOfUser getRolesOfUser(Long userID) throws NotFoundException {
         try {
-            String url = "https://localhost:8080/user/" + userID + "/tracks/role";
+            String url = usersURL + "/user/" + userID + "/tracks/role";
             String response = httpRequestSender.sendGetRequest(url);
             RolesOfUser rolesOfUser;
             rolesOfUser = objectMapper.readValue(response, RolesOfUser.class);
@@ -66,7 +66,7 @@ public class ExternalRepository {
      */
     public Submission getSubmission(Long paperID) throws NotFoundException {
         try {
-            String url = "https://localhost:8080/submission/" + paperID + "/" + ourID;
+            String url = submissionsURL + "/submission/" + paperID + "/" + ourID;
             String response = httpRequestSender.sendGetRequest(url);
             Submission submission;
             submission = objectMapper.readValue(response, Submission.class);
