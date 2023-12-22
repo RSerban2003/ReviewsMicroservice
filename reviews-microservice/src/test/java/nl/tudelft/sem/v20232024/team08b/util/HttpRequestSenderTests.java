@@ -3,15 +3,10 @@ package nl.tudelft.sem.v20232024.team08b.util;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.http.HttpStatus;
-
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;

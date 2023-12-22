@@ -1,8 +1,5 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.ReviewsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
@@ -14,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 @RestController
