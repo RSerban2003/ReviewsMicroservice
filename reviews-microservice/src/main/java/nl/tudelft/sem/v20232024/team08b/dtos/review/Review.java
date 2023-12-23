@@ -1,13 +1,15 @@
 package nl.tudelft.sem.v20232024.team08b.dtos.review;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import nl.tudelft.sem.v20232024.team08b.domain.ConfidenceScore;
 import nl.tudelft.sem.v20232024.team08b.domain.RecommendationScore;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Schema(description = "The review of a paper. It does not contain the confidential comments")
 public class Review {
     @Schema(description = "The confidence score of the reviewer", example = "EXPERT")
@@ -22,4 +24,16 @@ public class Review {
 
     @Schema(description = "Then recommendation score for the paper")
     private RecommendationScore recommendationScore;
+
+    /**
+     * Constructor that maps from domain object to this DTO object.
+     *
+     * @param reviewDomain the domain object, storing review information
+     */
+    public Review(nl.tudelft.sem.v20232024.team08b.domain.Review reviewDomain) {
+        this.confidenceScore = reviewDomain.getConfidenceScore();
+        this.commentForAuthor = reviewDomain.getCommentForAuthor();
+        this.confidentialComment = reviewDomain.getCommentForReviewers();
+        this.recommendationScore = reviewDomain.getRecommendationScore();
+    }
 }

@@ -7,11 +7,16 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.ManyToOne;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @IdClass(BidId.class)
+@AllArgsConstructor
+@NoArgsConstructor
 public class Bid implements Serializable {
 
     @Id
@@ -20,7 +25,4 @@ public class Bid implements Serializable {
     @Id
     @ManyToOne(cascade = CascadeType.ALL)
     private User bidder;
-
-    public Bid() {}
-
 }

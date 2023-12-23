@@ -6,17 +6,18 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Conference implements Serializable {
     @Id
     private Long id;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Track> track;
-
-
-    public Conference(){}
-
 }

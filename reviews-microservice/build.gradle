@@ -21,13 +21,13 @@ plugins {
 	id 'jacoco'
 
 	// Code style
-    id 'checkstyle'
+	id 'checkstyle'
 
 	// PMD
 	id 'pmd'
 
 	// PITest
-	id 'info.solidsoft.pitest' version '1.5.2'
+	id 'info.solidsoft.pitest' version '1.15.0'
 }
 
 group = 'nl.tudelft.cse.sem.v20232024.team08b'
@@ -41,6 +41,7 @@ repositories {
 
 dependencies {
 
+	testImplementation 'junit:junit:4.13.1'
 	compileOnly 'org.projectlombok:lombok:1.18.24'
 	annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
@@ -79,7 +80,6 @@ test {
 	jacoco {
 		enabled = true
 		includes = ['nl.tudelft.sem.v20232024.team08b.*']
-		excludes = []
 	}
 }
 
@@ -90,7 +90,16 @@ repositories {
 jacoco {
 	toolVersion = "0.8.7" // Use the desired version of JaCoCo
 }
-
+jacocoTestReport {
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: ['**/submissions/**',
+										'**/users/**',
+										'**/ignore/**',
+										'**/config/**'])
+		}))
+	}
+}
 jacocoTestCoverageVerification() {
 	dependsOn test
 	violationRules {
@@ -98,7 +107,9 @@ jacocoTestCoverageVerification() {
 			enabled = true
 			element = 'CLASS'
 			includes = ['nl.tudelft.sem.v20232024.team08b.*']
-
+			excludes = ['nl.tudelft.sem.v20232024.team08b.dtos.submissions',
+						'nl.tudelft.sem.v20232024.team08b.dtos.users',
+						'ignore']
 			limit {
 				counter = 'BRANCH'
 				value = 'COVEREDRATIO'
@@ -128,10 +139,12 @@ pmd {
 apply plugin: 'info.solidsoft.pitest'
 pitest {
 	//adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
-	junit5PluginVersion = '0.12'
+	junit5PluginVersion = '1.2.1'
 
 	targetClasses = ['nl.tudelft.sem.v20232024.team08b.*']  //by default "${project.group}.*"
-	pitestVersion = '1.5.1' //not needed when a default PIT version should be used
+	excludedClasses = ['nl.tudelft.sem.v20232024.team08b.config.*',
+					   'nl.tudelft.sem.v20232024.team08b.dtos.*']	// TODO: maybe include our DTOs for testing
+	pitestVersion = '1.15.2'
 	threads = 4
 	outputFormats = ['XML', 'HTML']
 	timestampedReports = false
