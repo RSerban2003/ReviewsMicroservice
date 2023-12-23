@@ -1,63 +1,80 @@
 package nl.tudelft.sem.v20232024.team08b.repos;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Review;
+import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
+import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 @Repository
 public class ExternalRepository {
+    private final int ourID = -1;
     private ObjectMapper objectMapper;
-    private HttpClient httpClient;
+    private HttpRequestSender httpRequestSender;
+    private String submissionsURL = "https://localhost:8081";
+    private String usersURL = "https://localhost:8080";
 
     /**
-     * Empty constructor.
+     * Default constructor.
+     *
+     * @param httpRequestSender class used for sending HTTP requests
      */
-    public ExternalRepository() {
+    @Autowired
+    public ExternalRepository(HttpRequestSender httpRequestSender) {
+        this.httpRequestSender = httpRequestSender;
         this.objectMapper = new ObjectMapper();
-        this.httpClient = HttpClient.newHttpClient();
     }
 
     /**
-     * Method that performs a GET request to a given endpoint.
+     * Constructor used for testing purposes.
      *
-     * @param url the URL of the endpoint
-     * @return the response in JSON format
+     * @param httpRequestSender class used for sending HTTP requests
+     * @param objectMapper class used to map objects to json
      */
-    private String sendGetRequest(String url) {
-        HttpRequest request;
-        String response;
+    public ExternalRepository(HttpRequestSender httpRequestSender, ObjectMapper objectMapper) {
+        this.httpRequestSender = httpRequestSender;
+        this.objectMapper = objectMapper;
+    }
+
+    /**
+     * Gets from the Users microservice all the roles of a user.
+     *
+     * @param userID the ID of the user
+     * @return a list of roles of that user
+     */
+    public RolesOfUser getRolesOfUser(Long userID) throws NotFoundException {
         try {
-            request = HttpRequest.newBuilder()
-                .uri(new URI(url))
-                .header("Content-Type", "application/json")
-                .GET()
-                .build();
-            response = httpClient.send(
-                    request, HttpResponse.BodyHandlers.ofString()).body();
+            String url = usersURL + "/user/" + userID + "/tracks/role";
+            String response = httpRequestSender.sendGetRequest(url);
+            RolesOfUser rolesOfUser;
+            rolesOfUser = objectMapper.readValue(response, RolesOfUser.class);
+            return rolesOfUser;
+        } catch (NotFoundException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return response;
-    }
-
-    /**
-     * Sample method that gets and Event from submissions microservice.
-     *
-     * @return Event object gotten from other microservice.
-     */
-    public Review getEvent() {
-        String response = sendGetRequest("https://29889bc5-e017-4c7b-8e69-e567dcd4556d.mock.pstmn.io/review/1/1");
-        Review review;
-        try {
-            review = objectMapper.readValue(response, Review.class);
-        } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to parse the HTTP response");
         }
-        return review;
+    }
+
+    /**
+     * Gets a paper (called submission) from the Submissions microservice.
+     *
+     * @param paperID the ID of the paper to get
+     * @return the gotten Submission object
+     */
+    public Submission getSubmission(Long paperID) throws NotFoundException {
+        try {
+            String url = submissionsURL + "/submission/" + paperID + "/" + ourID;
+            String response = httpRequestSender.sendGetRequest(url);
+            Submission submission;
+            submission = objectMapper.readValue(response, Submission.class);
+            return submission;
+        } catch (NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse the HTTP response");
+        }
     }
 }
