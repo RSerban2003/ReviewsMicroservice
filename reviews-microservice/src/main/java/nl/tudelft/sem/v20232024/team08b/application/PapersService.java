@@ -50,11 +50,7 @@ public class PapersService {
     }
 
     /**
-     * Verifies if:
-     * - the paper exists;
-     * - the user exists;
-     * - the paper is IN_REVIEW phase || the paper is IN_DISCUSSION phase;
-     * - the user is reviewer for the paper || is chair for the paper;
+     * Verifies whether the user has permission to view the paper.
      *
      * @param reviewerID the ID of the requesting user
      * @param paperID the ID of the paper that is requested
