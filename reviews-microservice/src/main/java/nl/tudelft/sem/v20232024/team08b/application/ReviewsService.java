@@ -144,7 +144,7 @@ public class ReviewsService {
             return false;
         }
 
-        // Finally, if such reviewer exists, and such paper exists, we have to chek
+        // Finally, if such reviewer exists, and such paper exists, we have to check if it is assigned to the paper
         if (!isReviewerForPaper(reviewerID, paperID)) {
             return false;
         }
