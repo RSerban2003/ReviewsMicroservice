@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import java.io.IOException;
+import java.util.Arrays;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -71,5 +74,55 @@ public class ExternalRepositoryTests {
                 objectMapper.readValue("json", Submission.class)
         ).thenReturn(fakeSubmission);
         assertThat(externalRepository.getSubmission(1L)).isEqualTo(fakeSubmission);
+    }
+
+    @Test
+    void getFullPaperSuccessful() throws NotFoundException {
+        Submission fakeSubmission = new Submission();
+        fakeSubmission.setTitle("Test Title");
+        fakeSubmission.setKeywords(Arrays.asList("Test", "Keywords"));
+        fakeSubmission.setAbstract("Test Abstract");
+        fakeSubmission.setPaper("Test Paper Content".getBytes());
+
+        when(externalRepository.getSubmission(1L)).thenReturn(fakeSubmission);
+
+        Paper expectedPaper = new Paper();
+        expectedPaper.setTitle("Test Title");
+        expectedPaper.setKeywords(Arrays.asList("Test", "Keywords"));
+        expectedPaper.setAbstractSection("Test Abstract");
+        expectedPaper.setMainText("Test Paper Content");
+
+        Paper actualPaper = externalRepository.getFullPaper(1L);
+        assertThat(actualPaper).isEqualToComparingFieldByField(expectedPaper);
+    }
+
+    @Test
+    void getFullPaperNotFound() throws NotFoundException {
+        when(externalRepository.getSubmission(1L)).thenThrow(new NotFoundException(""));
+
+        assertThrows(NotFoundException.class, () -> externalRepository.getFullPaper(1L));
+    }
+
+    @Test
+    void getTitleAndAbstractSuccessful() throws NotFoundException, IOException {
+        Submission fakeSubmission = new Submission();
+        fakeSubmission.setTitle("Test Title");
+        fakeSubmission.setAbstract("Test Abstract");
+
+        when(externalRepository.getSubmission(1L)).thenReturn(fakeSubmission);
+
+        Paper expectedPaper = new Paper();
+        expectedPaper.setTitle("Test Title");
+        expectedPaper.setAbstractSection("Test Abstract");
+
+        Paper actualPaper = externalRepository.getTitleAndAbstract(1L);
+        assertThat(actualPaper).isEqualToComparingFieldByField(expectedPaper);
+    }
+
+    @Test
+    void getTitleAndAbstractNotFound() throws NotFoundException {
+        when(externalRepository.getSubmission(1L)).thenThrow(new NotFoundException(""));
+
+        assertThrows(NotFoundException.class, () -> externalRepository.getTitleAndAbstract(1L));
     }
 }
