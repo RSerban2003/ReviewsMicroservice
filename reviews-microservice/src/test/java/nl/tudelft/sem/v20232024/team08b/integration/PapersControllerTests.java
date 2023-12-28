@@ -41,7 +41,7 @@ public class PapersControllerTests {
         fakePaper = new Paper();
         fakePaper.setTitle("title");
         fakePaper.setAbstractSection("abstract");
-        fakePaper.setKeywords(Arrays.asList("keyword1","keyword2"));
+        fakePaper.setKeywords(Arrays.asList("keyword1", "keyword2"));
         fakePaper.setMainText("text");
 
         fakeTitleAndAbstract = new Paper();
