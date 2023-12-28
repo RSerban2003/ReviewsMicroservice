@@ -36,6 +36,7 @@ public class PapersService {
         this.externalRepository = externalRepository;
         this.verificationService = verificationService;
     }
+
     /**
      * Checks if a user is assigned to review a paper
      *
@@ -44,8 +45,10 @@ public class PapersService {
      * @return true, iff the user is a reviewer for the paper
      */
     private boolean isReviewerForPaper(Long reviewerID, Long paperID) {
+
         return reviewRepository.findById(new ReviewID(paperID, reviewerID)).isPresent();
     }
+
     /**
      * Verifies if:
      * - the paper exists
@@ -63,6 +66,7 @@ public class PapersService {
     public void verifyReviewerPermissionToViewPaper(Long reviewerID,
                                                     Long paperID) throws NotFoundException,
                                                                          IllegalCallerException {
+
         // Check if such paper exists
         if (!verificationService.verifyPaper(paperID)) {
             throw new NotFoundException("No such paper exists");

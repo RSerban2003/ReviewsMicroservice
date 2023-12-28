@@ -45,7 +45,8 @@ public class PapersController implements PapersAPI {
             // The requested paper was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
-            // The requester must be a reviewer assigned to the given paper or a chair, and the review phase must have started
+            // The requester must be a reviewer assigned to the given paper or a chair,
+            // and the review phase must have started
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             // Internal server error
@@ -77,7 +78,8 @@ public class PapersController implements PapersAPI {
             // The requested paper was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
-            // The requester must be a reviewer assigned to the given paper or a chair, and the review phase must have started
+            // The requester must be a reviewer assigned to the given paper or a chair,
+            // and the review phase must have started
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             // Internal server error
