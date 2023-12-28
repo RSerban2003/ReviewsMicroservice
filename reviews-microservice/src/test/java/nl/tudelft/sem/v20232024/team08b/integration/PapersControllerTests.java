@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.controllers.PapersController;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
@@ -59,13 +60,54 @@ public class PapersControllerTests {
         String expectedJSON = objectMapper.writeValueAsString(fakePaper);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/papers/{paperID}", paperID.toString())
-                                .param("requesterID", requesterID.toString())
-                                .contentType(MediaType.APPLICATION_JSON)
+                MockMvcRequestBuilders.get("/papers/{paperID}", paperID.toString())
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(MockMvcResultMatchers.status().is(200))
                 .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
 
         verify(paperService).getPaper(requesterID, paperID);
+    }
+
+    /**
+     * Simulates an exception inside getTitleAndAbstract function
+     * and checks for correct status code.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    public void getPaperWithException(Exception exception, int expected) throws Exception {
+
+        doThrow(exception).when(paperService).getPaper(requesterID, paperID);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/{paperID}", paperID.toString())
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        verify(paperService).getPaper(requesterID, paperID);
+    }
+
+    @Test
+    void getPaper_NoSuchRequester() throws Exception {
+        getPaperWithException(new IllegalCallerException(""), 404);
+    }
+
+    @Test
+    void getPaper_NoSuchPaper() throws Exception {
+        getPaperWithException(new NotFoundException(""), 404);
+    }
+
+    @Test
+    void getPaper_IllegalAccess() throws Exception {
+        getPaperWithException(new IllegalAccessException(""), 403);
+    }
+
+    @Test
+    void getPaper_InternalError() throws Exception {
+        getPaperWithException(new Exception(""), 500);
     }
 
     @Test
@@ -83,5 +125,46 @@ public class PapersControllerTests {
                 .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
 
         verify(paperService).getTitleAndAbstract(requesterID, paperID);
+    }
+
+    /**
+     * Simulates an exception inside getTitleAndAbstract function
+     * and checks for correct status code.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    public void getTitleAndAbstractWithException(Exception exception, int expected) throws Exception {
+
+        doThrow(exception).when(paperService).getPaper(requesterID, paperID);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/{paperID}/title-and-abstract", paperID.toString())
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        verify(paperService).getPaper(requesterID, paperID);
+    }
+
+    @Test
+    void getTitleAndAbstract_NoSuchRequester() throws Exception {
+        getTitleAndAbstractWithException(new IllegalCallerException(""), 404);
+    }
+
+    @Test
+    void getTitleAndAbstract_NoSuchPaper() throws Exception {
+        getTitleAndAbstractWithException(new NotFoundException(""), 404);
+    }
+
+    @Test
+    void getTitleAndAbstract_IllegalAccess() throws Exception {
+        getTitleAndAbstractWithException(new IllegalAccessException(""), 403);
+    }
+
+    @Test
+    void getTitleAndAbstract_InternalError() throws Exception {
+        getTitleAndAbstractWithException(new Exception(""), 500);
     }
 }
