@@ -38,7 +38,7 @@ public class PapersService {
     }
 
     /**
-     * Checks if a user is assigned to review a paper
+     * Checks if a user is assigned to review a paper.
      *
      * @param reviewerID the ID of the user
      * @param paperID the ID of the paper
@@ -51,10 +51,10 @@ public class PapersService {
 
     /**
      * Verifies if:
-     * - the paper exists
-     * - the user exists
-     * - the paper is IN_REVIEW phase || the paper is IN_DISCUSSION phase
-     * - the user is reviewer for the paper || is chair for the paper
+     * - the paper exists;
+     * - the user exists;
+     * - the paper is IN_REVIEW phase || the paper is IN_DISCUSSION phase;
+     * - the user is reviewer for the paper || is chair for the paper;
      *
      * @param reviewerID the ID of the requesting user
      * @param paperID the ID of the paper that is requested
