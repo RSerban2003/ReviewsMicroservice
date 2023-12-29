@@ -16,8 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -47,20 +50,26 @@ public class PapersServiceTests {
 
         fakePaper = new Paper();
         fakeSubmission = new Submission();
+
+        fakeSubmission.setTitle("Test Title");
+        fakeSubmission.setKeywords(Arrays.asList("Test", "Keywords"));
+        fakeSubmission.setAbstract("Test Abstract");
+        fakeSubmission.setPaper("Test Paper Content".getBytes());
+
         fakeReview = new Review();
         fakeSubmission.setEventId(conferenceID);
         fakeSubmission.setTrackId(trackID);
     }
 
     @Test
-    void getPaper_NoSuchPaper() {
+    void getPaper_NoPaperFound() {
         when(verificationService.verifyPaper(paperID)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> papersService.getPaper(reviewerID, paperID));
     }
 
     @Test
-    void getPaper_NoSuchUser() throws Exception {
+    void getPaper_NoUserFound() throws Exception {
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
         when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(false);
@@ -79,41 +88,78 @@ public class PapersServiceTests {
     }
 
     @Test
-    void getPaper_Successful() throws Exception {
+    void getPaper_NoSubmissionFound() throws NotFoundException {
+        when(externalRepository.getSubmission(1L)).thenThrow(new NotFoundException(""));
+
+        assertThrows(NotFoundException.class, () -> papersService.getPaper(1L,2L));
+    }
+
+    @Test
+    void getPaper_Successful() throws NotFoundException,
+                                         IllegalAccessException {
+
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
         when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
-        when(externalRepository.getFullPaper(paperID)).thenReturn(fakePaper);
+
+        when(externalRepository.getSubmission(1L)).thenReturn(fakeSubmission);
+
+        Paper expectedPaper = new Paper();
+        expectedPaper.setTitle("Test Title");
+        expectedPaper.setKeywords(Arrays.asList("Test", "Keywords"));
+        expectedPaper.setAbstractSection("Test Abstract");
+        expectedPaper.setMainText("Test Paper Content");
 
         Paper result = papersService.getPaper(reviewerID, paperID);
         assertEquals(fakePaper, result);
+
+        Paper actualPaper = papersService.getPaper(1L, 2L);
+        assertThat(actualPaper).isEqualToComparingFieldByField(expectedPaper);
     }
 
     @Test
-    void getTitleAndAbstract_Successful() throws Exception {
-        when(verificationService.verifyPaper(paperID)).thenReturn(true);
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
-        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
-        when(externalRepository.getTitleAndAbstract(paperID)).thenReturn(fakePaper);
-
-        Paper result = papersService.getTitleAndAbstract(reviewerID, paperID);
-        assertEquals(fakePaper, result);
-    }
-
-    @Test
-    void getTitleAndAbstract_NoSuchPaper() {
+    void getTitleAndAbstract_NoPaperFound() {
         when(verificationService.verifyPaper(paperID)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> papersService.getTitleAndAbstract(reviewerID, paperID));
     }
 
     @Test
-    void getTitleAndAbstract_NoSuchUser() throws Exception {
+    void getTitleAndAbstract_NoUserFound() throws Exception {
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
         when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(false);
 
         assertThrows(IllegalCallerException.class, () -> papersService.getTitleAndAbstract(reviewerID, paperID));
     }
+
+    @Test
+    void getTitleAndAbstract_NoSubmissionFound() throws NotFoundException {
+        when(externalRepository.getSubmission(1L)).thenThrow(new NotFoundException(""));
+
+        assertThrows(NotFoundException.class, () -> papersService.getTitleAndAbstract(1L,2L));
+    }
+
+    @Test
+    void getTitleAndAbstract_Successful() throws NotFoundException,
+            IllegalAccessException {
+
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+
+        Paper result = papersService.getTitleAndAbstract(reviewerID, paperID);
+        assertEquals(fakePaper, result);
+
+        when(externalRepository.getSubmission(1L)).thenReturn(fakeSubmission);
+
+        Paper expectedPaper = new Paper();
+        expectedPaper.setTitle("Test Title");
+        expectedPaper.setAbstractSection("Test Abstract");
+
+        Paper actualPaper = papersService.getTitleAndAbstract(1L, 2L);
+        assertThat(actualPaper).isEqualToComparingFieldByField(expectedPaper);
+    }
+
 }

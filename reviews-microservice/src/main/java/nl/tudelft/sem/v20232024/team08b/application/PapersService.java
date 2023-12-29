@@ -4,6 +4,7 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
@@ -85,24 +86,41 @@ public class PapersService {
      * @param paperID ID of the paper being requested
      * @return the paper, if all conditions are met
      */
-    public Paper getPaper(Long reviewerID, Long paperID) throws Exception {
+    public Paper getPaper(Long reviewerID, Long paperID) throws NotFoundException,
+                                                                IllegalAccessException {
         verifyReviewerPermissionToViewPaper(reviewerID, paperID);
         // Check if the user is assigned to the paper
         if (!isReviewerForPaper(reviewerID, paperID)) {
             throw new IllegalAccessException("The user is not a reviewer for this paper.");
         }
-        return externalRepository.getFullPaper(paperID);
+
+        Paper paper = new Paper();
+
+        Submission submission = externalRepository.getSubmission(paperID);
+        paper.setTitle(submission.getTitle());
+        paper.setKeywords(submission.getKeywords());
+        paper.setAbstractSection(submission.getAbstract());
+        paper.setMainText(new String(submission.getPaper()));
+
+        return paper;
     }
 
     /**
-     * Returns the title and abstract of the paper from the repository.
+     * Returns the title and abstract of the paper from the external repository.
      *
      * @param reviewerID ID of the reviewer requesting the paper
      * @param paperID ID of the paper being requested
      * @return the paper, if all conditions are met
      */
-    public Paper getTitleAndAbstract(Long reviewerID, Long paperID) throws Exception {
+    public Paper getTitleAndAbstract(Long reviewerID, Long paperID) throws NotFoundException,
+                                                                           IllegalAccessException {
         verifyReviewerPermissionToViewPaper(reviewerID, paperID);
-        return externalRepository.getTitleAndAbstract(paperID);
+        Paper paper = new Paper();
+
+        Submission submission = externalRepository.getSubmission(paperID);
+        paper.setTitle(submission.getTitle());
+        paper.setAbstractSection(submission.getAbstract());
+
+        return paper;
     }
 }

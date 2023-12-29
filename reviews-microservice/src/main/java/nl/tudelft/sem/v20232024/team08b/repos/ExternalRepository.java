@@ -79,41 +79,4 @@ public class ExternalRepository {
         }
     }
 
-    /**
-     * Retrieves and sets the details of a paper from an external submission database into a Paper DTO.
-     *
-     * @param paperID The identifier of the paper from which details are needed.
-     * @return A Paper DTO filled with values from the submission.
-     * @throws NotFoundException If the submission is not found in the external database.
-     */
-    public Paper getFullPaper(Long paperID) throws NotFoundException {
-
-        Paper paper = new Paper();
-
-        Submission submission = getSubmission(paperID);
-        paper.setTitle(submission.getTitle());
-        paper.setKeywords(submission.getKeywords());
-        paper.setAbstractSection(submission.getAbstract());
-        paper.setMainText(new String(submission.getPaper()));
-
-        return paper;
-    }
-
-    /**
-     * Retrieves and sets the title and abstract of a paper from an external submission database into a Paper DTO.
-     *
-     * @param paperID The unique identifier of the paper whose title and abstract are to be retrieved.
-     * @return A Paper DTO containing the title and abstract from the submission.
-     * @throws NotFoundException If the submission corresponding to the paperID is not found in the external database.
-     */
-    public Paper getTitleAndAbstract(Long paperID) throws NotFoundException {
-
-        Paper paper = new Paper();
-
-        Submission submission = getSubmission(paperID);
-        paper.setTitle(submission.getTitle());
-        paper.setAbstractSection(submission.getAbstract());
-
-        return paper;
-    }
 }
