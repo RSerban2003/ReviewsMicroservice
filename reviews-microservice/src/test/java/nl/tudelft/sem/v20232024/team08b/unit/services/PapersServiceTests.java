@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 

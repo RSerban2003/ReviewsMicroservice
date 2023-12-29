@@ -2,7 +2,6 @@ package nl.tudelft.sem.v20232024.team08b.repos;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
@@ -78,5 +77,4 @@ public class ExternalRepository {
             throw new RuntimeException("Failed to parse the HTTP response");
         }
     }
-
 }

@@ -2,7 +2,6 @@ package nl.tudelft.sem.v20232024.team08b.database;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import java.io.IOException;
-import java.util.Arrays;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
