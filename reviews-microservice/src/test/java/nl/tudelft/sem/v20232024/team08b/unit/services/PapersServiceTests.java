@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -35,11 +36,10 @@ public class PapersServiceTests {
 
     private PapersService papersService;
 
-    private Long reviewerID = 1L;
-    private Long paperID = 2L;
-    private Long trackID = 3L;
-    private Long conferenceID = 4L;
-    private Paper fakePaper;
+    private final Long reviewerID = 1L;
+    private final Long paperID = 2L;
+    private final Long trackID = 3L;
+    private final Long conferenceID = 4L;
     private Submission fakeSubmission;
     private Review fakeReview;
 
@@ -47,15 +47,9 @@ public class PapersServiceTests {
     void setUp() {
         papersService = new PapersService(paperRepository, reviewRepository, externalRepository, verificationService);
 
-        fakePaper = new Paper();
         fakeSubmission = new Submission();
-
-        fakeSubmission.setTitle("Test Title");
-        fakeSubmission.setKeywords(Arrays.asList("Test", "Keywords"));
-        fakeSubmission.setAbstract("Test Abstract");
-        fakeSubmission.setPaper("Test Paper Content".getBytes());
-
         fakeReview = new Review();
+
         fakeSubmission.setEventId(conferenceID);
         fakeSubmission.setTrackId(trackID);
     }
@@ -90,7 +84,7 @@ public class PapersServiceTests {
     void getPaper_NoSubmissionFound() throws NotFoundException {
         when(externalRepository.getSubmission(1L)).thenThrow(new NotFoundException(""));
 
-        assertThrows(NotFoundException.class, () -> papersService.getPaper(1L,2L));
+        assertThrows(NotFoundException.class, () -> papersService.getPaper(1L, 2L));
     }
 
     @Test
@@ -102,19 +96,19 @@ public class PapersServiceTests {
         when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
 
-        when(externalRepository.getSubmission(1L)).thenReturn(fakeSubmission);
+        fakeSubmission.setTitle("Title");
+        fakeSubmission.setKeywords(List.of("Keywords"));
+        fakeSubmission.setAbstract("Abstract");
+        fakeSubmission.setPaper("Content".getBytes());
 
         Paper expectedPaper = new Paper();
-        expectedPaper.setTitle("Test Title");
-        expectedPaper.setKeywords(Arrays.asList("Test", "Keywords"));
-        expectedPaper.setAbstractSection("Test Abstract");
-        expectedPaper.setMainText("Test Paper Content");
+        expectedPaper.setTitle("Title");
+        expectedPaper.setKeywords(List.of("Keywords"));
+        expectedPaper.setAbstractSection("Abstract");
+        expectedPaper.setMainText(new String(fakeSubmission.getPaper()));
 
         Paper result = papersService.getPaper(reviewerID, paperID);
-        assertEquals(fakePaper, result);
-
-        Paper actualPaper = papersService.getPaper(1L, 2L);
-        assertThat(actualPaper).isEqualToComparingFieldByField(expectedPaper);
+        assertThat(result).isEqualToComparingFieldByField(expectedPaper);
     }
 
     @Test
@@ -137,7 +131,7 @@ public class PapersServiceTests {
     void getTitleAndAbstract_NoSubmissionFound() throws NotFoundException {
         when(externalRepository.getSubmission(1L)).thenThrow(new NotFoundException(""));
 
-        assertThrows(NotFoundException.class, () -> papersService.getTitleAndAbstract(1L,2L));
+        assertThrows(NotFoundException.class, () -> papersService.getTitleAndAbstract(1L, 2L));
     }
 
     @Test
@@ -148,17 +142,18 @@ public class PapersServiceTests {
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
         when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
 
-        Paper result = papersService.getTitleAndAbstract(reviewerID, paperID);
-        assertEquals(fakePaper, result);
-
-        when(externalRepository.getSubmission(1L)).thenReturn(fakeSubmission);
+        fakeSubmission.setTitle("Title");
+        fakeSubmission.setAbstract("Abstract");
 
         Paper expectedPaper = new Paper();
-        expectedPaper.setTitle("Test Title");
-        expectedPaper.setAbstractSection("Test Abstract");
+        expectedPaper.setTitle("Title");
+        expectedPaper.setAbstractSection("Abstract");
 
-        Paper actualPaper = papersService.getTitleAndAbstract(1L, 2L);
-        assertThat(actualPaper).isEqualToComparingFieldByField(expectedPaper);
+        // Call the method to test
+        Paper result = papersService.getTitleAndAbstract(reviewerID, paperID);
+
+        // Assert that the result matches the expected paper
+        assertThat(result).isEqualToComparingFieldByField(expectedPaper);
     }
 
 }

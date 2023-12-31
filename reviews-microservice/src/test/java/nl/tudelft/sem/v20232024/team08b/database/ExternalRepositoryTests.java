@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import java.io.IOException;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -73,5 +72,4 @@ public class ExternalRepositoryTests {
         ).thenReturn(fakeSubmission);
         assertThat(externalRepository.getSubmission(1L)).isEqualTo(fakeSubmission);
     }
-
 }

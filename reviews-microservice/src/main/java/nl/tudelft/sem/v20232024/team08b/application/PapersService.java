@@ -72,7 +72,7 @@ public class PapersService {
         Long trackId = externalRepository.getSubmission(paperID).getTrackId();
         Long conferenceID = externalRepository.getSubmission(paperID).getEventId();
         //checks if the user is a reviewer or chair in the same track and conference as the paper
-        if (!verificationService.verifyUser(reviewerID, conferenceID, trackId, UserRole.REVIEWER) ||
+        if (!verificationService.verifyUser(reviewerID, conferenceID, trackId, UserRole.REVIEWER) &&
             !verificationService.verifyUser(reviewerID, conferenceID, trackId, UserRole.CHAIR)) {
             //throws error if user does not exist
             throw new IllegalCallerException("No such user exists");

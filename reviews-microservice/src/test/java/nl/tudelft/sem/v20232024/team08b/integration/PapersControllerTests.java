@@ -60,8 +60,9 @@ public class PapersControllerTests {
         String expectedJSON = objectMapper.writeValueAsString(fakePaper);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/papers/{paperID}", paperID.toString())
+                MockMvcRequestBuilders.get("/papers/" + paperID.toString())
                         .param("requesterID", requesterID.toString())
+                        .param("paperID", paperID.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(MockMvcResultMatchers.status().is(200))
                 .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
@@ -82,8 +83,9 @@ public class PapersControllerTests {
         doThrow(exception).when(paperService).getPaper(requesterID, paperID);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/papers/{paperID}", paperID.toString())
+                MockMvcRequestBuilders.get("/papers/" + paperID.toString())
                         .param("requesterID", requesterID.toString())
+                        .param("paperID", paperID.toString())
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(MockMvcResultMatchers.status().is(expected));
 
@@ -107,19 +109,20 @@ public class PapersControllerTests {
 
     @Test
     void getPaper_InternalError() throws Exception {
-        getPaperWithException(new Exception(""), 500);
+        getPaperWithException(new RuntimeException(""), 500);
     }
 
     @Test
     public void getTitleAndAbstractSuccessfully() throws Exception {
 
-        when(paperService.getPaper(requesterID, paperID)).thenReturn(fakeTitleAndAbstract);
+        when(paperService.getTitleAndAbstract(requesterID, paperID)).thenReturn(fakeTitleAndAbstract);
 
         String expectedJSON = objectMapper.writeValueAsString(fakeTitleAndAbstract);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/papers/{paperID}/title-and-abstract", paperID.toString())
+                        MockMvcRequestBuilders.get("/papers/" + paperID.toString() + "/title-and-abstract")
                                 .param("requesterID", requesterID.toString())
+                                .param("paperID", paperID.toString())
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(MockMvcResultMatchers.status().is(200))
                 .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
@@ -137,15 +140,16 @@ public class PapersControllerTests {
      */
     public void getTitleAndAbstractWithException(Exception exception, int expected) throws Exception {
 
-        doThrow(exception).when(paperService).getPaper(requesterID, paperID);
+        doThrow(exception).when(paperService).getTitleAndAbstract(requesterID, paperID);
 
         mockMvc.perform(
-                MockMvcRequestBuilders.get("/papers/{paperID}/title-and-abstract", paperID.toString())
+                MockMvcRequestBuilders.get("/papers/" + paperID.toString() + "/title-and-abstract")
                         .param("requesterID", requesterID.toString())
+                        .param("paperID", paperID.toString())
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(MockMvcResultMatchers.status().is(expected));
 
-        verify(paperService).getPaper(requesterID, paperID);
+        verify(paperService).getTitleAndAbstract(requesterID, paperID);
     }
 
     @Test
@@ -165,6 +169,6 @@ public class PapersControllerTests {
 
     @Test
     void getTitleAndAbstract_InternalError() throws Exception {
-        getTitleAndAbstractWithException(new Exception(""), 500);
+        getTitleAndAbstractWithException(new RuntimeException(""), 500);
     }
 }
