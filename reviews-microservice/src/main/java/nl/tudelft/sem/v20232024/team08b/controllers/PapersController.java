@@ -40,7 +40,7 @@ public class PapersController implements PapersAPI {
     public ResponseEntity<PaperSummary> getTitleAndAbstract(Long requesterID,
                                                             Long paperID) {
         try {
-            papersService.getTitleAndAbstract(requesterID, paperID);
+            return ResponseEntity.ok(papersService.getTitleAndAbstract(requesterID, paperID));
         } catch (IllegalCallerException | NotFoundException e) {
             // The requested paper was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -52,10 +52,6 @@ public class PapersController implements PapersAPI {
             // Internal server error
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .build();
     }
 
     /**
@@ -73,7 +69,7 @@ public class PapersController implements PapersAPI {
     public ResponseEntity<Paper> get(Long requesterID,
                                      Long paperID) {
         try {
-            papersService.getPaper(requesterID, paperID);
+            return ResponseEntity.ok(papersService.getPaper(requesterID, paperID));
         } catch (IllegalCallerException | NotFoundException e) {
             // The requested paper was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -85,10 +81,6 @@ public class PapersController implements PapersAPI {
             // Internal server error
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .build();
     }
 
     /**

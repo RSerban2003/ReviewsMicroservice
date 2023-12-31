@@ -3,6 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.application;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
@@ -112,15 +113,16 @@ public class PapersService {
      * @param paperID ID of the paper being requested
      * @return the paper, if all conditions are met
      */
-    public Paper getTitleAndAbstract(Long reviewerID, Long paperID) throws NotFoundException,
+    public PaperSummary getTitleAndAbstract(Long reviewerID, Long paperID) throws NotFoundException,
                                                                            IllegalAccessException {
         verifyReviewerPermissionToViewPaper(reviewerID, paperID);
-        Paper paper = new Paper();
+
+        PaperSummary paperSummary = new PaperSummary();
 
         Submission submission = externalRepository.getSubmission(paperID);
-        paper.setTitle(submission.getTitle());
-        paper.setAbstractSection(submission.getAbstract());
+        paperSummary.setTitle(submission.getTitle());
+        paperSummary.setAbstractSection(submission.getAbstract());
 
-        return paper;
+        return paperSummary;
     }
 }

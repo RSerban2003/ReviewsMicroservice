@@ -6,6 +6,7 @@ import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -149,10 +149,8 @@ public class PapersServiceTests {
         expectedPaper.setTitle("Title");
         expectedPaper.setAbstractSection("Abstract");
 
-        // Call the method to test
-        Paper result = papersService.getTitleAndAbstract(reviewerID, paperID);
+        PaperSummary result = papersService.getTitleAndAbstract(reviewerID, paperID);
 
-        // Assert that the result matches the expected paper
         assertThat(result).isEqualToComparingFieldByField(expectedPaper);
     }
 

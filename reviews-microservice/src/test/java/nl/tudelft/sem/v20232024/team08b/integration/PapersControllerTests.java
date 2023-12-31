@@ -5,6 +5,7 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.controllers.PapersController;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -25,11 +27,11 @@ import static org.mockito.Mockito.*;
 public class PapersControllerTests {
     MockMvc mockMvc;
 
-    private PapersService paperService = Mockito.mock(PapersService.class);
+    private final PapersService paperService = Mockito.mock(PapersService.class);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Paper fakePaper;
-    private Paper fakeTitleAndAbstract;
+    private PaperSummary fakeTitleAndAbstract;
     private Long requesterID;
     private Long paperID;
 
@@ -39,14 +41,15 @@ public class PapersControllerTests {
                 new PapersController(paperService)
         ).build();
         fakePaper = new Paper();
-        fakePaper.setTitle("title");
-        fakePaper.setAbstractSection("abstract");
-        fakePaper.setKeywords(Arrays.asList("keyword1", "keyword2"));
-        fakePaper.setMainText("text");
+        fakePaper.setTitle("Title");
+        fakePaper.setAbstractSection("Abstract");
+        fakePaper.setKeywords(List.of("Keyword"));
+        fakePaper.setMainText("Text");
+        fakePaper.setReplicationPackageLink("https://localhost/paper");
 
-        fakeTitleAndAbstract = new Paper();
-        fakeTitleAndAbstract.setTitle("title");
-        fakeTitleAndAbstract.setAbstractSection("abstract");
+        fakeTitleAndAbstract = new PaperSummary();
+        fakeTitleAndAbstract.setTitle("Title");
+        fakeTitleAndAbstract.setAbstractSection("Abstract");
 
         requesterID = 1L;
         paperID = 2L;
