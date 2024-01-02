@@ -56,10 +56,14 @@ public class PapersService {
         }
 
         if (!verificationService.verifyRole(reviewerID, paperID, UserRole.CHAIR)) {
-            if (!verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER)) {throw new IllegalCallerException("No such user exists");}
-            else if (!verificationService.isReviewerForPaper(reviewerID, paperID)) {throw new IllegalAccessException("The user is not a reviewer for this paper.");}
+            if (!verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER)) {
+                throw new IllegalCallerException("No such user exists");
+            } else if (!verificationService.isReviewerForPaper(reviewerID, paperID)) {
+                throw new IllegalAccessException("The user is not a reviewer for this paper.");
+            }
         }
     }
+
     /**
      * Returns the content of the paper from the repository.
      *
