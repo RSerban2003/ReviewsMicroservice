@@ -58,7 +58,7 @@ public class VerificationServiceTests {
     @Test
     void verifyUserExists() throws NotFoundException {
         when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
-        assertThat(verificationService.verifyUser(1L, 4L, 2L, UserRole.REVIEWER)).isEqualTo(true);
+        assertThat(verificationService.verifyRoleFromTrack(1L, 4L, 2L, UserRole.REVIEWER)).isEqualTo(true);
     }
 
 
@@ -66,14 +66,14 @@ public class VerificationServiceTests {
     void verifyUserExistsButInDifferentConference() throws NotFoundException {
         // This user IS a reviewer in a track with the same ID, but in a different conference
         when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
-        assertThat(verificationService.verifyUser(1L, 3L, 2L, UserRole.REVIEWER)).isEqualTo(false);
+        assertThat(verificationService.verifyRoleFromTrack(1L, 3L, 2L, UserRole.REVIEWER)).isEqualTo(false);
     }
 
     @Test
     void verifyUserExistsButInDifferentEvent() throws NotFoundException {
         // This user IS a reviewer in a track with the same ID, but in a different track
         when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
-        assertThat(verificationService.verifyUser(1L, 4L, 1L, UserRole.REVIEWER)).isEqualTo(false);
+        assertThat(verificationService.verifyRoleFromTrack(1L, 4L, 1L, UserRole.REVIEWER)).isEqualTo(false);
     }
 
     @Test
@@ -94,13 +94,13 @@ public class VerificationServiceTests {
 
         // Mock the return
         when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
-        assertThat(verificationService.verifyUser(1L, 3L, 2L, UserRole.REVIEWER)).isEqualTo(false);
+        assertThat(verificationService.verifyRoleFromTrack(1L, 3L, 2L, UserRole.REVIEWER)).isEqualTo(false);
     }
 
     @Test
     void verifyUserDoesNotExist() throws NotFoundException {
         when(externalRepository.getRolesOfUser(1L)).thenThrow(new NotFoundException(""));
-        assertThat(verificationService.verifyUser(1L, 4L, 2L, UserRole.REVIEWER)).isEqualTo(false);
+        assertThat(verificationService.verifyRoleFromTrack(1L, 4L, 2L, UserRole.REVIEWER)).isEqualTo(false);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class VerificationServiceTests {
         // Add the user to the DTO
         fakeRolesOfUser.getTracks().add(innerChair);
         when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
-        assertThat(verificationService.verifyUser(1L, 4L, 2L, UserRole.REVIEWER))
+        assertThat(verificationService.verifyRoleFromTrack(1L, 4L, 2L, UserRole.REVIEWER))
                 .isEqualTo(true);
     }
 
@@ -132,7 +132,7 @@ public class VerificationServiceTests {
         fakeRolesOfUser.getTracks().add(innerChair);
 
         when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
-        assertThat(verificationService.verifyUser(1L, 4L, 2L, UserRole.REVIEWER))
+        assertThat(verificationService.verifyRoleFromTrack(1L, 4L, 2L, UserRole.REVIEWER))
                 .isEqualTo(false);
     }
 

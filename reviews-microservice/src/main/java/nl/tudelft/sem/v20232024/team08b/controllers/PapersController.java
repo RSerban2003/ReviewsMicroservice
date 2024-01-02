@@ -26,14 +26,17 @@ public class PapersController implements PapersAPI {
     }
 
     /**
-     * This method retrieves a summary view of a paper, which includes only its title and abstract.
+     * Retrieves a summary view of a paper, which includes only its title and abstract, for a specific requester.
+     * This method also checks if the requester has the appropriate permissions.
+     *
+     * This method handles the caught exceptions and converts them into appropriate HTTP status responses.
+     * - NotFoundException results in an HTTP NOT_FOUND status if the paper with the specified ID is not found.
+     * - IllegalAccessException results in an HTTP FORBIDDEN status if the requester does not have the appropriate permissions.
+     * - Other general exceptions result in an HTTP INTERNAL_SERVER_ERROR status, indicating an internal server issue.
      *
      * @param requesterID The unique identifier of the user making the request.
      * @param paperID The unique identifier of the paper whose title and abstract are being requested.
      * @return A ResponseEntity containing the paper summary, which includes the title and abstract of the paper.
-     * @throws NotFoundException If the paper with the specified ID is not found.
-     * @throws IllegalAccessException If the requesting user does not have the appropriate permissions to access the paper.
-     * @throws Exception For other general errors, indicating an internal server issue.
      */
     @Override
     public ResponseEntity<PaperSummary> getTitleAndAbstract(Long requesterID,
@@ -57,12 +60,14 @@ public class PapersController implements PapersAPI {
      * Retrieves a paper by its ID, omitting author names, for a specific requester.
      * It also checks whether the requester has the appropriate permissions.
      *
+     * This method handles the caught exceptions and converts them into appropriate HTTP status responses.
+     * - NotFoundException results in an HTTP NOT_FOUND status if the paper with the specified ID is not found.
+     * - IllegalAccessException results in an HTTP FORBIDDEN status if the requester does not have the appropriate permissions.
+     * - Other general exceptions result in an HTTP INTERNAL_SERVER_ERROR status, indicating an internal server issue.
+     *
      * @param requesterID the ID of the requesting user
      * @param paperID the ID of the paper
-     * @return response entity indicating the success of the request
-     * @throws NotFoundException If the paper with the specified ID is not found.
-     * @throws IllegalAccessException If the requesting user does not have the appropriate permissions to access the paper.
-     * @throws Exception For other general errors, indicating an internal server issue.
+     * @return A ResponseEntity indicating the success of the request or the type of failure if an error occurs.
      */
     @Override
     public ResponseEntity<Paper> get(Long requesterID,

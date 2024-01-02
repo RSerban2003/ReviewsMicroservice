@@ -3,11 +3,13 @@ package nl.tudelft.sem.v20232024.team08b.dtos.review;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Schema(description = "The full contents of a submitted paper. Doesn't include the author names.")
 public class Paper {
     @Schema(description = "The title of the paper", example = "Tails of frogs")
@@ -24,11 +26,6 @@ public class Paper {
 
     @Schema(description = "The link to replication package", example = "https://localhost/paper")
     private String replicationPackageLink;
-
-    /**
-     * Empty constructor for creating a Paper object.
-     */
-    public Paper() {}
 
     /**
      * Constructs a Paper object from a given Submission.

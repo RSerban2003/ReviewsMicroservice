@@ -82,7 +82,7 @@ public class ReviewsServiceTests {
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF does not work
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(false);
 
         Assert.assertThrows(IllegalCallerException.class, () -> {
@@ -99,7 +99,7 @@ public class ReviewsServiceTests {
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF works
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
 
         // Assume that the user is not a reviewer - i.e., the third IF does not work
@@ -119,7 +119,7 @@ public class ReviewsServiceTests {
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF works
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
 
         // Assume that the third if works
@@ -146,10 +146,10 @@ public class ReviewsServiceTests {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user is not a reviewer
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(false);
         // Assume user is not a chair either
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.CHAIR))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
 
         Assert.assertThrows(IllegalCallerException.class, () -> {
@@ -162,12 +162,12 @@ public class ReviewsServiceTests {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user exists
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.CHAIR))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
         // Assume the reviewer does not exist
-        when(verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
                 .thenReturn(false);
         when(verificationService.isReviewerForPaper(reviewerID, paperID))
                 .thenReturn(false);
@@ -182,13 +182,13 @@ public class ReviewsServiceTests {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume is reviewer
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
         // Assume is not chair
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.CHAIR))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
         // Assume the reviewer does exist
-        when(verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
         // Assume said reviewer is not assigned to the paper
         when(verificationService.isReviewerForPaper(reviewerID, paperID))
@@ -204,13 +204,13 @@ public class ReviewsServiceTests {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user is not a reviewer
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(false);
         // Assume user is a chair
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.CHAIR))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(true);
         // Assume the reviewer does exist
-        when(verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
         // Assume the reviewer does exist
         when(verificationService.isReviewerForPaper(reviewerID, paperID))
@@ -224,13 +224,13 @@ public class ReviewsServiceTests {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user is a reviewer
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
         // Assume user is not a chair
-        when(verificationService.verifyRole(requesterID, paperID, UserRole.CHAIR))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
         // Assume the reviewer does exist
-        when(verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
         // Assume the reviewer does exist
         when(verificationService.isReviewerForPaper(reviewerID, paperID))

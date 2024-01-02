@@ -2,11 +2,13 @@ package nl.tudelft.sem.v20232024.team08b.dtos.review;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Schema(description = "Includes the title and abstract of a paper for use during the Bidding process")
 public class PaperSummary {
     @Schema(description = "The title of the paper", example = "Tails of frogs")
@@ -14,11 +16,6 @@ public class PaperSummary {
 
     @Schema(description = "The abstract of the paper", example = "Some sample abstract")
     private String abstractSection;
-
-    /**
-     * Empty constructor for creating a PaperSummary object.
-     */
-    public PaperSummary() {}
 
     /**
      * Constructs a PaperSummary object from a given Submission.

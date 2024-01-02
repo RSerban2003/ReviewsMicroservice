@@ -66,7 +66,7 @@ public class ReviewsService {
         }
 
         // Check if such user exists and has correct privileges
-        if (!verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER)) {
+        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) {
             throw new IllegalCallerException("No such user exists");
         }
 
@@ -127,9 +127,9 @@ public class ReviewsService {
             throw new NotFoundException("No such paper exists");
         }
 
-        boolean isReviewer = verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER);
-        boolean isChair = verificationService.verifyRole(requesterID, paperID, UserRole.CHAIR);
-        boolean reviewerExists = verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER);
+        boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
+        boolean isChair = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        boolean reviewerExists = verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER);
         boolean reviewerIsAuthorOfReview = verificationService.isReviewerForPaper(reviewerID, paperID);
 
         // Check if the requesting user is either a chair or a reviewer in that conference

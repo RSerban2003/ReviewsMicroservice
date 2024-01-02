@@ -55,8 +55,8 @@ public class PapersService {
             throw new NotFoundException("No such paper exists");
         }
 
-        if (!verificationService.verifyRole(reviewerID, paperID, UserRole.CHAIR)) {
-            if (!verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER)) {
+        if (!verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.CHAIR)) {
+            if (!verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER)) {
                 throw new IllegalCallerException("No such user exists");
             } else if (!verificationService.isReviewerForPaper(reviewerID, paperID)) {
                 throw new IllegalAccessException("The user is not a reviewer for this paper.");
@@ -99,8 +99,8 @@ public class PapersService {
             throw new NotFoundException("No such paper exists");
         }
 
-        if (!verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER) &&
-                !verificationService.verifyRole(reviewerID, paperID, UserRole.CHAIR)) {
+        if (!verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER) &&
+                !verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.CHAIR)) {
 
             throw new IllegalCallerException("No such user exists");
         }

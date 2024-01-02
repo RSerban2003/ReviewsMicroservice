@@ -35,7 +35,7 @@ public class VerificationService {
      * @param role the role to check for that user.
      * @return true, iff the given user exists with the given role.
      */
-    public boolean verifyUser(Long userID, Long conferenceID, Long trackID, UserRole role) {
+    public boolean verifyRoleFromTrack(Long userID, Long conferenceID, Long trackID, UserRole role) {
         try {
             // Get all roles of each track from other microservice
             RolesOfUser roles = externalRepository.getRolesOfUser(userID);
@@ -74,10 +74,14 @@ public class VerificationService {
      * @param role the role to check for that user.
      * @return true, iff the given user exists with the given role.
      */
-    public boolean verifyRole(Long userID, Long paperID, UserRole role) throws NotFoundException {
-        Long trackID = externalRepository.getSubmission(paperID).getTrackId();
-        Long conferenceID = externalRepository.getSubmission(paperID).getEventId();
-        return verifyUser(userID, trackID, conferenceID, role);
+    public boolean verifyRoleFromPaper(Long userID, Long paperID, UserRole role) {
+        try {
+            Long trackID = externalRepository.getSubmission(paperID).getTrackId();
+            Long conferenceID = externalRepository.getSubmission(paperID).getEventId();
+            return verifyRoleFromTrack(userID, trackID, conferenceID, role);
+        } catch (NotFoundException e) {
+            return false;
+        }
     }
 
     /**
