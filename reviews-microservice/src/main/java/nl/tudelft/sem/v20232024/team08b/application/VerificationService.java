@@ -2,16 +2,17 @@ package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class VerificationService {
     ExternalRepository externalRepository;
+    ReviewRepository reviewRepository;
 
     /**
      * Default constructor.
@@ -19,20 +20,22 @@ public class VerificationService {
      * @param externalRepository the external repository (injected)
      */
     @Autowired
-    public VerificationService(ExternalRepository externalRepository) {
+    public VerificationService(ExternalRepository externalRepository,
+                               ReviewRepository reviewRepository) {
         this.externalRepository = externalRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     /**
-     * Checks whether a user with a given ID exists.
+     * Checks whether a user with a given ID exists and is in the same conference and track as a paper with a give ID.
      *
      * @param userID the ID of the user.
-     * @param conferenceID the ID of the conference
      * @param trackID the ID of the track.
+     * @param conferenceID the ID of the conference.
      * @param role the role to check for that user.
      * @return true, iff the given user exists with the given role.
      */
-    public boolean verifyUser(Long userID, Long conferenceID, Long trackID, UserRole role) {
+    public boolean verifyRoleFromTrack(Long userID, Long conferenceID, Long trackID, UserRole role) {
         try {
             // Get all roles of each track from other microservice
             RolesOfUser roles = externalRepository.getRolesOfUser(userID);
@@ -62,6 +65,38 @@ public class VerificationService {
         }
     }
 
+
+    /**
+     * Checks whether a user with a given ID exists and is in the same conference and track as a paper with a give ID.
+     *
+     * @param userID the ID of the user.
+     * @param paperID the ID of the paper.
+     * @param role the role to check for that user.
+     * @return true, iff the given user exists with the given role.
+     */
+    public boolean verifyRoleFromPaper(Long userID, Long paperID, UserRole role) {
+        try {
+            Long trackID = externalRepository.getSubmission(paperID).getTrackId();
+            Long conferenceID = externalRepository.getSubmission(paperID).getEventId();
+            return verifyRoleFromTrack(userID, trackID, conferenceID, role);
+        } catch (NotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether a user is assigned as a reviewer to a specific paper.
+     *
+     * @param reviewerID the ID of the user.
+     * @param paperID the ID of the paper.
+     * @return whether the user is assigned to the paper or not.
+     * @throws IllegalAccessException if the user is not assigned to the paper.
+     */
+    public boolean isReviewerForPaper(Long reviewerID, Long paperID) {
+
+        return reviewRepository.isReviewerForPaper(reviewerID, paperID);
+    }
+
     /**
      * Checks whether a paper with a given ID exists.
      *
@@ -70,7 +105,7 @@ public class VerificationService {
      */
     public boolean verifyPaper(Long paperID) {
         try {
-            Submission submission = externalRepository.getSubmission(paperID);
+            externalRepository.getSubmission(paperID);
             return true;
         } catch (NotFoundException e) {
             return false;
