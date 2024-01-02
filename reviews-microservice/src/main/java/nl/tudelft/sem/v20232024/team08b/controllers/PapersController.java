@@ -27,11 +27,11 @@ public class PapersController implements PapersAPI {
 
     /**
      * Retrieves a summary view of a paper, which includes only its title and abstract, for a specific requester.
-     * This method also checks if the requester has the appropriate permissions.
-     *
-     * This method handles the caught exceptions and converts them into appropriate HTTP status responses.
+     * The method also checks if the requester has the appropriate permissions.
+     * All caught exceptions are handled and converted into appropriate HTTP status responses.
      * - NotFoundException results in an HTTP NOT_FOUND status if the paper with the specified ID is not found.
-     * - IllegalAccessException results in an HTTP FORBIDDEN status if the requester does not have the appropriate permissions.
+     * - IllegalAccessException results in an HTTP FORBIDDEN status
+     * if the requester does not have the appropriate permissions.
      * - Other general exceptions result in an HTTP INTERNAL_SERVER_ERROR status, indicating an internal server issue.
      *
      * @param requesterID The unique identifier of the user making the request.
@@ -59,10 +59,10 @@ public class PapersController implements PapersAPI {
     /**
      * Retrieves a paper by its ID, omitting author names, for a specific requester.
      * It also checks whether the requester has the appropriate permissions.
-     *
-     * This method handles the caught exceptions and converts them into appropriate HTTP status responses.
+     * All caught exceptions are handled and converted into appropriate HTTP status responses.
      * - NotFoundException results in an HTTP NOT_FOUND status if the paper with the specified ID is not found.
-     * - IllegalAccessException results in an HTTP FORBIDDEN status if the requester does not have the appropriate permissions.
+     * - IllegalAccessException results in an HTTP FORBIDDEN status
+     * if the requester does not have the appropriate permissions.
      * - Other general exceptions result in an HTTP INTERNAL_SERVER_ERROR status, indicating an internal server issue.
      *
      * @param requesterID the ID of the requesting user
