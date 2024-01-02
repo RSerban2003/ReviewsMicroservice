@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 
 @Getter
 @Setter
@@ -23,4 +24,21 @@ public class Paper {
 
     @Schema(description = "The link to replication package", example = "https://localhost/paper")
     private String replicationPackageLink;
+
+    /**
+     * Empty constructor for creating a Paper object.
+     */
+    public Paper() {}
+
+    /**
+     * Constructs a Paper object from a given Submission.
+     *
+     * @param submission The Submission object containing the paper's details.
+     */
+    public Paper(Submission submission) {
+        this.title = submission.getTitle();
+        this.keywords = submission.getKeywords();
+        this.abstractSection = submission.getAbstract();
+        this.mainText = new String(submission.getPaper());
+    }
 }

@@ -1,7 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
@@ -14,16 +13,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PapersService {
-    private final PaperRepository paperRepository;
     private final ReviewRepository reviewRepository;
     private final ExternalRepository externalRepository;
-
+    private final PaperRepository paperRepository;
     private final VerificationService verificationService;
 
     /**
      * Default constructor for the service.
      *
-     * @param paperRepository repository storing the papers
      * @param reviewRepository repository storing the reviews
      * @param externalRepository repository storing everything outside of
      *                           this microservice
@@ -40,46 +37,29 @@ public class PapersService {
     }
 
     /**
-     * Checks if a user is assigned to review a paper.
-     *
-     * @param reviewerID the ID of the user
-     * @param paperID the ID of the paper
-     * @return true, iff the user is a reviewer for the paper
-     */
-    private boolean isReviewerForPaper(Long reviewerID, Long paperID) {
-
-        return reviewRepository.findById(new ReviewID(paperID, reviewerID)).isPresent();
-    }
-
-    /**
      * Verifies whether the user has permission to view the paper.
+     * TODO: add phase verification.
      *
      * @param reviewerID the ID of the requesting user
      * @param paperID the ID of the paper that is requested
      * @throws NotFoundException if such paper is not found
-     * @throws IllegalCallerException if such user does not exist
-     * @throws IllegalAccessException if the user is not allowed to access the paper
+     * @throws IllegalCallerException if the user is not assigned as a reviewer to the paper
+     * @throws IllegalAccessException if the user is not reviewer or chair in the track of the paper
      *
      */
-    public void verifyReviewerPermissionToViewPaper(Long reviewerID,
-                                                    Long paperID) throws NotFoundException,
-                                                                         IllegalCallerException {
-
-        // Check if such paper exists
+    public void verifyPermissionToViewPaper(Long reviewerID,
+                                            Long paperID) throws IllegalCallerException,
+                                                                 IllegalAccessException,
+                                                                 NotFoundException {
         if (!verificationService.verifyPaper(paperID)) {
             throw new NotFoundException("No such paper exists");
         }
 
-        Long trackId = externalRepository.getSubmission(paperID).getTrackId();
-        Long conferenceID = externalRepository.getSubmission(paperID).getEventId();
-        //checks if the user is a reviewer or chair in the same track and conference as the paper
-        if (!verificationService.verifyUser(reviewerID, conferenceID, trackId, UserRole.REVIEWER) &&
-            !verificationService.verifyUser(reviewerID, conferenceID, trackId, UserRole.CHAIR)) {
-            //throws error if user does not exist
-            throw new IllegalCallerException("No such user exists");
+        if (!verificationService.verifyRole(reviewerID, paperID, UserRole.CHAIR)) {
+            if (!verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER)) {throw new IllegalCallerException("No such user exists");}
+            else if (!verificationService.isReviewerForPaper(reviewerID, paperID)) {throw new IllegalAccessException("The user is not a reviewer for this paper.");}
         }
     }
-
     /**
      * Returns the content of the paper from the repository.
      *
@@ -89,21 +69,37 @@ public class PapersService {
      */
     public Paper getPaper(Long reviewerID, Long paperID) throws NotFoundException,
                                                                 IllegalAccessException {
-        verifyReviewerPermissionToViewPaper(reviewerID, paperID);
-        // Check if the user is assigned to the paper
-        if (!isReviewerForPaper(reviewerID, paperID)) {
-            throw new IllegalAccessException("The user is not a reviewer for this paper.");
-        }
-
-        Paper paper = new Paper();
+        verifyPermissionToViewPaper(reviewerID, paperID);
 
         Submission submission = externalRepository.getSubmission(paperID);
-        paper.setTitle(submission.getTitle());
-        paper.setKeywords(submission.getKeywords());
-        paper.setAbstractSection(submission.getAbstract());
-        paper.setMainText(new String(submission.getPaper()));
+        Paper paper = new Paper(submission);
 
         return paper;
+    }
+
+    /**
+     * Verifies whether the user has permission to view the title and abstract.
+     * TODO: add phase verification.
+     *
+     * @param reviewerID the ID of the requesting user
+     * @param paperID the ID of the paper that is requested
+     * @throws NotFoundException if such paper is not found
+     * @throws IllegalAccessException if the user is not reviewer or chair in the track of the paper
+     *
+     */
+    public void verifyPermissionToViewTitleAndAbstract(Long reviewerID,
+                                                       Long paperID) throws IllegalCallerException,
+                                                                            NotFoundException {
+
+        if (!verificationService.verifyPaper(paperID)) {
+            throw new NotFoundException("No such paper exists");
+        }
+
+        if (!verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER) &&
+                !verificationService.verifyRole(reviewerID, paperID, UserRole.CHAIR)) {
+
+            throw new IllegalCallerException("No such user exists");
+        }
     }
 
     /**
@@ -115,13 +111,10 @@ public class PapersService {
      */
     public PaperSummary getTitleAndAbstract(Long reviewerID, Long paperID) throws NotFoundException,
                                                                            IllegalAccessException {
-        verifyReviewerPermissionToViewPaper(reviewerID, paperID);
-
-        PaperSummary paperSummary = new PaperSummary();
+        verifyPermissionToViewTitleAndAbstract(reviewerID, paperID);
 
         Submission submission = externalRepository.getSubmission(paperID);
-        paperSummary.setTitle(submission.getTitle());
-        paperSummary.setAbstractSection(submission.getAbstract());
+        PaperSummary paperSummary = new PaperSummary(submission);
 
         return paperSummary;
     }

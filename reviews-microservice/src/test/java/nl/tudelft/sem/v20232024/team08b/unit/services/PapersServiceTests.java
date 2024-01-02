@@ -3,7 +3,6 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
-import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
@@ -38,20 +37,15 @@ public class PapersServiceTests {
 
     private final Long reviewerID = 1L;
     private final Long paperID = 2L;
-    private final Long trackID = 3L;
-    private final Long conferenceID = 4L;
     private Submission fakeSubmission;
-    private Review fakeReview;
 
     @BeforeEach
     void setUp() {
         papersService = new PapersService(paperRepository, reviewRepository, externalRepository, verificationService);
 
         fakeSubmission = new Submission();
-        fakeReview = new Review();
-
-        fakeSubmission.setEventId(conferenceID);
-        fakeSubmission.setTrackId(trackID);
+        fakeSubmission.setEventId(3L);
+        fakeSubmission.setTrackId(4L);
     }
 
     @Test
@@ -65,7 +59,7 @@ public class PapersServiceTests {
     void getPaper_NoUserFound() throws Exception {
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
-        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(false);
+        when(verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(false);
 
         assertThrows(IllegalCallerException.class, () -> papersService.getPaper(reviewerID, paperID));
     }
@@ -74,8 +68,8 @@ public class PapersServiceTests {
     void getPaper_NotAReviewer() throws Exception {
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
-        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
-        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.empty());
+        when(verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(verificationService.isReviewerForPaper(reviewerID,paperID)).thenReturn(false);
 
         assertThrows(IllegalAccessException.class, () -> papersService.getPaper(reviewerID, paperID));
     }
@@ -88,13 +82,36 @@ public class PapersServiceTests {
     }
 
     @Test
-    void getPaper_Successful() throws NotFoundException,
+    void getPaper_Successful_Reviewer() throws NotFoundException,
                                          IllegalAccessException {
 
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
-        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
-        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
+        when(verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(verificationService.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
+
+        fakeSubmission.setTitle("Title");
+        fakeSubmission.setKeywords(List.of("Keywords"));
+        fakeSubmission.setAbstract("Abstract");
+        fakeSubmission.setPaper("Content".getBytes());
+
+        Paper expectedPaper = new Paper();
+        expectedPaper.setTitle("Title");
+        expectedPaper.setKeywords(List.of("Keywords"));
+        expectedPaper.setAbstractSection("Abstract");
+        expectedPaper.setMainText(new String(fakeSubmission.getPaper()));
+
+        Paper result = papersService.getPaper(reviewerID, paperID);
+        assertThat(result).isEqualToComparingFieldByField(expectedPaper);
+    }
+
+    @Test
+    void getPaper_Successful_Chair() throws NotFoundException,
+            IllegalAccessException {
+
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(verificationService.verifyRole(reviewerID, paperID, UserRole.CHAIR)).thenReturn(true);
 
         fakeSubmission.setTitle("Title");
         fakeSubmission.setKeywords(List.of("Keywords"));
@@ -122,7 +139,7 @@ public class PapersServiceTests {
     void getTitleAndAbstract_NoUserFound() throws Exception {
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
-        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(false);
+        when(verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(false);
 
         assertThrows(IllegalCallerException.class, () -> papersService.getTitleAndAbstract(reviewerID, paperID));
     }
@@ -140,7 +157,7 @@ public class PapersServiceTests {
 
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
-        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(true);
 
         fakeSubmission.setTitle("Title");
         fakeSubmission.setAbstract("Abstract");

@@ -43,19 +43,6 @@ public class ReviewsService {
     }
 
     /**
-     * Checks if a user is a reviewer of a paper.
-     * TODO: make sure that when a user is assigned to review some paper, an empty
-     *       review is created with that user and the paper ID.
-     *
-     * @param reviewerID the ID of the user
-     * @param paperID the ID of the paper
-     * @return true, iff the user is a reviewer for the paper
-     */
-    private boolean isReviewerForPaper(Long reviewerID, Long paperID) {
-        return reviewRepository.findById(new ReviewID(paperID, reviewerID)).isPresent();
-    }
-
-    /**
      * Verifies if:
      *  - given user exists
      *  - given paper exists
@@ -79,15 +66,12 @@ public class ReviewsService {
         }
 
         // Check if such user exists and has correct privileges
-        Long containingTrackID = externalRepository.getSubmission(paperID).getTrackId();
-        Long containingConferenceID = externalRepository.getSubmission(paperID).getEventId();
-        if (!verificationService.verifyUser(requesterID, containingConferenceID,
-                containingTrackID, UserRole.REVIEWER)) {
+        if (!verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER)) {
             throw new IllegalCallerException("No such user exists");
         }
 
         // Check if the user is allowed to review this paper
-        if (!isReviewerForPaper(requesterID, paperID)) {
+        if (!verificationService.isReviewerForPaper(requesterID, paperID)) {
             throw new IllegalAccessException("The user is not a reviewer for this paper.");
         }
     }
@@ -124,35 +108,6 @@ public class ReviewsService {
     }
 
     /**
-     * Checks if a review exists.
-     *
-     * @param conferenceID the conference where the review is in.
-     * @param trackID the track where the conference is in.
-     * @param reviewerID the ID of the reviewer of the review.
-     * @param paperID the ID of the reviewer paper
-     * @return true, iff such review exists.
-     */
-    public boolean checkIfReviewExists(Long conferenceID, Long trackID,
-                                        Long reviewerID, Long paperID) {
-        // Check if such paper exists
-        if (!verificationService.verifyPaper(paperID)) {
-            return false;
-        }
-
-        // Check if the reviewer that is supposed to have reviewed the given paper even exists
-        if (!verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER)) {
-            return false;
-        }
-
-        // Finally, if such reviewer exists, and such paper exists, we have to check if it is assigned to the paper
-        if (!isReviewerForPaper(reviewerID, paperID)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Verifies if a user can access a review. The user either has to be a chair
      * of the track of the review, or the reviewer himself.
      * TODO: the review phase information is not taken into account. For instance, after
@@ -168,16 +123,14 @@ public class ReviewsService {
     public void verifyIfUserCanAccessReview(Long requesterID,
                                            Long reviewerID,
                                            Long paperID) throws NotFoundException, IllegalAccessException {
+        if (!verificationService.verifyPaper(paperID)) {
+            throw new NotFoundException("No such paper exists");
+        }
 
-
-        // Get the containing track ID.
-        Long containingTrackID = externalRepository.getSubmission(paperID).getTrackId();
-        Long containingConferenceID = externalRepository.getSubmission(paperID).getEventId();
-
-        boolean isReviewer = verificationService.verifyUser(requesterID, containingConferenceID,
-                containingTrackID, UserRole.REVIEWER);
-        boolean isChair = verificationService.verifyUser(requesterID, containingConferenceID,
-                containingTrackID, UserRole.CHAIR);
+        boolean isReviewer = verificationService.verifyRole(requesterID, paperID, UserRole.REVIEWER);
+        boolean isChair = verificationService.verifyRole(requesterID, paperID, UserRole.CHAIR);
+        boolean reviewerExists = verificationService.verifyRole(reviewerID, paperID, UserRole.REVIEWER);
+        boolean reviewerIsAuthorOfReview = verificationService.isReviewerForPaper(reviewerID, paperID);
 
         // Check if the requesting user is either a chair or a reviewer in that conference
         if (!isReviewer && !isChair) {
@@ -185,10 +138,9 @@ public class ReviewsService {
         }
 
         // Check if such review exists
-        if (!checkIfReviewExists(containingConferenceID, containingTrackID, reviewerID, paperID)) {
+        if (!reviewerExists || !reviewerIsAuthorOfReview) {
             throw new NotFoundException("Such review does not exist");
         }
-
     }
 
     /**

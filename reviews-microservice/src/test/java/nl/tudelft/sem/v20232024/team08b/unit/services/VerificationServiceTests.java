@@ -7,6 +7,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,8 +20,9 @@ import static org.mockito.Mockito.when;
 public class VerificationServiceTests {
     @MockBean
     ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-    private VerificationService verificationService = new VerificationService(externalRepository);
-
+    @MockBean
+    ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
+    private VerificationService verificationService = new VerificationService(externalRepository, reviewRepository);
     private Submission fakeSubmission;
     private RolesOfUser fakeRolesOfUser;
 
@@ -58,6 +60,7 @@ public class VerificationServiceTests {
         when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
         assertThat(verificationService.verifyUser(1L, 4L, 2L, UserRole.REVIEWER)).isEqualTo(true);
     }
+
 
     @Test
     void verifyUserExistsButInDifferentConference() throws NotFoundException {
@@ -131,5 +134,23 @@ public class VerificationServiceTests {
         when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
         assertThat(verificationService.verifyUser(1L, 4L, 2L, UserRole.REVIEWER))
                 .isEqualTo(false);
+    }
+
+    @Test
+    void userIsReviewerForPaper() {
+        Long reviewerID = 1L;
+        Long paperID = 1L;
+
+        when(reviewRepository.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
+        assertThat(verificationService.isReviewerForPaper(reviewerID, paperID)).isEqualTo(true);
+    }
+
+    @Test
+    void userIsNotReviewerForPaper() {
+        Long reviewerID = 1L;
+        Long paperID = 1L;
+
+        when(reviewRepository.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
+        assertThat(verificationService.isReviewerForPaper(reviewerID, paperID)).isEqualTo(false);
     }
 }
