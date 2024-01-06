@@ -17,10 +17,10 @@ import java.util.Optional;
 
 @Component
 public class PaperPhaseCalculator {
-    PaperRepository paperRepository;
-    TrackRepository trackRepository;
-    ExternalRepository externalRepository;
-    ReviewRepository reviewRepository;
+    private final PaperRepository paperRepository;
+    private final TrackRepository trackRepository;
+    private final ExternalRepository externalRepository;
+    private final ReviewRepository reviewRepository;
 
     /**
      * Default constructor.
@@ -69,7 +69,9 @@ public class PaperPhaseCalculator {
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
 
         for (Review review : reviews) {
-            if (review.getConfidenceScore() == null) return false;
+            if (review.getConfidenceScore() == null) {
+                return false;
+            }
         }
         return true;
     }
@@ -102,30 +104,29 @@ public class PaperPhaseCalculator {
      * - else, if the reviews have not yet been finalized -> IN_DISCUSSION
      * - finally, if all reviews have been finalized (flag reviewsHaveBeenFinalized is
      *  true) in the paper object is set to true -> REVIEWED.
+     *
      * @param paperID the ID of the paper
      * @return current phase of the given paper.
      */
     public PaperPhase getPaperPhase(Long paperID) throws NotFoundException {
-        Long trackID, conferenceID;
-
         // Technically the following line could throw, but this should not be the
         // case, since the calling function will first verify if paper exists
         var submission = externalRepository.getSubmission(paperID);
-        trackID = submission.getTrackId();
-        conferenceID = submission.getEventId();
+        Long trackID = submission.getTrackId();
+        Long conferenceID = submission.getEventId();
 
         // Check if the reviewers of the containing track have not yet been assigned
-        if(checkIfReviewersAreAssignedToTrack(trackID, conferenceID)) {
+        if (checkIfReviewersAreAssignedToTrack(trackID, conferenceID)) {
             return PaperPhase.BEFORE_REVIEW;
         }
 
         // Check if every reviewer has submitted a review
-        if(!checkIfEveryReviewerHasSubmitted(paperID)) {
+        if (!checkIfEveryReviewerHasSubmitted(paperID)) {
             return PaperPhase.IN_REVIEW;
         }
 
         // Check if reviews for this paper have been finalized
-        if(!checkIfPaperIsFinalized(paperID)) {
+        if (!checkIfPaperIsFinalized(paperID)) {
             return PaperPhase.IN_DISCUSSION;
         }
 

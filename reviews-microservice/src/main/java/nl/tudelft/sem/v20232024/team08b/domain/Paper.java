@@ -3,6 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;

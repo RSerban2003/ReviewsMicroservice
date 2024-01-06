@@ -30,7 +30,7 @@ public interface ReviewRepository extends JpaRepository<Review, ReviewID> {
     List<Review> findByReviewIDReviewerID(Long reviewerID);
 
     /**
-     * Finds a list of reviews that are assigned to given paper
+     * Finds a list of reviews that are assigned to given paper.
      *
      * @param paperID the ID of the paper
      * @return a list of reviews by that reviewer

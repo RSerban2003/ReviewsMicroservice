@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.ReviewsAPI;
+import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
@@ -17,15 +18,19 @@ import java.util.List;
 @RestController
 public class ReviewsController implements ReviewsAPI {
     private final ReviewsService reviewsService;
+    private final PapersService papersService;
 
     /**
      * Default constructor for the controller.
      *
      * @param reviewsService the respective service to inject
+     * @param papersService service responsible for papers
      */
     @Autowired
-    public ReviewsController(ReviewsService reviewsService) {
+    public ReviewsController(ReviewsService reviewsService,
+                             PapersService papersService) {
         this.reviewsService = reviewsService;
+        this.papersService = papersService;
     }
 
     /**
@@ -115,7 +120,18 @@ public class ReviewsController implements ReviewsAPI {
     @Override
     public ResponseEntity<PaperPhase> getPhase(Long requesterID,
                                                Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(papersService.getPaperPhase(requesterID, paperID));
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

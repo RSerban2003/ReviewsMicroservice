@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.controllers.ReviewsController;
 import nl.tudelft.sem.v20232024.team08b.domain.ConfidenceScore;
@@ -24,7 +25,8 @@ import static org.mockito.Mockito.*;
 public class ReviewsControllerTests {
     MockMvc mockMvc;
 
-    private ReviewsService reviewsService = Mockito.mock(ReviewsService.class);
+    private final ReviewsService reviewsService = Mockito.mock(ReviewsService.class);
+    private final PapersService papersService = Mockito.mock(PapersService.class);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Review fakeReviewDTO;
@@ -32,7 +34,7 @@ public class ReviewsControllerTests {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(
-                new ReviewsController(reviewsService)
+                new ReviewsController(reviewsService, papersService)
         ).build();
         fakeReviewDTO = new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(
                 ConfidenceScore.BASIC,

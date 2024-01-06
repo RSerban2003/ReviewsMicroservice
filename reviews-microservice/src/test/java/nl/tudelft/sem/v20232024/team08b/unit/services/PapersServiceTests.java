@@ -3,6 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
+import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
@@ -30,6 +31,8 @@ public class PapersServiceTests {
     private ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     @MockBean
     private VerificationService verificationService = Mockito.mock(VerificationService.class);
+    @MockBean
+    private PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
 
     private PapersService papersService;
 
@@ -39,7 +42,12 @@ public class PapersServiceTests {
 
     @BeforeEach
     void setUp() {
-        papersService = new PapersService(paperRepository, reviewRepository, externalRepository, verificationService);
+        papersService = new PapersService(
+                paperRepository,
+                reviewRepository,
+                externalRepository,
+                verificationService,
+                paperPhaseCalculator);
 
         fakeSubmission = new Submission();
         fakeSubmission.setEventId(3L);
