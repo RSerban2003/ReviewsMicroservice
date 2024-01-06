@@ -5,6 +5,8 @@ import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, ReviewID> {
 
@@ -16,8 +18,23 @@ public interface ReviewRepository extends JpaRepository<Review, ReviewID> {
      * @return whether the user is assigned to the paper or not
      */
     default boolean isReviewerForPaper(Long reviewerID, Long paperID) {
-
         return findById(new ReviewID(paperID, reviewerID)).isPresent();
     }
+
+    /**
+     * Finds a list of reviews that were reviewed by a given reviewer.
+     *
+     * @param reviewerID the ID of the reviewer
+     * @return a list of reviews by that reviewer
+     */
+    List<Review> findByReviewIDReviewerID(Long reviewerID);
+
+    /**
+     * Finds a list of reviews that are assigned to given paper
+     *
+     * @param paperID the ID of the paper
+     * @return a list of reviews by that reviewer
+     */
+    List<Review> findByReviewIDPaperID(Long paperID);
 
 }
