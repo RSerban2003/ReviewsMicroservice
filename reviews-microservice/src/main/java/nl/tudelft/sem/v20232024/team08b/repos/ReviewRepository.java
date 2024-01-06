@@ -7,4 +7,17 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, ReviewID> {
+
+    /**
+     * Checks whether a user is assigned as a reviewer to a specific paper.
+     *
+     * @param reviewerID the ID of the user
+     * @param paperID the ID of the paper
+     * @return whether the user is assigned to the paper or not
+     */
+    default boolean isReviewerForPaper(Long reviewerID, Long paperID) {
+
+        return findById(new ReviewID(paperID, reviewerID)).isPresent();
+    }
+
 }

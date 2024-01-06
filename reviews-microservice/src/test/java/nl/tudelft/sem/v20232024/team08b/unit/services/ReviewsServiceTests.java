@@ -21,7 +21,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -48,8 +47,6 @@ public class ReviewsServiceTests {
     private Submission fakeSubmission;
     private Review fakeReview;
     private Long requesterID = 0L;
-    private Long conferenceID = 1L;
-    private Long trackID = 2L;
     private Long reviewerID = 3L;
     private Long paperID = 4L;
     @BeforeEach
@@ -64,8 +61,8 @@ public class ReviewsServiceTests {
         fakeReview = new Review();
 
         fakeSubmission = new Submission();
-        fakeSubmission.setTrackId(trackID);
-        fakeSubmission.setEventId(conferenceID);
+        fakeSubmission.setTrackId(2L);
+        fakeSubmission.setEventId(1L);
     }
 
     @Test
@@ -85,7 +82,7 @@ public class ReviewsServiceTests {
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF does not work
-        when(verificationService.verifyUser(requesterID, conferenceID, trackID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(false);
 
         Assert.assertThrows(IllegalCallerException.class, () -> {
@@ -102,12 +99,11 @@ public class ReviewsServiceTests {
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF works
-        when(verificationService.verifyUser(requesterID, conferenceID, trackID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
 
         // Assume that the user is not a reviewer - i.e., the third IF does not work
-        when(reviewRepository.findById(new ReviewID(paperID, reviewerID)))
-                .thenReturn(Optional.empty());
+        when(verificationService.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
 
         Assert.assertThrows(IllegalAccessException.class, () -> {
             reviewsService.submitReview(reviewDTO, requesterID, paperID);
@@ -123,12 +119,11 @@ public class ReviewsServiceTests {
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF works
-        when(verificationService.verifyUser(requesterID, conferenceID, trackID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
 
         // Assume that the third if works
-        when(reviewRepository.findById(new ReviewID(paperID, requesterID)))
-                .thenReturn(Optional.of(fakeReview));
+        when(verificationService.isReviewerForPaper(requesterID, paperID)).thenReturn(true);
 
         // Assert that a correct review is added to the repository
         Review expected = new Review(reviewDTO, new ReviewID(paperID, requesterID));
@@ -137,115 +132,111 @@ public class ReviewsServiceTests {
     }
 
     @Test
-    void checkIfReviewExists_NoSuchPaper() {
+    void verifyIfUserCanAccessReview_NoSuchPaper() {
         // Assume paper does not exist
         when(verificationService.verifyPaper(paperID)).thenReturn(false);
-        assertThat(reviewsService.checkIfReviewExists(conferenceID, trackID, reviewerID, paperID))
-                .isEqualTo(false);
+
+        Assert.assertThrows(NotFoundException.class, () -> {
+            reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+        });
     }
 
     @Test
-    void checkIfReviewExists_NoSuchUser() {
+    void verifyIfUserCanAccessReview_NoSuchUser() throws NotFoundException {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
-        // Assume reviewer does not exist
-        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER))
+        // Assume user is not a reviewer
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
+                .thenReturn(false);
+        // Assume user is not a chair either
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
 
-        assertThat(reviewsService.checkIfReviewExists(conferenceID, trackID, reviewerID, paperID))
-                .isEqualTo(false);
+        Assert.assertThrows(IllegalCallerException.class, () -> {
+            reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+        });
     }
 
     @Test
-    void checkIfReviewExists_NoSuchReview() {
+    void verifyIfUserCanAccessReview_NoSuchReviewer() throws NotFoundException {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user exists
-        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
-        // Assume such review does not exist
-        when(reviewRepository.findById(new ReviewID(paperID, reviewerID)))
-                .thenReturn(Optional.empty());
-        assertThat(reviewsService.checkIfReviewExists(conferenceID, trackID, reviewerID, paperID))
-                .isEqualTo(false);
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
+                .thenReturn(false);
+        // Assume the reviewer does not exist
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
+                .thenReturn(false);
+        when(verificationService.isReviewerForPaper(reviewerID, paperID))
+                .thenReturn(false);
+
+        Assert.assertThrows(NotFoundException.class, () -> {
+            reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+        });
     }
 
     @Test
-    void checkIfReviewExists_Successful() {
+    void verifyIfUserCanAccessReview_NoSuchReviewConnectedToReviewer() throws NotFoundException {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
-        // Assume reviewer exists
-        when(verificationService.verifyUser(reviewerID, conferenceID, trackID, UserRole.REVIEWER))
+        // Assume is reviewer
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
-        // Assume such submission exists
-        when(reviewRepository.findById(new ReviewID(paperID, reviewerID)))
-                .thenReturn(Optional.of(fakeReview));
-        assertThat(reviewsService.checkIfReviewExists(conferenceID, trackID, reviewerID, paperID))
-                .isEqualTo(true);
-    }
-
-    @Test
-    void verifyIfUserCanAccessReview_NotReviewer() throws NotFoundException {
-        // Fake the track, that the submission belongs to
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
-
-        // Assume user is not a reviewer and not a chair
-        when(verificationService.verifyUser(requesterID, conferenceID, trackID, UserRole.REVIEWER))
+        // Assume is not chair
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
-        when(verificationService.verifyUser(requesterID, conferenceID, trackID, UserRole.CHAIR))
+        // Assume the reviewer does exist
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
+                .thenReturn(true);
+        // Assume said reviewer is not assigned to the paper
+        when(verificationService.isReviewerForPaper(reviewerID, paperID))
                 .thenReturn(false);
 
-        assertThrows(IllegalCallerException.class, () -> {
+        Assert.assertThrows(NotFoundException.class, () -> {
             reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
         });
     }
 
     @Test
-    void verifyIfUserCanAccessReview_ReviewDoesNotExist() throws NotFoundException {
+    void checkIfReviewExists_SuccessfulChair() throws NotFoundException, IllegalAccessException {
+        // Assume paper exists
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        // Assume user is not a reviewer
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
+                .thenReturn(false);
+        // Assume user is a chair
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
+                .thenReturn(true);
+        // Assume the reviewer does exist
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
+                .thenReturn(true);
+        // Assume the reviewer does exist
+        when(verificationService.isReviewerForPaper(reviewerID, paperID))
+                .thenReturn(true);
 
-        // We are going to mock the "checkIfReviewExists" method.
-        reviewsService = Mockito.spy(reviewsService);
+        reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+    }
 
-        // Fake the track, that the submission belongs to
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
-
+    @Test
+    void checkIfReviewExists_SuccessfulReviewer() throws NotFoundException, IllegalAccessException {
+        // Assume paper exists
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user is a reviewer
-        when(verificationService.verifyUser(requesterID, conferenceID, trackID, UserRole.REVIEWER))
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
-        when(verificationService.verifyUser(requesterID, conferenceID, trackID, UserRole.CHAIR))
+        // Assume user is not a chair
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
-
-        // Assume such review does not exist
-        doReturn(false).when(reviewsService)
-                .checkIfReviewExists(conferenceID, trackID, reviewerID, paperID);
-
-        assertThrows(NotFoundException.class, () -> {
-            reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
-        });
-    }
-
-    @Test
-    void verifyIfUserCanAccessReview_Successful() throws NotFoundException {
-
-        // We are going to mock the "checkIfReviewExists" method.
-        reviewsService = Mockito.spy(reviewsService);
-
-        // Fake the track, that the submission belongs to
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
-
-        // Assume user is a reviewer
-        when(verificationService.verifyUser(requesterID, conferenceID, trackID, UserRole.REVIEWER))
+        // Assume the reviewer does exist
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
-        when(verificationService.verifyUser(requesterID, conferenceID, trackID, UserRole.CHAIR))
-                .thenReturn(false);
+        // Assume the reviewer does exist
+        when(verificationService.isReviewerForPaper(reviewerID, paperID))
+                .thenReturn(true);
 
-        // Assume such review does exist
-        doReturn(true).when(reviewsService)
-                .checkIfReviewExists(conferenceID, trackID, reviewerID, paperID);
-
-        assertDoesNotThrow(() -> {
-            reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
-        });
+        reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
     }
 
     @Test
