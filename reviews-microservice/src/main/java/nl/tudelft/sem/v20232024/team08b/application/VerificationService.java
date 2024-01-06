@@ -76,4 +76,21 @@ public class VerificationService {
             return false;
         }
     }
+
+    /**
+     * Verifies if a given track exists.
+     *
+     * @param conferenceID the ID of the conference of the track
+     * @param trackID the ID of the track
+     * @return true, iff such track exists
+     */
+    public boolean verifyTrack(Long conferenceID,
+                               Long trackID) {
+        try {
+            externalRepository.getTrack(conferenceID, trackID);
+            return true;
+        } catch (NotFoundException e) {
+            return false;
+        }
+    }
 }
