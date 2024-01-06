@@ -1,8 +1,10 @@
 package nl.tudelft.sem.v20232024.team08b.application.phase;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
@@ -10,6 +12,7 @@ import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -72,16 +75,36 @@ public class TrackPhaseCalculator {
 
     /**
      * Checks if all papers in a given track have been finalized.
-     * TODO: implement this method.
      *
      * @param conferenceID the ID of the conference the track is in
      * @param trackID the ID of the track
      * @return true, iff all papers in a given track have been finalized
      */
     public Boolean checkIfAllPapersFinalized(Long conferenceID,
-                                             Long trackID) {
+                                             Long trackID) throws NotFoundException {
+        // Check if such track exists
+        externalRepository.getTrack(conferenceID, trackID);
 
-        return false;
+        // Get the track
+        Optional<Track> trackOptional = trackRepository.findById(
+                new TrackID(conferenceID, trackID)
+        );
+        if (trackOptional.isEmpty()) {
+            // In theory, this method should be called only after reviews have
+            // been added, so this should not be reached.
+            return false;
+        }
+
+        // Get the papers of the track
+        List<Paper> papers = trackOptional.get().getPapers();
+
+        // Check if all the papers are finalized
+        Boolean ret = true;
+        for (var paper : papers) {
+            Long paperID = paper.getId();
+            ret &= paperPhaseCalculator.getPaperPhase(paperID) == PaperPhase.REVIEWED;
+        }
+        return ret;
     }
 
     /**
@@ -98,7 +121,7 @@ public class TrackPhaseCalculator {
      * @return the current phase of the track
      */
     public TrackPhase getTrackPhase(Long conferenceID,
-                                    Long trackID) throws NotFoundException, IllegalAccessException {
+                                    Long trackID) throws NotFoundException {
 
         // Get the track from external repository. Such track should always
         // exist, since we verified, so the following line will not throw.
