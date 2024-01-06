@@ -9,6 +9,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -31,6 +32,7 @@ public class TrackPhaseCalculator {
      *                           this microservice
      * @param paperPhaseCalculator object that calculates phase of the paper
      */
+    @Autowired
     public TrackPhaseCalculator(PaperRepository paperRepository,
                                 TrackRepository trackRepository,
                                 ExternalRepository externalRepository,
@@ -54,23 +56,6 @@ public class TrackPhaseCalculator {
     public Long getBiddingDeadlineAsLong(Long conferenceID,
                                          Long trackID) {
         return 1L;
-    }
-
-    /**
-     * Checks if a track is present in our DB, and if it is, whether
-     * reviewers have already been assigned to the track.
-     *
-     * @param conferenceID the ID of the conference the track is in
-     * @param trackID the ID of the track
-     * @return true, iff the reviewers are already assigned in a track
-     */
-    public Boolean checkIfReviewersAreAssigned(Long conferenceID,
-                                               Long trackID) {
-        Optional<Track> optional = trackRepository.findById(new TrackID(conferenceID, trackID));
-        if (optional.isEmpty()) {
-            return false;
-        }
-        return optional.get().getReviewersHaveBeenFinalized();
     }
 
     /**
@@ -144,7 +129,8 @@ public class TrackPhaseCalculator {
         }
 
         // Check if the reviewers haven't yet been assigned
-        Boolean reviewersAssigned = checkIfReviewersAreAssigned(conferenceID, trackID);
+        Boolean reviewersAssigned = paperPhaseCalculator
+                .checkIfReviewersAreAssignedToTrack(conferenceID, trackID);
         if (!reviewersAssigned) {
             return TrackPhase.ASSIGNING;
         }
