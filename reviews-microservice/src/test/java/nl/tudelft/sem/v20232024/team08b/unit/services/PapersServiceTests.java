@@ -4,9 +4,7 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
@@ -42,12 +40,15 @@ public class PapersServiceTests {
 
     @BeforeEach
     void setUp() {
-        papersService = new PapersService(
-                paperRepository,
-                reviewRepository,
-                externalRepository,
-                verificationService,
-                paperPhaseCalculator);
+        papersService = Mockito.spy(
+                new PapersService(
+                        paperRepository,
+                        reviewRepository,
+                        externalRepository,
+                        verificationService,
+                        paperPhaseCalculator
+                )
+        );
 
         fakeSubmission = new Submission();
         fakeSubmission.setEventId(3L);
@@ -175,6 +176,20 @@ public class PapersServiceTests {
         PaperSummary result = papersService.getTitleAndAbstract(reviewerID, paperID);
 
         assertThat(result).isEqualToComparingFieldByField(expectedPaper);
+    }
+
+    @Test
+    void getPaperPhase() throws NotFoundException, IllegalAccessException {
+        // Assume that the current phase is bidding
+        when(paperPhaseCalculator.getPaperPhase(1L)).thenReturn(PaperPhase.REVIEWED);
+
+        // Assume that the provided input to function is valid
+        doNothing().when(papersService).verifyPermissionToViewPaper(0L, 1L);
+
+        // Make sure, that the service returns the same result that the calculator returns
+        assertThat(
+                papersService.getPaperPhase(0L, 1L)
+        ).isEqualTo(PaperPhase.REVIEWED);
     }
 
 }
