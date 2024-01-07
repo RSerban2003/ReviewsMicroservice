@@ -24,7 +24,7 @@ public class Track implements Serializable {
     // TODO: make sure that when reviewer selection has
     //       been finalized, this is set to TRUE.
     @Basic(optional = false)
-    private Boolean reviewersHaveBeenFinalized;
+    private Boolean reviewersHaveBeenFinalized = false;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Paper> papers;

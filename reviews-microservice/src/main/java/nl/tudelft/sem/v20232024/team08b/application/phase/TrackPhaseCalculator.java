@@ -12,7 +12,7 @@ import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +22,7 @@ public class TrackPhaseCalculator {
     private final TrackRepository trackRepository;
     private final ExternalRepository externalRepository;
     private final PaperPhaseCalculator paperPhaseCalculator;
-
+    private Clock clock;
     /**
      * Default constructor for the phase calculator.
      *
@@ -41,6 +41,16 @@ public class TrackPhaseCalculator {
         this.trackRepository = trackRepository;
         this.externalRepository = externalRepository;
         this.paperPhaseCalculator = paperPhaseCalculator;
+        clock = Clock.systemUTC();
+    }
+
+    /**
+     * A setter for clock, so that we can inject it during testing.
+     *
+     * @param clock clock object
+     */
+    public void setClock(Clock clock) {
+        this.clock = clock;
     }
 
     /**
@@ -65,7 +75,7 @@ public class TrackPhaseCalculator {
      * @param trackID the ID of the track
      * @return true, iff all papers in a given track have been finalized
      */
-    public Boolean checkIfAllPapersFinalized(Long conferenceID,
+    public boolean checkIfAllPapersFinalized(Long conferenceID,
                                              Long trackID) throws NotFoundException {
         // Check if such track exists
         externalRepository.getTrack(conferenceID, trackID);
@@ -87,6 +97,10 @@ public class TrackPhaseCalculator {
         Boolean ret = true;
         for (var paper : papers) {
             Long paperID = paper.getId();
+
+            // We could also use paper.reviewsHaveBeenFinalized flag, instead of calling the
+            // getPaperPhase method. But calling the method gives less space for bugs to appear,
+            // since it performs many additional checks.
             ret &= paperPhaseCalculator.getPaperPhase(paperID) == PaperPhase.REVIEWED;
         }
         return ret;
@@ -114,7 +128,7 @@ public class TrackPhaseCalculator {
                 externalRepository.getTrack(conferenceID, trackID);
 
         // Get the current timestamp
-        Long currentTime = Instant.now().toEpochMilli();
+        Long currentTime = clock.instant().toEpochMilli();
 
         // Check if submission deadline has not yet passed
         Long submissionDeadline = Long.valueOf(track.getDeadline());
