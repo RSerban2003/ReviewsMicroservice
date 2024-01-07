@@ -54,6 +54,7 @@ public class TracksServicesTests {
                 verificationService.verifyRoleFromTrack(0L, 1L, 2L, UserRole.CHAIR)
         ).thenReturn(false);
     }
+
     @Test
     void verifyIfUserCanAccessTrack_NoSuchTrack() {
         when(
@@ -64,11 +65,13 @@ public class TracksServicesTests {
             tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L);
         });
     }
+
     void applyRole(UserRole role) {
         when(
                 verificationService.verifyRoleFromTrack(0L, 1L, 2L, role)
         ).thenReturn(true);
     }
+
     @Test
     void verifyIfUserCanAccessTrack_Reviewer() {
         when(
@@ -82,6 +85,7 @@ public class TracksServicesTests {
             tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L);
         });
     }
+
     @Test
     void verifyIfUserCanAccessTrack_Chair() {
         when(
@@ -95,6 +99,7 @@ public class TracksServicesTests {
             tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L);
         });
     }
+
     @Test
     void verifyIfUserCanAccessTrack_NoOne() {
         when(

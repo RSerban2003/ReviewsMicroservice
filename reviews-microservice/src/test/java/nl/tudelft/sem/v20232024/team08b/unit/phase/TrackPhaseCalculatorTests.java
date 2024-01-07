@@ -122,6 +122,7 @@ public class TrackPhaseCalculatorTests {
 
         assertThat(result).isEqualTo(TrackPhase.SUBMITTING);
     }
+
     @Test
     void getTrackPhase_ExactlyAtSubmissionDeadline() throws NotFoundException {
         // Assume that the current time (10) is at the time of submission deadline

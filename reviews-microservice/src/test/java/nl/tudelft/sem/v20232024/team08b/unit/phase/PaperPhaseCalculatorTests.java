@@ -80,12 +80,6 @@ public class PaperPhaseCalculatorTests {
                 List.of()
         );
 
-        // Create a fake submission corresponding to paper1
-        Submission submission1 = new Submission();
-        submission1.setEventId(trackID.getConferenceID());
-        submission1.setTrackId(trackID.getTrackID());
-        when(externalRepository.getSubmission(paper1.getId())).thenReturn(submission1);
-
         ReviewID reviewID2 = new ReviewID(paper1.getId(), 6L);
         Review review2 = new Review(
                 reviewID2,
@@ -96,6 +90,13 @@ public class PaperPhaseCalculatorTests {
                 List.of()
         );
         reviews = List.of(review1, review2);
+
+        // Create a fake submission corresponding to paper1
+        Submission submission1 = new Submission();
+        submission1.setEventId(trackID.getConferenceID());
+        submission1.setTrackId(trackID.getTrackID());
+        when(externalRepository.getSubmission(paper1.getId())).thenReturn(submission1);
+
     }
 
     @Test
@@ -107,6 +108,7 @@ public class PaperPhaseCalculatorTests {
         );
         assertThat(result).isFalse();
     }
+
     @Test
     void checkIfReviewersAreAssignedToTrack_No() {
         // By default, we have set track.reviewersHaveBeenFinalized = false,
@@ -118,6 +120,7 @@ public class PaperPhaseCalculatorTests {
         );
         assertThat(result).isFalse();
     }
+
     @Test
     void checkIfReviewersAreAssignedToTrack_Yes() {
         track.setReviewersHaveBeenFinalized(true);
@@ -156,6 +159,7 @@ public class PaperPhaseCalculatorTests {
         // return false
         assertThat(result).isFalse();
     }
+
     @Test
     void checkIfPaperIsFinalized_NoSuchPaper() {
         when(paperRepository.findById(0L)).thenReturn(Optional.empty());
