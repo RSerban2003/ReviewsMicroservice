@@ -151,7 +151,7 @@ public class ReviewsControllerTests {
 
     @Test
     void getReview_NoSuchRequester() throws Exception {
-        getReviewWithException(new IllegalCallerException(""), 404);
+        getReviewWithException(new IllegalAccessException(""), 403);
     }
 
     @Test

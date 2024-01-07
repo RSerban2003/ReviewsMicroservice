@@ -50,7 +50,7 @@ public class ReviewsController implements ReviewsAPI {
         try {
             Review review = reviewsService.getReview(requesterID, reviewerID, paperID);
             return ResponseEntity.ok(review);
-        } catch (IllegalCallerException | NotFoundException e) {
+        } catch (NotFoundException e) {
             // The requested paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
