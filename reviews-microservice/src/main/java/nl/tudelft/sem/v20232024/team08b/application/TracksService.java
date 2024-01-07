@@ -65,9 +65,11 @@ public class TracksService {
                 trackID, UserRole.REVIEWER);
         boolean isChair = verificationService.verifyRoleFromTrack(requesterID, conferenceID,
                 trackID, UserRole.CHAIR);
+        boolean isAuthor = verificationService.verifyRoleFromTrack(requesterID, conferenceID,
+                trackID, UserRole.AUTHOR);
 
         // Check if the requesting user is either a chair or a reviewer in that conference
-        if (!isReviewer && !isChair) {
+        if (!isReviewer && !isChair && !isAuthor) {
             throw new IllegalAccessException("The requester is not allowed to access the track");
         }
     }
