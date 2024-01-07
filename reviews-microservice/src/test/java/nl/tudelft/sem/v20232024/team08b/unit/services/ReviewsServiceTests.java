@@ -35,7 +35,7 @@ public class ReviewsServiceTests {
     private final VerificationService verificationService = Mockito.mock(VerificationService.class);
     @MockBean
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-    ReviewsService reviewsService = new ReviewsService(
+    private ReviewsService reviewsService = new ReviewsService(
             reviewRepository,
             commentRepository,
             paperRepository,

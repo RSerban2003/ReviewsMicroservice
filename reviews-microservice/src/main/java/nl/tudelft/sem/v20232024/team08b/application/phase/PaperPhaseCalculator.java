@@ -31,7 +31,7 @@ public class PaperPhaseCalculator {
      * @param reviewRepository repository storing reviews
      */
     @Autowired
-    PaperPhaseCalculator(PaperRepository paperRepository,
+    public PaperPhaseCalculator(PaperRepository paperRepository,
                          TrackRepository trackRepository,
                          ExternalRepository externalRepository,
                          ReviewRepository reviewRepository) {
@@ -50,7 +50,7 @@ public class PaperPhaseCalculator {
      * @return true, iff the reviewers are already assigned in a track
      */
     public boolean checkIfReviewersAreAssignedToTrack(Long conferenceID,
-                                               Long trackID) {
+                                                      Long trackID) {
         Optional<Track> optional = trackRepository.findById(new TrackID(conferenceID, trackID));
         if (optional.isEmpty()) {
             return false;
@@ -115,7 +115,7 @@ public class PaperPhaseCalculator {
         Long conferenceID = submission.getEventId();
 
         // Check if the reviewers of the containing track have not yet been assigned
-        if (checkIfReviewersAreAssignedToTrack(trackID, conferenceID)) {
+        if (!checkIfReviewersAreAssignedToTrack(trackID, conferenceID)) {
             return PaperPhase.BEFORE_REVIEW;
         }
 
