@@ -7,6 +7,7 @@ import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.controllers.ReviewsController;
 import nl.tudelft.sem.v20232024.team08b.domain.ConfidenceScore;
 import nl.tudelft.sem.v20232024.team08b.domain.RecommendationScore;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Review;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -190,5 +192,71 @@ public class ReviewsControllerTests {
 
         // Make sure the required call to the service was made
         verify(reviewsService).getReview(requesterID, reviewerID, paperID);
+    }
+
+    /**
+     * Simulates an exception inside getPaperPhase function and checks if
+     * correct status code was returned.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    private void getPhase_WithException(Exception exception, int expected) throws Exception {
+        PaperPhase fakePaperPhase = PaperPhase.REVIEWED;
+
+        Long requesterID = 1L;
+        Long paperID = 2L;
+
+        // Make sure correct exception is thrown when the respective call to service is called
+        doThrow(exception).when(papersService).getPaperPhase(requesterID, paperID);
+
+        // Send the request to respective endpoint
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/{paperID}/reviews/phase", paperID.toString())
+                        .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        // Make sure the required call to the service was made
+        verify(papersService).getPaperPhase(requesterID, paperID);
+    }
+
+    @Test
+    void getPhase_NoSuchPaper() throws Exception {
+        getPhase_WithException(new NotFoundException(""), 404);
+    }
+
+    @Test
+    void getPhase_IllegalAccess() throws Exception {
+        getPhase_WithException(new IllegalAccessException(""), 403);
+    }
+
+    @Test
+    void getPhase_UnknownError() throws Exception {
+        getPhase_WithException(new RuntimeException(""), 500);
+    }
+
+    @Test
+    void getPhase_Successful() throws Exception {
+        PaperPhase fakePaperPhase = PaperPhase.REVIEWED;
+
+        Long requesterID = 1L;
+        Long paperID = 2L;
+
+        // Convert the object into JSON to be passed as body
+        String fakePaperPhaseJson = objectMapper.writeValueAsString(fakePaperPhase);
+
+        // Make sure correct exception is thrown when the respective call to service is called
+        doReturn(fakePaperPhase).when(papersService).getPaperPhase(requesterID, paperID);
+
+        // Send the request to respective endpoint
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/{paperID}/reviews/phase", paperID.toString())
+                        .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(200))
+        .andExpect(MockMvcResultMatchers.content().json(fakePaperPhaseJson));
+
+        // Make sure the required call to the service was made
+        verify(papersService).getPaperPhase(requesterID, paperID);
     }
 }
