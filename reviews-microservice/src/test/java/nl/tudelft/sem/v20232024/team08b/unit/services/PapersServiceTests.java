@@ -190,6 +190,7 @@ public class PapersServiceTests {
         assertThat(
                 papersService.getPaperPhase(0L, 1L)
         ).isEqualTo(PaperPhase.REVIEWED);
+        verify(papersService).verifyPermissionToViewPaper(0L, 1L);
     }
 
 }

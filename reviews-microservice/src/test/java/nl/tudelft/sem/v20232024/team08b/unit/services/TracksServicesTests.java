@@ -17,8 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TracksServicesTests {
     @MockBean
@@ -121,6 +120,7 @@ public class TracksServicesTests {
         assertThat(
                 tracksService.getTrackPhase(0L, 1L, 2L)
         ).isEqualTo(TrackPhase.BIDDING);
+        verify(tracksService).verifyIfUserCanAccessTrack(0L, 1L, 2L);
     }
 
 }
