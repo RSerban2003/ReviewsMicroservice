@@ -65,7 +65,6 @@ public class PaperPhaseCalculator {
      * @return true, iff every reviewer has submitted a paper at least once
      */
     public boolean checkIfEveryReviewerHasSubmitted(Long paperID) {
-        // TODO: integration-test this!
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
 
         for (Review review : reviews) {
