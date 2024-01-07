@@ -101,6 +101,20 @@ public class TracksServicesTests {
     }
 
     @Test
+    void verifyIfUserCanAccessTrack_Author() {
+        when(
+                verificationService.verifyTrack(1L, 2L)
+        ).thenReturn(true);
+
+        // Assume the user is a chair
+        applyRole(UserRole.AUTHOR);
+
+        assertDoesNotThrow(() -> {
+            tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L);
+        });
+    }
+
+    @Test
     void verifyIfUserCanAccessTrack_NoOne() {
         when(
                 verificationService.verifyTrack(1L, 2L)

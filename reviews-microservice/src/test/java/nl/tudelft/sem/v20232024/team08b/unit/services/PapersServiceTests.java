@@ -89,6 +89,26 @@ public class PapersServiceTests {
     }
 
     @Test
+    void getPaper_WrongPhase() throws NotFoundException, IllegalAccessException {
+        // Make verifyPermissionToViewUser() passes nicely
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(verificationService.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
+
+        // Make sure exception is thrown when phase is checked
+        doThrow(
+                new IllegalAccessException("")
+        ).when(verificationService).verifyTrackPhaseThePaperIsIn(
+                paperID,
+                List.of(TrackPhase.SUBMITTING, TrackPhase.REVIEWING, TrackPhase.FINAL)
+        );
+
+        // Assert that the method itself passes the exception upstream
+        assertThrows(IllegalAccessException.class, () -> papersService.getPaper(reviewerID, paperID));
+    }
+
+    @Test
     void getPaper_Successful_Reviewer() throws NotFoundException,
                                          IllegalAccessException {
 
@@ -159,12 +179,32 @@ public class PapersServiceTests {
     }
 
     @Test
-    void getTitleAndAbstract_Successful() throws NotFoundException,
+    void getTitleAndAbstract_SuccessfulReviewer() throws NotFoundException,
             IllegalAccessException {
 
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
         when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(true);
+
+        fakeSubmission.setTitle("Title");
+        fakeSubmission.setAbstract("Abstract");
+
+        Paper expectedPaper = new Paper();
+        expectedPaper.setTitle("Title");
+        expectedPaper.setAbstractSection("Abstract");
+
+        PaperSummary result = papersService.getTitleAndAbstract(reviewerID, paperID);
+
+        assertThat(result).isEqualToComparingFieldByField(expectedPaper);
+    }
+
+    @Test
+    void getTitleAndAbstract_SuccessfulChair() throws NotFoundException,
+            IllegalAccessException {
+
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.CHAIR)).thenReturn(true);
 
         fakeSubmission.setTitle("Title");
         fakeSubmission.setAbstract("Abstract");
