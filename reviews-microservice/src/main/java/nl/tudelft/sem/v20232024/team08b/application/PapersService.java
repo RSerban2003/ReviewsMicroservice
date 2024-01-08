@@ -1,9 +1,8 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
@@ -11,34 +10,42 @@ import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PapersService {
     private final ReviewRepository reviewRepository;
     private final ExternalRepository externalRepository;
     private final PaperRepository paperRepository;
     private final VerificationService verificationService;
+    private final PaperPhaseCalculator paperPhaseCalculator;
 
     /**
      * Default constructor for the service.
      *
+     * @param paperRepository  repository storing papers
      * @param reviewRepository repository storing the reviews
      * @param externalRepository repository storing everything outside of
      *                           this microservice
+     * @param verificationService service that handles verification
+     * @param paperPhaseCalculator class that calculates the phase of a paper
      */
     @Autowired
     public PapersService(PaperRepository paperRepository,
                          ReviewRepository reviewRepository,
                          ExternalRepository externalRepository,
-                         VerificationService verificationService) {
+                         VerificationService verificationService,
+                         PaperPhaseCalculator paperPhaseCalculator) {
         this.paperRepository = paperRepository;
         this.reviewRepository = reviewRepository;
         this.externalRepository = externalRepository;
         this.verificationService = verificationService;
+        this.paperPhaseCalculator = paperPhaseCalculator;
     }
 
     /**
-     * Verifies whether the user has permission to view the paper.
-     * TODO: add phase verification.
+     * Verifies whether the user has permission to view the paper. This method
+     * does not and SHOULD NOT do any phase checking.
      *
      * @param reviewerID the ID of the requesting user
      * @param paperID the ID of the paper that is requested
@@ -54,11 +61,13 @@ public class PapersService {
         if (!verificationService.verifyPaper(paperID)) {
             throw new NotFoundException("No such paper exists");
         }
-
-        if (!verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.CHAIR)) {
-            if (!verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER)) {
+        boolean isChair = verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.CHAIR);
+        boolean isReviewer = verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER);
+        boolean isReviewerForPaper = verificationService.isReviewerForPaper(reviewerID, paperID);
+        if (!isChair) {
+            if (!isReviewer) {
                 throw new IllegalCallerException("No such user exists");
-            } else if (!verificationService.isReviewerForPaper(reviewerID, paperID)) {
+            } else if (!isReviewerForPaper) {
                 throw new IllegalAccessException("The user is not a reviewer for this paper.");
             }
         }
@@ -73,7 +82,14 @@ public class PapersService {
      */
     public Paper getPaper(Long reviewerID, Long paperID) throws NotFoundException,
                                                                 IllegalAccessException {
+        // Verify that user has permission to view the paper
         verifyPermissionToViewPaper(reviewerID, paperID);
+
+        // Verify that the current track phase allows for reading full papers
+        verificationService.verifyTrackPhaseThePaperIsIn(
+                paperID,
+                List.of(TrackPhase.SUBMITTING, TrackPhase.REVIEWING, TrackPhase.FINAL)
+        );
 
         Submission submission = externalRepository.getSubmission(paperID);
         Paper paper = new Paper(submission);
@@ -83,7 +99,6 @@ public class PapersService {
 
     /**
      * Verifies whether the user has permission to view the title and abstract.
-     * TODO: add phase verification.
      *
      * @param reviewerID the ID of the requesting user
      * @param paperID the ID of the paper that is requested
@@ -117,9 +132,27 @@ public class PapersService {
                                                                            IllegalAccessException {
         verifyPermissionToViewTitleAndAbstract(reviewerID, paperID);
 
+        // Track phase verification for reading an abstract of a paper is not necessary,
+        // since title and abstract can be read during all phases
+
         Submission submission = externalRepository.getSubmission(paperID);
         PaperSummary paperSummary = new PaperSummary(submission);
 
         return paperSummary;
+    }
+
+    /**
+     * Gets the phase of the requested paper.
+     *
+     * @param requesterID the ID of the requesting user
+     * @param paperID the ID of the paper
+     * @return current phase of the paper
+     * @throws NotFoundException if such paper does not exist
+     * @throws IllegalAccessException if the user is not allowed to view the paper
+     */
+    public PaperPhase getPaperPhase(Long requesterID,
+                                    Long paperID) throws NotFoundException, IllegalAccessException {
+        verifyPermissionToViewPaper(requesterID, paperID);
+        return paperPhaseCalculator.getPaperPhase(paperID);
     }
 }
