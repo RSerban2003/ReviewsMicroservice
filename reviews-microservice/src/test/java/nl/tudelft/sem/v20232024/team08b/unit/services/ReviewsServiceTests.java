@@ -10,9 +10,7 @@ import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.repos.CommentRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,19 +29,12 @@ public class ReviewsServiceTests {
     @MockBean
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
     @MockBean
-    private final CommentRepository commentRepository = Mockito.mock(CommentRepository.class);
-    @MockBean
-    private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
-    @MockBean
     private final VerificationService verificationService = Mockito.mock(VerificationService.class);
     @MockBean
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     private ReviewsService reviewsService = new ReviewsService(
             reviewRepository,
-            commentRepository,
-            paperRepository,
-            verificationService,
-            externalRepository
+            verificationService
     );
 
     private nl.tudelft.sem.v20232024.team08b.dtos.review.Review reviewDTO;
@@ -58,7 +49,7 @@ public class ReviewsServiceTests {
                 ConfidenceScore.BASIC,
                 "Comment for author",
                 "Confidential comment",
-                RecommendationScore.STRONG_ACCEPT
+                RecommendationScore.WEAK_REJECT
         );
 
         fakeReview = new Review();
@@ -331,6 +322,20 @@ public class ReviewsServiceTests {
         nl.tudelft.sem.v20232024.team08b.dtos.review.Review expectedDTO =
                 new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(fakeReview);
         assertThat(reviewsService.getReview(requesterID, reviewerID, paperID)).isEqualTo(expectedDTO);
+    }
+
+    @Test
+    void getReview_NoSuchID() throws NotFoundException, IllegalAccessException {
+        // We are going to mock the "verifyIfUserCanAccessReview" method
+        reviewsService = Mockito.spy(reviewsService);
+
+        doNothing().when(reviewsService).verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.empty());
+        nl.tudelft.sem.v20232024.team08b.dtos.review.Review expectedDTO =
+                new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(fakeReview);
+        assertThrows(NotFoundException.class, () -> {
+            reviewsService.getReview(requesterID, reviewerID, paperID);
+        });
     }
 
     @Test

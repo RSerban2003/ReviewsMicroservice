@@ -5,44 +5,29 @@ import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.repos.CommentRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReviewsService {
     private final ReviewRepository reviewRepository;
-    private final CommentRepository commentRepository;
-    private final PaperRepository paperRepository;
     private final VerificationService verificationService;
-    private final ExternalRepository externalRepository;
 
     /**
      * Default constructor for the service.
      *
      * @param reviewRepository repository storing the reviews
-     * @param commentRepository repository storing the comments
-     * @param paperRepository repository storing the papers
      * @param verificationService service that handles authentication
-     * @param externalRepository  repository storing everything outside of
-     *                            this microservice
      */
     @Autowired
     public ReviewsService(ReviewRepository reviewRepository,
-                          CommentRepository commentRepository,
-                          PaperRepository paperRepository,
-                          VerificationService verificationService,
-                          ExternalRepository externalRepository) {
+                          VerificationService verificationService) {
         this.reviewRepository = reviewRepository;
-        this.commentRepository = commentRepository;
-        this.paperRepository = paperRepository;
         this.verificationService = verificationService;
-        this.externalRepository = externalRepository;
     }
 
     /**
@@ -90,7 +75,7 @@ public class ReviewsService {
     public void submitReview(nl.tudelft.sem.v20232024.team08b.dtos.review.Review reviewDTO,
                              Long requesterID,
                              Long paperID) throws Exception {
-        // Phase checking is done inside of the verifyIf..() method
+        // Phase checking is done inside verifyIf...() method
         verifyIfReviewerCanSubmitReview(requesterID, paperID);
 
         ReviewID reviewId = new ReviewID(paperID, requesterID);
@@ -105,9 +90,15 @@ public class ReviewsService {
      * @param paperID the ID of the paper
      * @return the review
      */
-    private Review getReview(Long reviewerID, Long paperID) {
+    private Review getReview(Long reviewerID, Long paperID) throws NotFoundException {
+
         ReviewID reviewId = new ReviewID(paperID, reviewerID);
-        return reviewRepository.findById(reviewId).get();
+        Optional<Review> optional = reviewRepository.findById(reviewId);
+        if (optional.isPresent()) {
+            return optional.get();
+        } else {
+            throw new NotFoundException("The review could not be found");
+        }
     }
 
     /**
@@ -175,10 +166,7 @@ public class ReviewsService {
         // TODO: make sure that if the requesting user is author, the confidential comment is stripped.
         Review review = getReview(reviewerID, paperID);
 
-        // Map the review from local domain object to a DTO
-        nl.tudelft.sem.v20232024.team08b.dtos.review.Review reviewDTO =
-                new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(review);
-
-        return reviewDTO;
+        // Map the review from local domain object to a DTO and return it
+        return new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(review);
     }
 }

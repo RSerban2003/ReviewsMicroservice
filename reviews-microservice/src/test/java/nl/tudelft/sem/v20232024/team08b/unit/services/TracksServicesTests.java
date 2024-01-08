@@ -6,9 +6,6 @@ import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,15 +18,6 @@ import static org.mockito.Mockito.*;
 
 public class TracksServicesTests {
     @MockBean
-    private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
-
-    @MockBean
-    private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
-
-    @MockBean
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-
-    @MockBean
     private final VerificationService verificationService = Mockito.mock(VerificationService.class);
 
     @MockBean
@@ -37,9 +25,6 @@ public class TracksServicesTests {
 
     private final TracksService tracksService = Mockito.spy(
             new TracksService(
-                    paperRepository,
-                    trackRepository,
-                    externalRepository,
                     verificationService,
                     trackPhaseCalculator
             )

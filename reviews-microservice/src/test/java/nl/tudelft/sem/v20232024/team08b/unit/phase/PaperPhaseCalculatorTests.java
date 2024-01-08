@@ -73,7 +73,7 @@ public class PaperPhaseCalculatorTests {
         ReviewID reviewID1 = new ReviewID(paper1.getId(), 5L);
         Review review1 = new Review(
                 reviewID1,
-                ConfidenceScore.BASIC,
+                ConfidenceScore.KNOWLEDGEABLE,
                 "Comment",
                 RecommendationScore.STRONG_ACCEPT,
                 "Comment",

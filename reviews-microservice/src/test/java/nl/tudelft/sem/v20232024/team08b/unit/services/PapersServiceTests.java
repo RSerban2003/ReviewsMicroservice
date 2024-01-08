@@ -7,8 +7,6 @@ import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,14 +15,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class PapersServiceTests {
-    @MockBean
-    private PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
-    @MockBean
-    private ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
     @MockBean
     private ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     @MockBean
@@ -42,8 +36,6 @@ public class PapersServiceTests {
     void setUp() {
         papersService = Mockito.spy(
                 new PapersService(
-                        paperRepository,
-                        reviewRepository,
                         externalRepository,
                         verificationService,
                         paperPhaseCalculator
@@ -129,7 +121,7 @@ public class PapersServiceTests {
         expectedPaper.setMainText(new String(fakeSubmission.getPaper()));
 
         Paper result = papersService.getPaper(reviewerID, paperID);
-        assertThat(result).isEqualToComparingFieldByField(expectedPaper);
+        assertThat(result).isEqualTo(expectedPaper);
     }
 
     @Test
@@ -152,7 +144,7 @@ public class PapersServiceTests {
         expectedPaper.setMainText(new String(fakeSubmission.getPaper()));
 
         Paper result = papersService.getPaper(reviewerID, paperID);
-        assertThat(result).isEqualToComparingFieldByField(expectedPaper);
+        assertThat(result).isEqualTo(expectedPaper);
     }
 
     @Test
@@ -189,13 +181,13 @@ public class PapersServiceTests {
         fakeSubmission.setTitle("Title");
         fakeSubmission.setAbstract("Abstract");
 
-        Paper expectedPaper = new Paper();
+        PaperSummary expectedPaper = new PaperSummary();
         expectedPaper.setTitle("Title");
         expectedPaper.setAbstractSection("Abstract");
 
         PaperSummary result = papersService.getTitleAndAbstract(reviewerID, paperID);
 
-        assertThat(result).isEqualToComparingFieldByField(expectedPaper);
+        assertThat(result).isEqualTo(expectedPaper);
     }
 
     @Test
@@ -209,13 +201,13 @@ public class PapersServiceTests {
         fakeSubmission.setTitle("Title");
         fakeSubmission.setAbstract("Abstract");
 
-        Paper expectedPaper = new Paper();
+        PaperSummary expectedPaper = new PaperSummary();
         expectedPaper.setTitle("Title");
         expectedPaper.setAbstractSection("Abstract");
 
         PaperSummary result = papersService.getTitleAndAbstract(reviewerID, paperID);
 
-        assertThat(result).isEqualToComparingFieldByField(expectedPaper);
+        assertThat(result).isEqualTo(expectedPaper);
     }
 
     @Test

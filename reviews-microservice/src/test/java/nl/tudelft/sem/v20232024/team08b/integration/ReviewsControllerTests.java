@@ -42,7 +42,7 @@ public class ReviewsControllerTests {
                 ConfidenceScore.BASIC,
                 "Comment for author",
                 "Confidential comment",
-                RecommendationScore.STRONG_ACCEPT
+                RecommendationScore.STRONG_REJECT
         );
     }
 

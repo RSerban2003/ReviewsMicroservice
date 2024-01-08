@@ -11,7 +11,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,12 +24,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 public class TrackPhaseCalculatorTests {
-    @MockBean
-    private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
-
     @MockBean
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
 
@@ -45,7 +42,6 @@ public class TrackPhaseCalculatorTests {
 
     private TrackPhaseCalculator trackPhaseCalculator = Mockito.spy(
             new TrackPhaseCalculator(
-                    paperRepository,
                     trackRepository,
                     externalRepository,
                     paperPhaseCalculator
