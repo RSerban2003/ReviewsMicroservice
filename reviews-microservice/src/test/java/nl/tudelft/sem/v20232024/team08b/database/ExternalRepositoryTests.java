@@ -4,15 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
+import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+
 import java.io.IOException;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 public class ExternalRepositoryTests {
     HttpRequestSender httpRequestSender = Mockito.mock(HttpRequestSender.class);
@@ -71,5 +74,32 @@ public class ExternalRepositoryTests {
                 objectMapper.readValue("json", Submission.class)
         ).thenReturn(fakeSubmission);
         assertThat(externalRepository.getSubmission(1L)).isEqualTo(fakeSubmission);
+    }
+
+
+    @Test
+    void getTrack_Fail() throws NotFoundException, IOException {
+        when(httpRequestSender.sendGetRequest(ArgumentMatchers.any())).thenReturn("json");
+        when(
+                objectMapper.readValue("json", Track.class)
+        ).thenThrow(new RuntimeException(""));
+        assertThrows(RuntimeException.class, () -> externalRepository.getTrack(1L, 2L));
+    }
+
+    @Test
+    void getTrack_NotFound() throws NotFoundException {
+        when(httpRequestSender.sendGetRequest(ArgumentMatchers.any()))
+                .thenThrow(new NotFoundException(""));
+        assertThrows(NotFoundException.class, () -> externalRepository.getTrack(1L, 2L));
+    }
+
+    @Test
+    void getTrack_Successful() throws NotFoundException, IOException {
+        Track fakeTrack = new Track();
+        when(httpRequestSender.sendGetRequest(ArgumentMatchers.any())).thenReturn("json");
+        when(
+                objectMapper.readValue("json", Track.class)
+        ).thenReturn(fakeTrack);
+        assertThat(externalRepository.getTrack(1L, 2L)).isEqualTo(fakeTrack);
     }
 }

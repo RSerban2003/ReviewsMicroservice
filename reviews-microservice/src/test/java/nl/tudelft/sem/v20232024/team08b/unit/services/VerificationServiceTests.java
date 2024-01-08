@@ -21,8 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class VerificationServiceTests {
     @MockBean
@@ -212,7 +211,7 @@ public class VerificationServiceTests {
     }
 
     @Test
-    void verifyTrackPhaseThePaperIsIn() throws NotFoundException, IllegalAccessException {
+    void verifyTrackPhaseThePaperIsIn_Throws() throws NotFoundException, IllegalAccessException {
         Long conferenceID = fakeSubmission.getEventId();
         Long trackID = fakeSubmission.getTrackId();
         Long paperID = fakeSubmission.getSubmissionId();
@@ -228,10 +227,87 @@ public class VerificationServiceTests {
                 .when(verificationService).verifyTrackPhase(conferenceID, trackID, acceptable);
         // Assume allowed phases are reviewing and bidding. Then the method should not throw
         assertThrows(NotFoundException.class, () -> {
-            verificationService.verifyTrackPhase(
-                    conferenceID, trackID,
+            verificationService.verifyTrackPhaseThePaperIsIn(
+                    paperID,
                     acceptable
             );
         });
+    }
+
+    @Test
+    void verifyTrackPhaseThePaperIsIn_AllWell() throws NotFoundException, IllegalAccessException {
+        Long conferenceID = fakeSubmission.getEventId();
+        Long trackID = fakeSubmission.getTrackId();
+        Long paperID = fakeSubmission.getSubmissionId();
+        List<TrackPhase> acceptable = List.of(TrackPhase.REVIEWING);
+
+        // When we want to figure out paper parent ID, we ask external repository
+        when(
+                externalRepository.getSubmission(paperID)
+        ).thenReturn(fakeSubmission);
+
+        // Assume verifyTrackPhase throws
+        doNothing()
+                .when(verificationService).verifyTrackPhase(conferenceID, trackID, acceptable);
+        // Assume allowed phases are reviewing and bidding. Then the method should not throw
+        assertDoesNotThrow(() -> {
+            verificationService.verifyTrackPhaseThePaperIsIn(
+                    paperID,
+                    acceptable
+            );
+        });
+    }
+
+    @Test
+    void verifyTrack_Yes() throws NotFoundException {
+        when(externalRepository.getTrack(1L, 2L)).thenReturn(null);
+        assertThat(verificationService.verifyTrack(1L, 2L)).isTrue();
+    }
+
+    @Test
+    void verifyTrack_No() throws NotFoundException {
+        when(externalRepository.getTrack(1L, 2L)).thenThrow(
+                new NotFoundException("")
+        );
+        assertThat(verificationService.verifyTrack(1L, 2L)).isFalse();
+    }
+
+    @Test
+    void verifyRoleFromPaper_Yes() throws NotFoundException {
+        Submission fakeSubmission = new Submission();
+        fakeSubmission.setEventId(1L);
+        fakeSubmission.setTrackId(2L);
+
+        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        doReturn(true).when(verificationService)
+                .verifyRoleFromTrack(0L, 1L, 2L, UserRole.CHAIR);
+        boolean result = verificationService.verifyRoleFromPaper(0L, 3L, UserRole.CHAIR);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void verifyRoleFromPaper_No() throws NotFoundException {
+        Submission fakeSubmission = new Submission();
+        fakeSubmission.setEventId(1L);
+        fakeSubmission.setTrackId(2L);
+
+        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        doReturn(false).when(verificationService)
+                .verifyRoleFromTrack(0L, 1L, 2L, UserRole.CHAIR);
+        boolean result = verificationService.verifyRoleFromPaper(0L, 3L, UserRole.CHAIR);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void verifyRoleFromPaper_NoSuchPaper() throws NotFoundException {
+        Submission fakeSubmission = new Submission();
+        fakeSubmission.setEventId(1L);
+        fakeSubmission.setTrackId(2L);
+
+        when(externalRepository.getSubmission(3L)).thenThrow(
+                new NotFoundException("")
+        );
+        boolean result = verificationService.verifyRoleFromPaper(0L, 3L, UserRole.CHAIR);
+        assertThat(result).isFalse();
     }
 }
