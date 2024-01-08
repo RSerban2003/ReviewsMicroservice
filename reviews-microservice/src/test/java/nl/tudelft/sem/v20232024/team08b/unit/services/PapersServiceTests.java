@@ -3,9 +3,8 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
@@ -30,6 +29,8 @@ public class PapersServiceTests {
     private ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     @MockBean
     private VerificationService verificationService = Mockito.mock(VerificationService.class);
+    @MockBean
+    private PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
 
     private PapersService papersService;
 
@@ -39,7 +40,15 @@ public class PapersServiceTests {
 
     @BeforeEach
     void setUp() {
-        papersService = new PapersService(paperRepository, reviewRepository, externalRepository, verificationService);
+        papersService = Mockito.spy(
+                new PapersService(
+                        paperRepository,
+                        reviewRepository,
+                        externalRepository,
+                        verificationService,
+                        paperPhaseCalculator
+                )
+        );
 
         fakeSubmission = new Submission();
         fakeSubmission.setEventId(3L);
@@ -77,6 +86,26 @@ public class PapersServiceTests {
         when(externalRepository.getSubmission(1L)).thenThrow(new NotFoundException(""));
 
         assertThrows(NotFoundException.class, () -> papersService.getPaper(1L, 2L));
+    }
+
+    @Test
+    void getPaper_WrongPhase() throws NotFoundException, IllegalAccessException {
+        // Make verifyPermissionToViewUser() passes nicely
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(verificationService.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
+
+        // Make sure exception is thrown when phase is checked
+        doThrow(
+                new IllegalAccessException("")
+        ).when(verificationService).verifyTrackPhaseThePaperIsIn(
+                paperID,
+                List.of(TrackPhase.SUBMITTING, TrackPhase.REVIEWING, TrackPhase.FINAL)
+        );
+
+        // Assert that the method itself passes the exception upstream
+        assertThrows(IllegalAccessException.class, () -> papersService.getPaper(reviewerID, paperID));
     }
 
     @Test
@@ -150,7 +179,7 @@ public class PapersServiceTests {
     }
 
     @Test
-    void getTitleAndAbstract_Successful() throws NotFoundException,
+    void getTitleAndAbstract_SuccessfulReviewer() throws NotFoundException,
             IllegalAccessException {
 
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
@@ -167,6 +196,41 @@ public class PapersServiceTests {
         PaperSummary result = papersService.getTitleAndAbstract(reviewerID, paperID);
 
         assertThat(result).isEqualToComparingFieldByField(expectedPaper);
+    }
+
+    @Test
+    void getTitleAndAbstract_SuccessfulChair() throws NotFoundException,
+            IllegalAccessException {
+
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.CHAIR)).thenReturn(true);
+
+        fakeSubmission.setTitle("Title");
+        fakeSubmission.setAbstract("Abstract");
+
+        Paper expectedPaper = new Paper();
+        expectedPaper.setTitle("Title");
+        expectedPaper.setAbstractSection("Abstract");
+
+        PaperSummary result = papersService.getTitleAndAbstract(reviewerID, paperID);
+
+        assertThat(result).isEqualToComparingFieldByField(expectedPaper);
+    }
+
+    @Test
+    void getPaperPhase() throws NotFoundException, IllegalAccessException {
+        // Assume that the current phase is bidding
+        when(paperPhaseCalculator.getPaperPhase(1L)).thenReturn(PaperPhase.REVIEWED);
+
+        // Assume that the provided input to function is valid
+        doNothing().when(papersService).verifyPermissionToViewPaper(0L, 1L);
+
+        // Make sure, that the service returns the same result that the calculator returns
+        assertThat(
+                papersService.getPaperPhase(0L, 1L)
+        ).isEqualTo(PaperPhase.REVIEWED);
+        verify(papersService).verifyPermissionToViewPaper(0L, 1L);
     }
 
 }

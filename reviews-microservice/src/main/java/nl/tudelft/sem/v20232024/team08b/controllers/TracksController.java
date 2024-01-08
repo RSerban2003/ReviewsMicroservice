@@ -1,5 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
+import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.TracksAPI;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
@@ -97,7 +98,22 @@ public class TracksController implements TracksAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<TrackPhase> getPhase(Long requesterID, Long conferenceID, Long trackID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<TrackPhase> getPhase(Long requesterID,
+                                               Long conferenceID,
+                                               Long trackID) {
+        try {
+            TrackPhase trackPhase = tracksService.getTrackPhase(
+                    requesterID,
+                    conferenceID,
+                    trackID
+            );
+            return ResponseEntity.ok(trackPhase);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

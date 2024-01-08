@@ -7,6 +7,7 @@ import nl.tudelft.sem.v20232024.team08b.domain.ConfidenceScore;
 import nl.tudelft.sem.v20232024.team08b.domain.RecommendationScore;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.CommentRepository;
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -35,7 +38,7 @@ public class ReviewsServiceTests {
     private final VerificationService verificationService = Mockito.mock(VerificationService.class);
     @MockBean
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-    ReviewsService reviewsService = new ReviewsService(
+    private ReviewsService reviewsService = new ReviewsService(
             reviewRepository,
             commentRepository,
             paperRepository,
@@ -85,7 +88,7 @@ public class ReviewsServiceTests {
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(false);
 
-        Assert.assertThrows(IllegalCallerException.class, () -> {
+        Assert.assertThrows(IllegalAccessException.class, () -> {
             reviewsService.submitReview(reviewDTO, requesterID, paperID);
         });
     }
@@ -105,6 +108,31 @@ public class ReviewsServiceTests {
         // Assume that the user is not a reviewer - i.e., the third IF does not work
         when(verificationService.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
 
+        Assert.assertThrows(IllegalAccessException.class, () -> {
+            reviewsService.submitReview(reviewDTO, requesterID, paperID);
+        });
+    }
+
+    @Test
+    void submitReview_WrongPhase() throws NotFoundException, IllegalAccessException {
+        // Assume first IF works
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+
+        // Essentially, fake the track, that the submission belongs to
+        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+
+        // Assume the second IF works
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
+                .thenReturn(true);
+
+        // Assume that the user a reviewer
+        when(verificationService.isReviewerForPaper(requesterID, paperID)).thenReturn(true);
+
+        // Assume the current phase is not the submitting phase
+        doThrow(new IllegalAccessException("")).when(verificationService).verifyTrackPhaseThePaperIsIn(
+                paperID,
+                List.of(TrackPhase.SUBMITTING)
+        );
         Assert.assertThrows(IllegalAccessException.class, () -> {
             reviewsService.submitReview(reviewDTO, requesterID, paperID);
         });
@@ -142,7 +170,7 @@ public class ReviewsServiceTests {
     }
 
     @Test
-    void verifyIfUserCanAccessReview_NoSuchUser() throws NotFoundException {
+    void verifyIfUserCanAccessReview_NoSuchUserInTheTrack() throws NotFoundException {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user is not a reviewer
@@ -151,8 +179,17 @@ public class ReviewsServiceTests {
         // Assume user is not a chair either
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
+        // Assume user is not an author
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
+                .thenReturn(false);
 
-        Assert.assertThrows(IllegalCallerException.class, () -> {
+        // Assume the paper exists and the review also exists
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
+                .thenReturn(true);
+        when(verificationService.isReviewerForPaper(reviewerID, paperID))
+                .thenReturn(true);
+
+        Assert.assertThrows(IllegalAccessException.class, () -> {
             reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
         });
     }
@@ -187,6 +224,9 @@ public class ReviewsServiceTests {
         // Assume is not chair
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
+        // Assume user is not an author
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR))
+                .thenReturn(false);
         // Assume the reviewer does exist
         when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
@@ -200,7 +240,7 @@ public class ReviewsServiceTests {
     }
 
     @Test
-    void checkIfReviewExists_SuccessfulChair() throws NotFoundException, IllegalAccessException {
+    void verifyIfUserCanAccessReview_SuccessfulChair() throws NotFoundException, IllegalAccessException {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user is not a reviewer
@@ -209,25 +249,8 @@ public class ReviewsServiceTests {
         // Assume user is a chair
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(true);
-        // Assume the reviewer does exist
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-                .thenReturn(true);
-        // Assume the reviewer does exist
-        when(verificationService.isReviewerForPaper(reviewerID, paperID))
-                .thenReturn(true);
-
-        reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
-    }
-
-    @Test
-    void checkIfReviewExists_SuccessfulReviewer() throws NotFoundException, IllegalAccessException {
-        // Assume paper exists
-        when(verificationService.verifyPaper(paperID)).thenReturn(true);
-        // Assume user is a reviewer
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
-                .thenReturn(true);
-        // Assume user is not a chair
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
+        // Assume user is not an author
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR))
                 .thenReturn(false);
         // Assume the reviewer does exist
         when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
@@ -237,7 +260,66 @@ public class ReviewsServiceTests {
                 .thenReturn(true);
 
         reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+
+        // Verify that the method checks for phase
+        verify(verificationService).verifyTrackPhaseThePaperIsIn(paperID,
+                List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
     }
+
+    @Test
+    void verifyIfUserCanAccessReview_SuccessfulReviewer() throws NotFoundException, IllegalAccessException {
+        // Assume paper exists
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        // Assume user is a reviewer
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
+                .thenReturn(true);
+        // Assume user is not a chair
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
+                .thenReturn(false);
+        // Assume user is not an author
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR))
+                .thenReturn(false);
+        // Assume the reviewer does exist
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
+                .thenReturn(true);
+        // Assume the reviewer does exist
+        when(verificationService.isReviewerForPaper(reviewerID, paperID))
+                .thenReturn(true);
+
+        reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+
+        // Verify that the method checks for phase
+        verify(verificationService).verifyTrackPhaseThePaperIsIn(paperID,
+                List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
+
+    }
+
+    @Test
+    void verifyIfUserCanAccessReview_SuccessfulAuthor() throws NotFoundException, IllegalAccessException {
+        // Assume paper exists
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        // Assume user is not reviewer
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
+                .thenReturn(false);
+        // Assume user is not a chair
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
+                .thenReturn(false);
+        // Assume user is an author
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR))
+                .thenReturn(true);
+        // Assume the reviewer does exist
+        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
+                .thenReturn(true);
+        // Assume the reviewer does exist
+        when(verificationService.isReviewerForPaper(reviewerID, paperID))
+                .thenReturn(true);
+
+        reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+
+        // Verify that the method checks for phase
+        verify(verificationService).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.FINAL));
+    }
+
 
     @Test
     void getReview_Successful() throws NotFoundException, IllegalAccessException {

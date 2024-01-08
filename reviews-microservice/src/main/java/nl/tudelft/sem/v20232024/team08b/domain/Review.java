@@ -1,16 +1,16 @@
 package nl.tudelft.sem.v20232024.team08b.domain;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
 import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -20,6 +20,7 @@ public class Review implements Serializable {
     @Id
     private ReviewID reviewID;
 
+    // TODO: make sure that when an empty review is inserted, this is set to null.
     private ConfidenceScore confidenceScore;
 
     private String commentForAuthor;

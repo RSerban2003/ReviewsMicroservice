@@ -1,7 +1,10 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
@@ -9,21 +12,28 @@ import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class VerificationService {
-    ExternalRepository externalRepository;
-    ReviewRepository reviewRepository;
+    private final ExternalRepository externalRepository;
+    private final ReviewRepository reviewRepository;
+    private final TrackPhaseCalculator trackPhaseCalculator;
 
     /**
      * Default constructor.
      *
      * @param externalRepository the external repository (injected)
+     * @param reviewRepository repository responsible for storing reviews
+     * @param trackPhaseCalculator object, responsible for getting current phase
      */
     @Autowired
     public VerificationService(ExternalRepository externalRepository,
-                               ReviewRepository reviewRepository) {
+                               ReviewRepository reviewRepository,
+                               TrackPhaseCalculator trackPhaseCalculator) {
         this.externalRepository = externalRepository;
         this.reviewRepository = reviewRepository;
+        this.trackPhaseCalculator = trackPhaseCalculator;
     }
 
     /**
@@ -78,7 +88,7 @@ public class VerificationService {
         try {
             Long trackID = externalRepository.getSubmission(paperID).getTrackId();
             Long conferenceID = externalRepository.getSubmission(paperID).getEventId();
-            return verifyRoleFromTrack(userID, trackID, conferenceID, role);
+            return verifyRoleFromTrack(userID, conferenceID, trackID, role);
         } catch (NotFoundException e) {
             return false;
         }
@@ -110,5 +120,62 @@ public class VerificationService {
         } catch (NotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * Verifies if a given track exists.
+     *
+     * @param conferenceID the ID of the conference of the track
+     * @param trackID the ID of the track
+     * @return true, iff such track exists
+     */
+    public boolean verifyTrack(Long conferenceID,
+                               Long trackID) {
+        try {
+            externalRepository.getTrack(conferenceID, trackID);
+            return true;
+        } catch (NotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Method that checks if the current phase is one of the given phases.
+     *
+     * @param conferenceID the ID of the conference of the track.
+     * @param trackID the ID of the conference.
+     * @param acceptablePhases a list of all acceptable phases
+     * @throws IllegalAccessException exception thrown if the current phase is not in the list
+     * @throws NotFoundException exception thrown if the track couldn't be found
+     */
+    public void verifyTrackPhase(Long conferenceID,
+                                 Long trackID,
+                                 List<TrackPhase> acceptablePhases) throws IllegalAccessException, NotFoundException {
+        try {
+            TrackPhase currentPhase = trackPhaseCalculator.getTrackPhase(conferenceID, trackID);
+            if (!acceptablePhases.contains(currentPhase)) {
+                throw new IllegalAccessException("This action is not allowed in the current phase");
+            }
+        } catch (NotFoundException e) {
+            throw new NotFoundException("No such track exists");
+        }
+    }
+
+    /**
+     * Finds the track a paper is in and checks if the current phase of that track
+     * is one of the listed.
+     *
+     * @param paperID the ID of the paper
+     * @param acceptablePhases a list of all acceptable phases
+     * @throws IllegalAccessException exception thrown if the current phase is not in the list
+     * @throws NotFoundException exception thrown if the track couldn't be found
+     */
+    public void verifyTrackPhaseThePaperIsIn(Long paperID,
+                                          List<TrackPhase> acceptablePhases) throws IllegalAccessException,
+                                                                                    NotFoundException {
+        Submission submission = externalRepository.getSubmission(paperID);
+        Long conferenceID = submission.getEventId();
+        Long trackID = submission.getTrackId();
+        verifyTrackPhase(conferenceID, trackID, acceptablePhases);
     }
 }
