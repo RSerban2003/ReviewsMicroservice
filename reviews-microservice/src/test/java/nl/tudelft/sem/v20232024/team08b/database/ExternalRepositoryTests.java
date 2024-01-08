@@ -34,7 +34,7 @@ public class ExternalRepositoryTests {
     }
 
     @Test
-    void getRolesOfUserUserNotFound() throws NotFoundException, IOException {
+    void getRolesOfUserUserNotFound() throws NotFoundException {
         when(httpRequestSender.sendGetRequest(ArgumentMatchers.any()))
                 .thenThrow(new NotFoundException(""));
         assertThrows(NotFoundException.class, () -> externalRepository.getRolesOfUser(1L));

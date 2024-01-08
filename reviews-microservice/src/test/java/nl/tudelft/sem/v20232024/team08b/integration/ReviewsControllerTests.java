@@ -203,8 +203,6 @@ public class ReviewsControllerTests {
      * @throws Exception method can throw exception
      */
     private void getPhase_WithException(Exception exception, int expected) throws Exception {
-        PaperPhase fakePaperPhase = PaperPhase.REVIEWED;
-
         Long requesterID = 1L;
         Long paperID = 2L;
 

@@ -9,7 +9,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -17,10 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class TracksServicesTests {
-    @MockBean
     private final VerificationService verificationService = Mockito.mock(VerificationService.class);
-
-    @MockBean
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
 
     private final TracksService tracksService = Mockito.spy(
@@ -46,9 +42,8 @@ public class TracksServicesTests {
                 verificationService.verifyTrack(1L, 2L)
         ).thenReturn(false);
 
-        assertThrows(NotFoundException.class, () -> {
-            tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L);
-        });
+        assertThrows(NotFoundException.class, () ->
+                tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L));
     }
 
     void applyRole(UserRole role) {
@@ -66,9 +61,8 @@ public class TracksServicesTests {
         // Assume the user is a reviewer
         applyRole(UserRole.REVIEWER);
 
-        assertDoesNotThrow(() -> {
-            tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L);
-        });
+        assertDoesNotThrow(() ->
+                tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L));
     }
 
     @Test
@@ -80,9 +74,8 @@ public class TracksServicesTests {
         // Assume the user is a chair
         applyRole(UserRole.CHAIR);
 
-        assertDoesNotThrow(() -> {
-            tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L);
-        });
+        assertDoesNotThrow(() ->
+                tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L));
     }
 
     @Test
@@ -94,9 +87,8 @@ public class TracksServicesTests {
         // Assume the user is a chair
         applyRole(UserRole.AUTHOR);
 
-        assertDoesNotThrow(() -> {
-            tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L);
-        });
+        assertDoesNotThrow(() ->
+                tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L));
     }
 
     @Test
@@ -107,9 +99,8 @@ public class TracksServicesTests {
 
         // Assume the user is neither chair nor reviewer
 
-        assertThrows(IllegalAccessException.class, () -> {
-            tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L);
-        });
+        assertThrows(IllegalAccessException.class, () ->
+                tracksService.verifyIfUserCanAccessTrack(0L, 1L, 2L));
     }
 
     @Test

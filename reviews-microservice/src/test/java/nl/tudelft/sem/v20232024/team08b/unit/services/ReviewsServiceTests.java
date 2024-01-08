@@ -16,7 +16,6 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class ReviewsServiceTests {
-    @MockBean
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
-    @MockBean
     private final VerificationService verificationService = Mockito.mock(VerificationService.class);
-    @MockBean
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     private ReviewsService reviewsService = new ReviewsService(
             reviewRepository,
@@ -40,9 +36,9 @@ public class ReviewsServiceTests {
     private nl.tudelft.sem.v20232024.team08b.dtos.review.Review reviewDTO;
     private Submission fakeSubmission;
     private Review fakeReview;
-    private Long requesterID = 0L;
-    private Long reviewerID = 3L;
-    private Long paperID = 4L;
+    private final Long requesterID = 0L;
+    private final Long reviewerID = 3L;
+    private final Long paperID = 4L;
     @BeforeEach
     void prepare() {
         reviewDTO = new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(
@@ -62,9 +58,8 @@ public class ReviewsServiceTests {
     @Test
     void submitReview_NoSuchPaper() {
         when(verificationService.verifyPaper(paperID)).thenReturn(false);
-        Assert.assertThrows(NotFoundException.class, () -> {
-            reviewsService.submitReview(reviewDTO, requesterID, paperID);
-        });
+        Assert.assertThrows(NotFoundException.class, () ->
+                reviewsService.submitReview(reviewDTO, requesterID, paperID));
     }
 
     @Test
@@ -79,9 +74,8 @@ public class ReviewsServiceTests {
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(false);
 
-        Assert.assertThrows(IllegalAccessException.class, () -> {
-            reviewsService.submitReview(reviewDTO, requesterID, paperID);
-        });
+        Assert.assertThrows(IllegalAccessException.class, () ->
+                reviewsService.submitReview(reviewDTO, requesterID, paperID));
     }
 
     @Test
@@ -99,9 +93,8 @@ public class ReviewsServiceTests {
         // Assume that the user is not a reviewer - i.e., the third IF does not work
         when(verificationService.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
 
-        Assert.assertThrows(IllegalAccessException.class, () -> {
-            reviewsService.submitReview(reviewDTO, requesterID, paperID);
-        });
+        Assert.assertThrows(IllegalAccessException.class, () ->
+                reviewsService.submitReview(reviewDTO, requesterID, paperID));
     }
 
     @Test
@@ -124,9 +117,8 @@ public class ReviewsServiceTests {
                 paperID,
                 List.of(TrackPhase.SUBMITTING)
         );
-        Assert.assertThrows(IllegalAccessException.class, () -> {
-            reviewsService.submitReview(reviewDTO, requesterID, paperID);
-        });
+        Assert.assertThrows(IllegalAccessException.class, () ->
+                reviewsService.submitReview(reviewDTO, requesterID, paperID));
     }
 
     @Test
@@ -155,13 +147,12 @@ public class ReviewsServiceTests {
         // Assume paper does not exist
         when(verificationService.verifyPaper(paperID)).thenReturn(false);
 
-        Assert.assertThrows(NotFoundException.class, () -> {
-            reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
-        });
+        Assert.assertThrows(NotFoundException.class, () ->
+                reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID));
     }
 
     @Test
-    void verifyIfUserCanAccessReview_NoSuchUserInTheTrack() throws NotFoundException {
+    void verifyIfUserCanAccessReview_NoSuchUserInTheTrack() {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user is not a reviewer
@@ -180,13 +171,12 @@ public class ReviewsServiceTests {
         when(verificationService.isReviewerForPaper(reviewerID, paperID))
                 .thenReturn(true);
 
-        Assert.assertThrows(IllegalAccessException.class, () -> {
-            reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
-        });
+        Assert.assertThrows(IllegalAccessException.class, () ->
+                reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID));
     }
 
     @Test
-    void verifyIfUserCanAccessReview_NoSuchReviewer() throws NotFoundException {
+    void verifyIfUserCanAccessReview_NoSuchReviewer() {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume user exists
@@ -200,13 +190,12 @@ public class ReviewsServiceTests {
         when(verificationService.isReviewerForPaper(reviewerID, paperID))
                 .thenReturn(false);
 
-        Assert.assertThrows(NotFoundException.class, () -> {
-            reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
-        });
+        Assert.assertThrows(NotFoundException.class, () ->
+                reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID));
     }
 
     @Test
-    void verifyIfUserCanAccessReview_NoSuchReviewConnectedToReviewer() throws NotFoundException {
+    void verifyIfUserCanAccessReview_NoSuchReviewConnectedToReviewer() {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume is reviewer
@@ -225,9 +214,8 @@ public class ReviewsServiceTests {
         when(verificationService.isReviewerForPaper(reviewerID, paperID))
                 .thenReturn(false);
 
-        Assert.assertThrows(NotFoundException.class, () -> {
-            reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
-        });
+        Assert.assertThrows(NotFoundException.class, () ->
+                reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID));
     }
 
     @Test
@@ -331,11 +319,8 @@ public class ReviewsServiceTests {
 
         doNothing().when(reviewsService).verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.empty());
-        nl.tudelft.sem.v20232024.team08b.dtos.review.Review expectedDTO =
-                new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(fakeReview);
-        assertThrows(NotFoundException.class, () -> {
-            reviewsService.getReview(requesterID, reviewerID, paperID);
-        });
+        assertThrows(NotFoundException.class, () ->
+                reviewsService.getReview(requesterID, reviewerID, paperID));
     }
 
     @Test
@@ -347,8 +332,6 @@ public class ReviewsServiceTests {
         doThrow(new NotFoundException("")).when(reviewsService)
                 .verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
 
-        assertThrows(NotFoundException.class, () -> {
-            reviewsService.getReview(requesterID, reviewerID, paperID);
-        });
+        assertThrows(NotFoundException.class, () -> reviewsService.getReview(requesterID, reviewerID, paperID));
     }
 }

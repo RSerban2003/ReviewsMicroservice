@@ -13,7 +13,6 @@ import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -25,16 +24,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 public class PaperPhaseCalculatorTests {
-    @MockBean
     private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
-
-    @MockBean
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
-
-    @MockBean
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-
-    @MockBean
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
 
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.spy(
