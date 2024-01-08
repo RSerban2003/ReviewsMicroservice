@@ -1,5 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
+import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.AssignmentsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
@@ -36,7 +37,21 @@ public class AssignmentsController implements AssignmentsAPI {
     public ResponseEntity<Void> assignManual(Long requesterID,
                                              Long reviewerID,
                                              Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            return ResponseEntity.ok(assignmentsService.assignManually(requesterID,reviewerID,paperID));
+        } catch (IllegalCallerException | NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            // The requester must be a pc chair
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        catch (Exception e) {
+            // Internal server error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     /**
