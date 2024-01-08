@@ -165,37 +165,16 @@ public class ReviewsServiceTests {
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(false);
 
-        // Assume the paper exists and the review also exists
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-                .thenReturn(true);
-        when(verificationService.isReviewerForPaper(reviewerID, paperID))
-                .thenReturn(true);
+        // Assume the review does exist
+        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(new Review()));
+
 
         Assert.assertThrows(IllegalAccessException.class, () ->
                 reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID));
     }
 
     @Test
-    void verifyIfUserCanAccessReview_NoSuchReviewer() {
-        // Assume paper exists
-        when(verificationService.verifyPaper(paperID)).thenReturn(true);
-        // Assume user exists
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
-                .thenReturn(true);
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
-                .thenReturn(false);
-        // Assume the reviewer does not exist
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-                .thenReturn(false);
-        when(verificationService.isReviewerForPaper(reviewerID, paperID))
-                .thenReturn(false);
-
-        Assert.assertThrows(NotFoundException.class, () ->
-                reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID));
-    }
-
-    @Test
-    void verifyIfUserCanAccessReview_NoSuchReviewConnectedToReviewer() {
+    void verifyIfUserCanAccessReview_NoSuchReview() {
         // Assume paper exists
         when(verificationService.verifyPaper(paperID)).thenReturn(true);
         // Assume is reviewer
@@ -207,12 +186,9 @@ public class ReviewsServiceTests {
         // Assume user is not an author
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR))
                 .thenReturn(false);
-        // Assume the reviewer does exist
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-                .thenReturn(true);
-        // Assume said reviewer is not assigned to the paper
-        when(verificationService.isReviewerForPaper(reviewerID, paperID))
-                .thenReturn(false);
+        // Assume the review doesn't exist
+        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.empty());
+
 
         Assert.assertThrows(NotFoundException.class, () ->
                 reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID));
@@ -231,12 +207,8 @@ public class ReviewsServiceTests {
         // Assume user is not an author
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR))
                 .thenReturn(false);
-        // Assume the reviewer does exist
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-                .thenReturn(true);
-        // Assume the reviewer does exist
-        when(verificationService.isReviewerForPaper(reviewerID, paperID))
-                .thenReturn(true);
+        // Assume the review does exist
+        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(new Review()));
 
         reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
 
@@ -258,12 +230,9 @@ public class ReviewsServiceTests {
         // Assume user is not an author
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR))
                 .thenReturn(false);
-        // Assume the reviewer does exist
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-                .thenReturn(true);
-        // Assume the reviewer does exist
-        when(verificationService.isReviewerForPaper(reviewerID, paperID))
-                .thenReturn(true);
+
+        // Assume the review does exist
+        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(new Review()));
 
         reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
 
@@ -286,12 +255,8 @@ public class ReviewsServiceTests {
         // Assume user is an author
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR))
                 .thenReturn(true);
-        // Assume the reviewer does exist
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-                .thenReturn(true);
-        // Assume the reviewer does exist
-        when(verificationService.isReviewerForPaper(reviewerID, paperID))
-                .thenReturn(true);
+        // Assume the review does exist
+        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(new Review()));
 
         reviewsService.verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
 
@@ -331,6 +296,7 @@ public class ReviewsServiceTests {
         // Assume the review was not found
         doThrow(new NotFoundException("")).when(reviewsService)
                 .verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
 
         assertThrows(NotFoundException.class, () -> reviewsService.getReview(requesterID, reviewerID, paperID));
     }

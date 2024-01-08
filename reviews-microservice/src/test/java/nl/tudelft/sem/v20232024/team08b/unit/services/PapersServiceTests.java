@@ -10,7 +10,6 @@ import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.List;
 
@@ -19,11 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class PapersServiceTests {
-    @MockBean
     private ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-    @MockBean
     private VerificationService verificationService = Mockito.mock(VerificationService.class);
-    @MockBean
     private PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
 
     private PapersService papersService;

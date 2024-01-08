@@ -26,7 +26,6 @@ import static org.mockito.Mockito.*;
 @AutoConfigureMockMvc
 public class ReviewsControllerTests {
     MockMvc mockMvc;
-
     private final ReviewsService reviewsService = Mockito.mock(ReviewsService.class);
     private final PapersService papersService = Mockito.mock(PapersService.class);
 

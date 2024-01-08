@@ -121,13 +121,9 @@ public class ReviewsService {
         boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         boolean isChair = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
         boolean isAuthor = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR);
-        boolean reviewerExists = verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER);
-        boolean reviewerIsAuthorOfReview = verificationService.isReviewerForPaper(reviewerID, paperID);
 
-        // Check if such review even exists
-        if (!reviewerExists || !reviewerIsAuthorOfReview) {
-            throw new NotFoundException("Such review does not exist");
-        }
+        // Check if such review even exists (the method throws if it doesn't)
+        getReview(reviewerID, paperID);
 
         if (isAuthor) {
             // If the requesting user is author, then he can only access the paper during final phase
