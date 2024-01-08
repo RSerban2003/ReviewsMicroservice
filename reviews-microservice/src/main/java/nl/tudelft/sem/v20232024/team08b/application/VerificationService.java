@@ -88,7 +88,7 @@ public class VerificationService {
         try {
             Long trackID = externalRepository.getSubmission(paperID).getTrackId();
             Long conferenceID = externalRepository.getSubmission(paperID).getEventId();
-            return verifyRoleFromTrack(userID, trackID, conferenceID, role);
+            return verifyRoleFromTrack(userID, conferenceID, trackID, role);
         } catch (NotFoundException e) {
             return false;
         }
