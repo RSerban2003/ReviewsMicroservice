@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class PapersServiceTests {
-    private ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-    private VerificationService verificationService = Mockito.mock(VerificationService.class);
-    private PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
+    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final VerificationService verificationService = Mockito.mock(VerificationService.class);
+    private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
 
     private PapersService papersService;
 

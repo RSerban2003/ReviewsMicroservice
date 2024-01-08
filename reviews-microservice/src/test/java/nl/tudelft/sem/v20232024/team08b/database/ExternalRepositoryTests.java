@@ -18,11 +18,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 public class ExternalRepositoryTests {
-    HttpRequestSender httpRequestSender = Mockito.mock(HttpRequestSender.class);
+    final HttpRequestSender httpRequestSender = Mockito.mock(HttpRequestSender.class);
 
-    ObjectMapper objectMapper = Mockito.mock(ObjectMapper.class);
+    final ObjectMapper objectMapper = Mockito.mock(ObjectMapper.class);
 
-    ExternalRepository externalRepository = new ExternalRepository(httpRequestSender, objectMapper);
+    final ExternalRepository externalRepository = new ExternalRepository(httpRequestSender, objectMapper);
 
     @Test
     void getRolesOfUserJsonFail() throws NotFoundException, IOException {

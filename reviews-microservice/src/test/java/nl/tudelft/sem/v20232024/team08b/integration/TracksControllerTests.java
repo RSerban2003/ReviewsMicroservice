@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 @AutoConfigureMockMvc
 public class TracksControllerTests {
     MockMvc mockMvc;
-    TracksService tracksService = Mockito.mock(TracksService.class);
+    final TracksService tracksService = Mockito.mock(TracksService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach

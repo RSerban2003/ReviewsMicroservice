@@ -13,7 +13,7 @@ import java.net.http.HttpResponse;
 
 @Component
 public class HttpRequestSender {
-    HttpClient httpClient;
+    final HttpClient httpClient;
 
     /**
      * Default constructor.

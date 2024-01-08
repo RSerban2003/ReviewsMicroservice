@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class VerificationServiceTests {
-    ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-    ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
-    TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
+    final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
+    final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
     private final VerificationService verificationService = Mockito.spy(
             new VerificationService(
                     externalRepository,
