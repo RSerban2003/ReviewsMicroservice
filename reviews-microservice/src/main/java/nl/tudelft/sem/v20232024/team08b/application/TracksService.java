@@ -124,7 +124,7 @@ public class TracksService {
         }
 
         // If the track is still not in the repository, we did something very wrong
-        if(optional.isEmpty()) {
+        if (optional.isEmpty()) {
             throw new RuntimeException("Track was not inserted into our " +
                     "repository, even though it should have been");
         }
@@ -142,7 +142,7 @@ public class TracksService {
      */
     public void insertTrackToOurDB(Long conferenceID,
                                    Long trackID) {
-        return ;
+        return;
     }
 
     /**
@@ -174,7 +174,7 @@ public class TracksService {
         Integer submissionDeadlineUnix = externalRepository.getTrack(conferenceID, trackID).getDeadline();
 
         // Add exactly 2 days (in milliseconds) to the submission deadline
-        Integer biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);
+        int biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);
 
         // Convert from Unix timestamp to Date
         Date biddingDeadline = Date.from(Instant.ofEpochMilli(biddingDeadlineUnix));
@@ -192,7 +192,7 @@ public class TracksService {
      * @param trackID the ID of the track
      * @return the bidding deadline
      * @throws NotFoundException if such track does not exist
-     * @throws IllegalAccessException if the user has not access to the track
+     * @throws IllegalAccessException if the user has no access to the track
      */
     public Date getBiddingDeadline(Long requesterID,
                                    Long conferenceID,

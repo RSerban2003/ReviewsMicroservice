@@ -15,6 +15,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -97,5 +100,70 @@ public class TracksControllerTests {
         verify(tracksService).getTrackPhase(requesterID, conferenceID, trackID);
     }
 
+    /**
+     * Simulates an exception inside getBiddingDeadline function and checks if
+     * correct status code was returned.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    private void getBiddingDeadline_WithException(Exception exception, int expected) throws Exception {
+        Long requesterID = 1L;
+        Long conferenceID = 2L;
+        Long trackID = 3L;
 
+        // Make sure correct exception is thrown when the respective call to service is called
+        doThrow(exception).when(tracksService).getBiddingDeadline(requesterID, conferenceID, trackID);
+
+        // Send the request to respective endpoint
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/bidding-deadline",
+                                conferenceID.toString(), trackID.toString())
+                        .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        // Make sure the required call to the service was made
+        verify(tracksService).getTrackPhase(requesterID, conferenceID, trackID);
+    }
+
+    @Test
+    void getBiddingDeadline_NoSuchPaper() throws Exception {
+        getPhase_WithException(new NotFoundException(""), 404);
+    }
+
+    @Test
+    void getBiddingDeadline_IllegalAccess() throws Exception {
+        getPhase_WithException(new IllegalAccessException(""), 403);
+    }
+
+    @Test
+    void getBiddingDeadline_UnknownError() throws Exception {
+        getPhase_WithException(new RuntimeException(""), 500);
+    }
+
+    @Test
+    void getBiddingDeadline_Successful() throws Exception {
+        Date fakeDate = Date.valueOf(LocalDate.of(2012, 10, 2));
+        String expectedJSON = objectMapper.writeValueAsString(fakeDate);
+
+        Long requesterID = 1L;
+        Long conferenceID = 2L;
+        Long trackID = 3L;
+
+        // Make sure correct exception is thrown when the respective call to service is called
+        doReturn(fakeDate).when(tracksService).getBiddingDeadline(requesterID, conferenceID, trackID);
+
+        // Send the request to respective endpoint
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/bidding-deadline",
+                                        conferenceID.toString(), trackID.toString())
+                                .param("requesterID", requesterID.toString())
+                ).andExpect(MockMvcResultMatchers.status().is(200))
+                .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
+
+        // Make sure the required call to the service was made
+        verify(tracksService).getBiddingDeadline(requesterID, conferenceID, trackID);
+
+    }
 }
