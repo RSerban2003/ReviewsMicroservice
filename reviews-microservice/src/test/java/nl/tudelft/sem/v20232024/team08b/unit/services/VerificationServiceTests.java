@@ -34,7 +34,8 @@ public class VerificationServiceTests {
             new VerificationService(
                     externalRepository,
                     reviewRepository,
-                    trackPhaseCalculator
+                    trackPhaseCalculator,
+                    null
             )
     );
     private Submission fakeSubmission;

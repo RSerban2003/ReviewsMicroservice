@@ -1,14 +1,20 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
+import javax.validation.Valid;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.domain.Track;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.User;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +26,8 @@ public class VerificationService {
     private final ReviewRepository reviewRepository;
     private final TrackPhaseCalculator trackPhaseCalculator;
 
+    private final TrackRepository trackRepository;
+
     /**
      * Default constructor.
      *
@@ -30,10 +38,11 @@ public class VerificationService {
     @Autowired
     public VerificationService(ExternalRepository externalRepository,
                                ReviewRepository reviewRepository,
-                               TrackPhaseCalculator trackPhaseCalculator) {
+                               TrackPhaseCalculator trackPhaseCalculator, TrackRepository trackRepository) {
         this.externalRepository = externalRepository;
         this.reviewRepository = reviewRepository;
         this.trackPhaseCalculator = trackPhaseCalculator;
+        this.trackRepository = trackRepository;
     }
 
     /**
@@ -177,5 +186,31 @@ public class VerificationService {
         Long conferenceID = submission.getEventId();
         Long trackID = submission.getTrackId();
         verifyTrackPhase(conferenceID, trackID, acceptablePhases);
+    }
+
+    public void verifyCOI(Long paperID, Long reviewerID) throws NotFoundException, ConflictOfInterestException {
+        Submission submission = externalRepository.getSubmission(paperID);
+        List<@Valid User> conflictsOfInterest = submission.getConflictsOfInterest();
+        for (User user : conflictsOfInterest) {
+            if (user.getUserId() == reviewerID) {
+                throw new ConflictOfInterestException("The reviewer has COI with this paper");
+            }
+        }
+    }
+
+    public void verifyIfTrackExists(Long paperID) throws NotFoundException {
+        Submission submission = externalRepository.getSubmission(paperID);
+        Long trackID = submission.getTrackId();
+        Long conferenceID = submission.getEventId();
+        if(trackRepository.findById(new TrackID(conferenceID,trackID)).isPresent()){
+            return;
+        }
+        Track toSave = new Track();
+        toSave.setTrackID(new TrackID(conferenceID,trackID));
+        toSave.setReviewersHaveBeenFinalized(false);
+        toSave.setBiddingDeadline(null);
+
+        trackRepository.save(toSave);
+
     }
 }
