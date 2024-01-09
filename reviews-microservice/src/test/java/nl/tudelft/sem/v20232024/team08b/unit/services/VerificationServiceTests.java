@@ -13,7 +13,6 @@ import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class VerificationServiceTests {
-    @MockBean
-    ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-    @MockBean
-    ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
-    @MockBean
-    TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
-    private VerificationService verificationService = Mockito.spy(
+    final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
+    final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
+    private final VerificationService verificationService = Mockito.spy(
             new VerificationService(
                     externalRepository,
                     reviewRepository,
@@ -173,9 +169,8 @@ public class VerificationServiceTests {
         when(
                 trackPhaseCalculator.getTrackPhase(0L, 1L)
         ).thenThrow(new NotFoundException(""));
-        assertThrows(NotFoundException.class, () -> {
-            verificationService.verifyTrackPhase(0L, 1L, List.of());
-        });
+        assertThrows(NotFoundException.class, () ->
+                verificationService.verifyTrackPhase(0L, 1L, List.of()));
     }
 
     @Test
@@ -186,12 +181,11 @@ public class VerificationServiceTests {
         ).thenReturn(TrackPhase.BIDDING);
 
         // Assume allowed phases are reviewing and final. Then the method should throw
-        assertThrows(IllegalAccessException.class, () -> {
-            verificationService.verifyTrackPhase(
-                    0L, 1L,
-                    List.of(TrackPhase.REVIEWING, TrackPhase.FINAL)
-            );
-        });
+        assertThrows(IllegalAccessException.class, () ->
+                verificationService.verifyTrackPhase(
+                0L, 1L,
+                List.of(TrackPhase.REVIEWING, TrackPhase.FINAL)
+        ));
     }
 
     @Test
@@ -202,12 +196,10 @@ public class VerificationServiceTests {
         ).thenReturn(TrackPhase.BIDDING);
 
         // Assume allowed phases are reviewing and bidding. Then the method should not throw
-        assertDoesNotThrow(() -> {
-            verificationService.verifyTrackPhase(
-                    0L, 1L,
-                    List.of(TrackPhase.REVIEWING, TrackPhase.BIDDING)
-            );
-        });
+        assertDoesNotThrow(() -> verificationService.verifyTrackPhase(
+                0L, 1L,
+                List.of(TrackPhase.REVIEWING, TrackPhase.BIDDING)
+        ));
     }
 
     @Test
@@ -226,12 +218,11 @@ public class VerificationServiceTests {
         doThrow(new NotFoundException(""))
                 .when(verificationService).verifyTrackPhase(conferenceID, trackID, acceptable);
         // Assume allowed phases are reviewing and bidding. Then the method should not throw
-        assertThrows(NotFoundException.class, () -> {
-            verificationService.verifyTrackPhaseThePaperIsIn(
-                    paperID,
-                    acceptable
-            );
-        });
+        assertThrows(NotFoundException.class, () ->
+                verificationService.verifyTrackPhaseThePaperIsIn(
+                        paperID,
+                        acceptable
+                ));
     }
 
     @Test
@@ -250,12 +241,12 @@ public class VerificationServiceTests {
         doNothing()
                 .when(verificationService).verifyTrackPhase(conferenceID, trackID, acceptable);
         // Assume allowed phases are reviewing and bidding. Then the method should not throw
-        assertDoesNotThrow(() -> {
-            verificationService.verifyTrackPhaseThePaperIsIn(
-                    paperID,
-                    acceptable
-            );
-        });
+        assertDoesNotThrow(() ->
+                verificationService.verifyTrackPhaseThePaperIsIn(
+                        paperID,
+                        acceptable
+                )
+        );
     }
 
     @Test
@@ -300,10 +291,6 @@ public class VerificationServiceTests {
 
     @Test
     void verifyRoleFromPaper_NoSuchPaper() throws NotFoundException {
-        Submission fakeSubmission = new Submission();
-        fakeSubmission.setEventId(1L);
-        fakeSubmission.setTrackId(2L);
-
         when(externalRepository.getSubmission(3L)).thenThrow(
                 new NotFoundException("")
         );

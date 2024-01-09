@@ -7,7 +7,6 @@ import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,6 @@ import java.util.Optional;
 
 @Component
 public class TrackPhaseCalculator {
-    private final PaperRepository paperRepository;
     private final TrackRepository trackRepository;
     private final ExternalRepository externalRepository;
     private final PaperPhaseCalculator paperPhaseCalculator;
@@ -26,18 +24,15 @@ public class TrackPhaseCalculator {
     /**
      * Default constructor for the phase calculator.
      *
-     * @param paperRepository repository storing the papers
      * @param trackRepository repository storing the tracks
      * @param externalRepository repository storing everything outside of
      *                           this microservice
      * @param paperPhaseCalculator object that calculates phase of the paper
      */
     @Autowired
-    public TrackPhaseCalculator(PaperRepository paperRepository,
-                                TrackRepository trackRepository,
+    public TrackPhaseCalculator(TrackRepository trackRepository,
                                 ExternalRepository externalRepository,
                                 PaperPhaseCalculator paperPhaseCalculator) {
-        this.paperRepository = paperRepository;
         this.trackRepository = trackRepository;
         this.externalRepository = externalRepository;
         this.paperPhaseCalculator = paperPhaseCalculator;
@@ -94,7 +89,7 @@ public class TrackPhaseCalculator {
         List<Paper> papers = trackOptional.get().getPapers();
 
         // Check if all the papers are finalized
-        Boolean ret = true;
+        boolean ret = true;
         for (var paper : papers) {
             Long paperID = paper.getId();
 
@@ -128,7 +123,7 @@ public class TrackPhaseCalculator {
                 externalRepository.getTrack(conferenceID, trackID);
 
         // Get the current timestamp
-        Long currentTime = clock.instant().toEpochMilli();
+        long currentTime = clock.instant().toEpochMilli();
 
         // Check if submission deadline has not yet passed
         Long submissionDeadline = Long.valueOf(track.getDeadline());
@@ -143,14 +138,14 @@ public class TrackPhaseCalculator {
         }
 
         // Check if the reviewers haven't yet been assigned
-        Boolean reviewersAssigned = paperPhaseCalculator
+        boolean reviewersAssigned = paperPhaseCalculator
                 .checkIfReviewersAreAssignedToTrack(conferenceID, trackID);
         if (!reviewersAssigned) {
             return TrackPhase.ASSIGNING;
         }
 
         // Check if all papers in a track have been finalized
-        Boolean allPapersFinalized = checkIfAllPapersFinalized(conferenceID, trackID);
+        boolean allPapersFinalized = checkIfAllPapersFinalized(conferenceID, trackID);
         if (!allPapersFinalized) {
             return TrackPhase.REVIEWING;
         }

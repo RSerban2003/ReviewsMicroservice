@@ -4,40 +4,24 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TracksService {
-    private final PaperRepository paperRepository;
-    private final TrackRepository trackRepository;
-    private final ExternalRepository externalRepository;
     private final VerificationService verificationService;
     private final TrackPhaseCalculator trackPhaseCalculator;
     /**
      * Default constructor for the service.
      *
-     * @param paperRepository repository storing the papers
-     * @param trackRepository repository storing the tracks
-     * @param externalRepository repository storing everything outside of
-     *                           this microservice
      * @param verificationService service responsible for verifying validity
      *                            of provided IDs
      * @param trackPhaseCalculator object responsible for getting the current phase
      *                             of a track
      */
     @Autowired
-    public TracksService(PaperRepository paperRepository,
-                         TrackRepository trackRepository,
-                         ExternalRepository externalRepository,
-                         VerificationService verificationService,
+    public TracksService(VerificationService verificationService,
                          TrackPhaseCalculator trackPhaseCalculator) {
-        this.paperRepository = paperRepository;
-        this.trackRepository = trackRepository;
-        this.externalRepository = externalRepository;
         this.verificationService = verificationService;
         this.trackPhaseCalculator = trackPhaseCalculator;
     }

@@ -13,9 +13,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("unchecked")
 public class HttpRequestSenderTests {
-    private HttpClient httpClient = Mockito.mock(HttpClient.class);
-    private HttpRequestSender httpRequestSender = new HttpRequestSender(httpClient);
+    private final HttpClient httpClient = Mockito.mock(HttpClient.class);
+    private final HttpRequestSender httpRequestSender = new HttpRequestSender(httpClient);
 
     @Test
     void simpleIOException1() throws IOException, InterruptedException {
@@ -35,7 +36,7 @@ public class HttpRequestSenderTests {
     @Test
     void statusOK() throws NotFoundException, IOException, InterruptedException {
         String url = "http://fake.url";
-        HttpResponse fakeResponse = Mockito.mock(HttpResponse.class);
+        var fakeResponse = Mockito.mock(HttpResponse.class);
         when(fakeResponse.body()).thenReturn("fake body");
         when(fakeResponse.statusCode()).thenReturn(200);
         when(httpClient.send(any(), any())).thenReturn(fakeResponse);
@@ -45,7 +46,7 @@ public class HttpRequestSenderTests {
     @Test
     void statusNotFound() throws IOException, InterruptedException {
         String url = "http://fake.url";
-        HttpResponse fakeResponse = Mockito.mock(HttpResponse.class);
+        var fakeResponse = Mockito.mock(HttpResponse.class);
         when(fakeResponse.statusCode()).thenReturn(404);
         when(httpClient.send(any(), any())).thenReturn(fakeResponse);
         assertThrows(NotFoundException. class, () ->
@@ -56,7 +57,7 @@ public class HttpRequestSenderTests {
     @Test
     void statusUnknown() throws IOException, InterruptedException {
         String url = "http://fake.url";
-        HttpResponse fakeResponse = Mockito.mock(HttpResponse.class);
+        var fakeResponse = Mockito.mock(HttpResponse.class);
         when(fakeResponse.statusCode()).thenReturn(102);
         when(httpClient.send(any(), any())).thenReturn(fakeResponse);
         assertThrows(RuntimeException.class, () ->

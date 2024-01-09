@@ -22,14 +22,6 @@ public interface ReviewRepository extends JpaRepository<Review, ReviewID> {
     }
 
     /**
-     * Finds a list of reviews that were reviewed by a given reviewer.
-     *
-     * @param reviewerID the ID of the reviewer
-     * @return a list of reviews by that reviewer
-     */
-    List<Review> findByReviewIDReviewerID(Long reviewerID);
-
-    /**
      * Finds a list of reviews that are assigned to given paper.
      *
      * @param paperID the ID of the paper

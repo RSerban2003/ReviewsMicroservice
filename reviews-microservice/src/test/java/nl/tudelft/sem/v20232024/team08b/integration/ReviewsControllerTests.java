@@ -26,7 +26,6 @@ import static org.mockito.Mockito.*;
 @AutoConfigureMockMvc
 public class ReviewsControllerTests {
     MockMvc mockMvc;
-
     private final ReviewsService reviewsService = Mockito.mock(ReviewsService.class);
     private final PapersService papersService = Mockito.mock(PapersService.class);
 
@@ -42,7 +41,7 @@ public class ReviewsControllerTests {
                 ConfidenceScore.BASIC,
                 "Comment for author",
                 "Confidential comment",
-                RecommendationScore.STRONG_ACCEPT
+                RecommendationScore.STRONG_REJECT
         );
     }
 
@@ -203,8 +202,6 @@ public class ReviewsControllerTests {
      * @throws Exception method can throw exception
      */
     private void getPhase_WithException(Exception exception, int expected) throws Exception {
-        PaperPhase fakePaperPhase = PaperPhase.REVIEWED;
-
         Long requesterID = 1L;
         Long paperID = 2L;
 

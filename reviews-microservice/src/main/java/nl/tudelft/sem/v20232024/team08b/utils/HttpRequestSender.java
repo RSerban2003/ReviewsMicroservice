@@ -13,7 +13,7 @@ import java.net.http.HttpResponse;
 
 @Component
 public class HttpRequestSender {
-    HttpClient httpClient;
+    final HttpClient httpClient;
 
     /**
      * Default constructor.
@@ -46,19 +46,16 @@ public class HttpRequestSender {
                     .GET()
                     .build();
 
-            HttpResponse response = httpClient.send(
+            var response = httpClient.send(
                     request, HttpResponse.BodyHandlers.ofString());
 
             HttpStatus status = HttpStatus.valueOf(response.statusCode());
 
-            switch (status) {
-                case OK, CREATED:
-                    return (String) response.body();
-                case NOT_FOUND:
-                    throw new NotFoundException("404, not found");
-                default:
-                    throw new RuntimeException("Failed to parse status.");
-            }
+            return switch (status) {
+                case OK, CREATED -> response.body();
+                case NOT_FOUND -> throw new NotFoundException("404, not found");
+                default -> throw new RuntimeException("Failed to parse status.");
+            };
         } catch (URISyntaxException | InterruptedException | IOException e) {
             throw new RuntimeException("GET request failed");
         }

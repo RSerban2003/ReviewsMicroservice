@@ -4,19 +4,16 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
-import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.sql.Date;
 import java.time.Clock;
@@ -25,27 +22,17 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 public class TrackPhaseCalculatorTests {
-    @MockBean
-    private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
-
-    @MockBean
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
-
-    @MockBean
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-
-    @MockBean
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
-
-    @MockBean
     private final Clock clock = Mockito.mock(Clock.class);
 
-    private TrackPhaseCalculator trackPhaseCalculator = Mockito.spy(
+    private final TrackPhaseCalculator trackPhaseCalculator = Mockito.spy(
             new TrackPhaseCalculator(
-                    paperRepository,
                     trackRepository,
                     externalRepository,
                     paperPhaseCalculator
@@ -55,7 +42,6 @@ public class TrackPhaseCalculatorTests {
     private Track track;
     private TrackID trackID;
     private List<Paper> papers;
-    private List<Review> reviews;
     nl.tudelft.sem.v20232024.team08b.dtos.users.Track trackDTO;
 
 
@@ -77,7 +63,7 @@ public class TrackPhaseCalculatorTests {
 
         // Set current time to 10ms since start of time
         when(clock.instant()).thenReturn(Instant.ofEpochMilli(10L));
-        // Setup a fake track with fake papers
+        // Set up a fake track with fake papers
 
         // Create 2 papers for the single track
         Paper paper1 = new Paper(3L, null, PaperStatus.NOT_DECIDED, false);
@@ -96,7 +82,7 @@ public class TrackPhaseCalculatorTests {
                 papers
         );
 
-        // Setup a fake track DTO
+        // Set up a fake track DTO
         trackDTO = new nl.tudelft.sem.v20232024.team08b.dtos.users.Track();
 
         when(
