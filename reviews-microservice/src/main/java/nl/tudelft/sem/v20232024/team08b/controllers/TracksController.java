@@ -86,7 +86,20 @@ public class TracksController implements TracksAPI {
     public ResponseEntity<Date> getBiddingDeadline(Long requesterID,
                                                    Long conferenceID,
                                                    Long trackID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            Date biddingDeadline = tracksService.getBiddingDeadline(
+                    requesterID,
+                    conferenceID,
+                    trackID
+            );
+            return ResponseEntity.ok(biddingDeadline);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
