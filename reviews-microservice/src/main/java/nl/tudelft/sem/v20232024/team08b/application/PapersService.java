@@ -162,7 +162,7 @@ public class PapersService {
                                               Long paperID) throws NotFoundException,
                                                                    IllegalAccessException{
 
-        if(!(verificationService.isReviewerForPaper(requesterID, paperID) &&
+        if (!(verificationService.isReviewerForPaper(requesterID, paperID) &&
                 verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) ||
         !(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR) &&
                 verificationService.isAuthorToPaper(requesterID, paperID)) ||

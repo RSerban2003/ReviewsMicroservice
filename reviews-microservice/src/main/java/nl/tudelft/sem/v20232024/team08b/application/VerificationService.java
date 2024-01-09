@@ -191,8 +191,8 @@ public class VerificationService {
     public boolean isAuthorToPaper(Long userID, Long paperID) throws NotFoundException {
         Submission submission = externalRepository.getSubmission(paperID);
         List<@Valid User> authors = submission.getAuthors();
-        for(@Valid User author : authors) {
-            if(Objects.equals(author.getUserId(), userID))
+        for (@Valid User author : authors) {
+            if (Objects.equals(author.getUserId(), userID))
                 return true;
         }
         return false;
