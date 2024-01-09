@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -215,5 +216,39 @@ public class TracksService {
         // Finally, get the deadline of the track
         Track track = getTrackWithInsertionToOurRepo(conferenceID, trackID);
         return track.getBiddingDeadline();
+    }
+
+    /**
+     * Sets the bidding deadline to the one provided. Also performs checks if
+     * the user is allowed to change the deadline, and if the current phase allows
+     * it.
+     *
+     * @param requesterID the ID of the requester
+     * @param conferenceID the ID of the conference
+     * @param trackID the ID of the track
+     * @param newDeadline the new deadline to be set
+     * @throws NotFoundException if no such track exists
+     * @throws IllegalAccessException if the user does not have permissions to set deadline
+     */
+    public void setBiddingDeadline(Long requesterID,
+                                   Long conferenceID,
+                                   Long trackID,
+                                   Date newDeadline) throws NotFoundException, IllegalAccessException {
+        // First, we check if the user in general can access the track
+        verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+
+        // We also check if the user is a chair in the track
+        boolean isChair = verificationService.verifyRoleFromTrack(requesterID, conferenceID,
+                trackID, UserRole.CHAIR);
+
+        if (!isChair) {
+            throw new IllegalAccessException("The user is not a chair in the track");
+        }
+
+        // Verify that the current phase is either bidding or submitting phase
+        verificationService.verifyTrackPhase(conferenceID, trackID,
+                List.of(TrackPhase.BIDDING, TrackPhase.SUBMITTING));
+
+        setBiddingDeadlineCommon(conferenceID, trackID, newDeadline);
     }
 }
