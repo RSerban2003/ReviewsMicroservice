@@ -192,8 +192,9 @@ public class VerificationService {
         Submission submission = externalRepository.getSubmission(paperID);
         List<@Valid User> authors = submission.getAuthors();
         for (@Valid User author : authors) {
-            if (Objects.equals(author.getUserId(), userID))
+            if (Objects.equals(author.getUserId(), userID)) {
                 return true;
+            }
         }
         return false;
     }
