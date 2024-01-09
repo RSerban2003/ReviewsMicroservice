@@ -17,7 +17,9 @@ import org.mockito.Mockito;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -248,6 +250,9 @@ public class TracksServicesTests {
         // Assert the result
         Date result = tracksService.getBiddingDeadline(requesterID, conferenceID, trackID);
         assertThat(result).isEqualTo(biddingDeadline);
+
+        // Verify user access to track was checked
+        verify(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
     }
 
     @Test
@@ -273,6 +278,58 @@ public class TracksServicesTests {
         // Verify that the track was added to the DB and the the default bidding deadline was set
         verify(tracksService, times(2)).getTrackWithInsertionToOurRepo(conferenceID, trackID);
         verify(tracksService).setDefaultBiddingDeadline(conferenceID, trackID);
+    }
+
+    @Test
+    void setBiddingDeadline_NotChair() throws NotFoundException, IllegalAccessException {
+        Date date = java.sql.Date.valueOf(LocalDate.of(2012, 10, 2));
+        // Assume the user is allowed to access the track
+        doNothing().when(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+
+        // Assume the user is not a chair
+        when(verificationService.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR))
+                .thenReturn(false);
+        assertThrows(IllegalAccessException.class, () ->
+                tracksService.setBiddingDeadline(requesterID, conferenceID, trackID, date)
+        );
+    }
+
+    @Test
+    void setBiddingDeadline_AllFine() throws NotFoundException, IllegalAccessException {
+
+        List<TrackPhase> goodPhases = List.of(TrackPhase.BIDDING, TrackPhase.SUBMITTING);
+
+        // Assume the user is allowed to access the track
+        doNothing().when(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+
+        // Assume the user is a chair
+        when(verificationService.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR))
+                .thenReturn(true);
+
+        // Assume phase is right
+        doNothing().when(verificationService).verifyTrackPhase(conferenceID, trackID, goodPhases);
+
+        // Assume the repository returns our fake track
+        doReturn(track).when(tracksService).getTrackWithInsertionToOurRepo(conferenceID, trackID);
+        doReturn(track).when(trackRepository).save(track);
+
+        // Create fake date
+        Date date = java.sql.Date.valueOf(LocalDate.of(2012, 10, 2));
+
+        // Call the method
+        tracksService.setBiddingDeadline(requesterID, conferenceID, trackID, date);
+
+        // Make sure user access was verified
+        verify(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+
+        // Make sure phase was checked
+        verify(verificationService).verifyTrackPhase(conferenceID, trackID, goodPhases);
+
+        // Make sure our track was saved
+        verify(trackRepository).save(track);
+
+        // Make sure track date is set
+        assertThat(track.getBiddingDeadline()).isEqualTo(date);
     }
 
 }
