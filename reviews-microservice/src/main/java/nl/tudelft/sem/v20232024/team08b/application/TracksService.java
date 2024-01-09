@@ -108,12 +108,12 @@ public class TracksService {
      * @throws NotFoundException if no such track exists
      */
     public Track getTrackWithInsertionToOurRepo(Long conferenceID, Long trackID) throws NotFoundException {
-        // If such track does not exist, return empty
+        // If such track does not exist, throw error
         if (!verificationService.verifyTrack(conferenceID, trackID)) {
             throw new NotFoundException("Such track does not exist");
         }
 
-        // Get the track from our local DB
+        // Get the track from our local repository
         TrackID id = new TrackID(conferenceID, trackID);
         Optional<Track> optional = trackRepository.findById(id);
 
