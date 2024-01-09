@@ -11,6 +11,10 @@ import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Date;
+import java.util.Optional;
+
 @Service
 public class TracksService {
     private final VerificationService verificationService;
@@ -30,7 +34,7 @@ public class TracksService {
      */
     @Autowired
     public TracksService(VerificationService verificationService,
-                         TrackPhaseCalculator trackPhaseCalculator) {
+                         TrackPhaseCalculator trackPhaseCalculator,
                          TrackRepository trackRepository,
                          ExternalRepository externalRepository) {
         this.verificationService = verificationService;
@@ -141,4 +145,75 @@ public class TracksService {
         return ;
     }
 
+    /**
+     * Sets the bidding deadline of a track and saves it in the repository.
+     *
+     * @param conferenceID the ID of the conference of the track
+     * @param trackID the ID of the track
+     * @param deadline the deadline to set
+     * @throws NotFoundException if such track does not exist
+     */
+    private void setBiddingDeadlineCommon(Long conferenceID,
+                                   Long trackID,
+                                   Date deadline) throws NotFoundException {
+        Track track = getTrackWithInsertionToOurRepo(conferenceID, trackID);
+        track.setBiddingDeadline(deadline);
+        trackRepository.save(track);
+    }
+
+    /**
+     * Sets the default bidding deadline for a track. Assumes that the track
+     * exists.
+     *
+     * @param conferenceID the ID of the conference the track is in.
+     * @param trackID the ID of the track.
+     */
+    public void setDefaultBiddingDeadline(Long conferenceID,
+                                           Long trackID) throws NotFoundException {
+        // Get the submission deadline from the other microservice
+        Integer submissionDeadlineUnix = externalRepository.getTrack(conferenceID, trackID).getDeadline();
+
+        // Add exactly 2 days (in milliseconds) to the submission deadline
+        Integer biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);
+
+        // Convert from Unix timestamp to Date
+        Date biddingDeadline = Date.from(Instant.ofEpochMilli(biddingDeadlineUnix));
+
+        // Set the bidding deadline for the track
+        setBiddingDeadlineCommon(conferenceID, trackID, biddingDeadline);
+    }
+
+
+    /**
+     * Gets the current bidding deadline of a track.
+     *
+     * @param requesterID the ID of the requesting user
+     * @param conferenceID the ID of the conference of the track
+     * @param trackID the ID of the track
+     * @return the bidding deadline
+     * @throws NotFoundException if such track does not exist
+     * @throws IllegalAccessException if the user has not access to the track
+     */
+    public Date getBiddingDeadline(Long requesterID,
+                                   Long conferenceID,
+                                   Long trackID) throws NotFoundException,
+                                                        IllegalAccessException {
+        // No phase verification needs to be done. We only need to check if
+        // the requester belongs to the given track.
+        verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+
+        // Check if the track is in our repo at the moment
+        boolean isInRepo = trackRepository.findById(new TrackID(conferenceID, trackID)).isPresent();
+
+        // If the track was not in the repository before getting it, we need to
+        // add it to the repo and set the default deadline for it
+        if (!isInRepo) {
+            getTrackWithInsertionToOurRepo(conferenceID, trackID);
+            setDefaultBiddingDeadline(conferenceID, trackID);
+        }
+
+        // Finally, get the deadline of the track
+        Track track = getTrackWithInsertionToOurRepo(conferenceID, trackID);
+        return track.getBiddingDeadline();
+    }
 }
