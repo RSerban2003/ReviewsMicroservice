@@ -5,6 +5,7 @@ import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.User;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
@@ -12,7 +13,9 @@ import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class VerificationService {
@@ -175,5 +178,23 @@ public class VerificationService {
         Long conferenceID = submission.getEventId();
         Long trackID = submission.getTrackId();
         verifyTrackPhase(conferenceID, trackID, acceptablePhases);
+    }
+
+    /**
+     *  Checks whether a user given by userID is an author of a paper given by paperID.
+     *
+     * @param userID the ID of the user
+     * @param paperID the ID of the paper
+     * @return true if the user is an author of the paper, false otherwise
+     * @throws NotFoundException if the paperID is not valid
+     */
+    public boolean isAuthorToPaper(Long userID, Long paperID) throws NotFoundException {
+        Submission submission = externalRepository.getSubmission(paperID);
+        List<@Valid User> authors = submission.getAuthors();
+        for(@Valid User author : authors) {
+            if(Objects.equals(author.getUserId(), userID))
+                return true;
+        }
+        return false;
     }
 }

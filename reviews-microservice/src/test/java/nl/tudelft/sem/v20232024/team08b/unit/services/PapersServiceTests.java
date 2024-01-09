@@ -7,6 +7,7 @@ import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,6 +20,7 @@ import static org.mockito.Mockito.*;
 
 public class PapersServiceTests {
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
     private final VerificationService verificationService = Mockito.mock(VerificationService.class);
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
 
@@ -33,6 +35,7 @@ public class PapersServiceTests {
         papersService = Mockito.spy(
                 new PapersService(
                         externalRepository,
+                        paperRepository,
                         verificationService,
                         paperPhaseCalculator
                 )
