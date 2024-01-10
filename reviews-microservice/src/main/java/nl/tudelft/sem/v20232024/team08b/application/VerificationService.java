@@ -109,10 +109,8 @@ public class VerificationService {
      * @param reviewerID the ID of the user.
      * @param paperID the ID of the paper.
      * @return whether the user is assigned to the paper or not.
-     * @throws IllegalAccessException if the user is not assigned to the paper.
      */
     public boolean isReviewerForPaper(Long reviewerID, Long paperID) {
-
         return reviewRepository.isReviewerForPaper(reviewerID, paperID);
     }
 

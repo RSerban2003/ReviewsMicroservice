@@ -12,10 +12,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ExternalRepository {
     private final int ourID = -1;
-    private ObjectMapper objectMapper;
-    private HttpRequestSender httpRequestSender;
-    private String submissionsURL = "https://localhost:8081";
-    private String usersURL = "https://localhost:8080";
+    private final String submissionsURL = "https://localhost:8081";
+    private final String usersURL = "https://localhost:8080";
+    private final ObjectMapper objectMapper;
+    private final HttpRequestSender httpRequestSender;
 
     /**
      * Default constructor.

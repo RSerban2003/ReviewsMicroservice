@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
 @DataJpaTest
 @RunWith(SpringRunner.class)
@@ -29,7 +30,12 @@ public class ReviewsRepositoryTests {
 
         Optional<Review> got = reviewRepository.findById(reviewId);
         assertThat(got).isNotEmpty();
-        assertThat(got.get().getReviewID()).isEqualTo(reviewId);
+        if (got.isPresent()) {
+            assertThat(got.get().getReviewID()).isEqualTo(reviewId);
+        } else {
+            fail("Got is not present");
+        }
+
     }
 
     @Test

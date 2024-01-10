@@ -25,9 +25,7 @@ import static org.mockito.Mockito.*;
 @AutoConfigureMockMvc
 public class PapersControllerTests {
     MockMvc mockMvc;
-
     private final PapersService paperService = Mockito.mock(PapersService.class);
-
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Paper fakePaper;
     private PaperSummary fakeTitleAndAbstract;
