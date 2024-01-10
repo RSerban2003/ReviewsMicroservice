@@ -71,13 +71,13 @@ public class VerificationServiceTests {
         when(externalRepository.getSubmission(1L)).thenReturn(fakeSubmission);
         //empty coi's list
         assertDoesNotThrow(() -> verificationService.verifyCOI(1L, 1L));
-        List<@Valid User> users = new ArrayList<>();
         User u1 = new User();
         u1.userId(5L);
         User u2 = new User();
         u2.userId(6L);
         User u3 = new User();
         u3.userId((7L));
+        List<@Valid User> users = new ArrayList<>();
         users.add(u1);
         users.add(u2);
         users.add(u3);
