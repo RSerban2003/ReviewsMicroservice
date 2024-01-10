@@ -66,6 +66,7 @@ public class TracksServicesTests {
         assertThrows(NotFoundException.class, () ->
                 tracksService.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID));
     }
+
     @Test
     void insertTrackToOurDB_ValidInput_SaveMethodCalled() {
         Long conferenceID = 1L;

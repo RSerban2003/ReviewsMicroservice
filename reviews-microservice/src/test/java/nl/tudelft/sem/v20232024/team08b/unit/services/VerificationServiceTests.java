@@ -73,17 +73,17 @@ public class VerificationServiceTests {
         assertDoesNotThrow(() -> verificationService.verifyCOI(1L, 1L));
         List<@Valid User> users = new ArrayList<>();
         User u1 = new User();
-        User u2 = new User();
-        User u3 = new User();
         u1.userId(5L);
+        User u2 = new User();
         u2.userId(6L);
+        User u3 = new User();
         u3.userId((7L));
         users.add(u1);
         users.add(u2);
         users.add(u3);
         fakeSubmission.setConflictsOfInterest(users);
         //not in coi;s list
-        assertDoesNotThrow(() ->verificationService.verifyCOI(1L, 1L));
+        assertDoesNotThrow(() -> verificationService.verifyCOI(1L, 1L));
         //coi exists
         assertThrows(ConflictOfInterestException.class, () -> {
             verificationService.verifyCOI(1L, 5L);

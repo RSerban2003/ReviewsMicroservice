@@ -102,21 +102,22 @@ public class AssignmentsServiceTests {
 
         verify(verificationService).verifyCOI(paperID, reviewerID);
     }
+
     @Test
     void verifyIfReviewerCanBeAssignedUserInTrackConflictOfInterest()
-        throws NotFoundException, ConflictOfInterestException, IllegalAccessException {
+        throws NotFoundException, ConflictOfInterestException {
 
         when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
             .thenReturn(true);
-        doThrow(new ConflictOfInterestException("there is coi")).when(verificationService).verifyCOI(anyLong(),anyLong());
-        assertThrows(ConflictOfInterestException.class, () ->{
+        doThrow(new ConflictOfInterestException("there is coi")).when(verificationService).verifyCOI(anyLong(), anyLong());
+        assertThrows(ConflictOfInterestException.class, () -> {
             assignmentsService.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
         });
     }
 
     @Test
-    void verifyIfUserCanAssignUndefined(){
-        assertThrows(IllegalAccessException.class, () ->{
+    void verifyIfUserCanAssignUndefined() {
+        assertThrows(IllegalAccessException.class, () -> {
             assignmentsService.verifyIfUserCanAssign(requesterID, paperID, UserRole.AUTHOR);
         });
     }
@@ -148,9 +149,9 @@ public class AssignmentsServiceTests {
     }
 
     @Test
-    void assignmentsThrows(){
+    void assignmentsThrows() {
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
-        assertThrows(IllegalAccessException.class, () ->{
+        assertThrows(IllegalAccessException.class, () -> {
             assignmentsService.assignments(requesterID, paperID);
         });
     }
@@ -164,12 +165,12 @@ public class AssignmentsServiceTests {
         Review r1 = new Review();
         Review r2 = new Review();
         Review r3 = new Review();
-        ReviewID rID1 = new ReviewID(paperID, 8L);
-        ReviewID rID2 = new ReviewID(paperID, reviewerID);
-        ReviewID rID3 = new ReviewID(paperID, reviewerID);
-        r1.setReviewID(rID1);
-        r2.setReviewID(rID2);
-        r3.setReviewID(rID3);
+        ReviewID riD1 = new ReviewID(paperID, 8L);
+        ReviewID riD2 = new ReviewID(paperID, reviewerID);
+        ReviewID riD3 = new ReviewID(paperID, reviewerID);
+        r1.setReviewID(riD1);
+        r2.setReviewID(riD2);
+        r3.setReviewID(riD3);
         reviews.add(r1);
         assertThat(assignmentsService.assignments(requesterID, paperID).size()).isEqualTo(1);
         reviews.add(r2);

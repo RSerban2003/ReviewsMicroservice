@@ -17,11 +17,8 @@ import nl.tudelft.sem.v20232024.team08b.controllers.AssignmentsController;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -58,7 +55,8 @@ public class AssignmentsControllerTests {
 
     @Test
     void assignManualReturnsNotFound() throws Exception {
-        doThrow(new NotFoundException("Not found")).when(assignmentsService).assignManually(requesterID, reviewerID, paperID);
+        doThrow(new NotFoundException("Not found")).when(assignmentsService).assignManually(requesterID,
+            reviewerID, paperID);
 
         mockMvc.perform(post("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
                 .param("requesterID", String.valueOf(requesterID))
@@ -71,7 +69,8 @@ public class AssignmentsControllerTests {
     @Test
     void assignManualReturnsForbidden() throws Exception {
 
-        doThrow(new IllegalAccessException("Forbidden")).when(assignmentsService).assignManually(requesterID, reviewerID, paperID);
+        doThrow(new IllegalAccessException("Forbidden")).when(assignmentsService).assignManually(requesterID,
+            reviewerID, paperID);
 
         mockMvc.perform(post("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
                 .param("requesterID", String.valueOf(requesterID))
@@ -84,7 +83,8 @@ public class AssignmentsControllerTests {
     @Test
     void assignManualReturnsConflict() throws Exception {
 
-        doThrow(new ConflictOfInterestException("COI")).when(assignmentsService).assignManually(requesterID, reviewerID, paperID);
+        doThrow(new ConflictOfInterestException("COI")).when(assignmentsService).assignManually(requesterID,
+            reviewerID, paperID);
 
         mockMvc.perform(post("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
                 .param("requesterID", String.valueOf(requesterID))
@@ -97,7 +97,8 @@ public class AssignmentsControllerTests {
     @Test
     void assignManualReturnsInternalServerError() throws Exception {
 
-        doThrow(new RuntimeException("Internal server error")).when(assignmentsService).assignManually(requesterID, reviewerID, paperID);
+        doThrow(new RuntimeException("Internal server error")).when(assignmentsService).assignManually(requesterID,
+            reviewerID, paperID);
 
 
         mockMvc.perform(post("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)

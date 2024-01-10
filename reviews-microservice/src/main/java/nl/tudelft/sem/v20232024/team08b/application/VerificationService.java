@@ -204,7 +204,7 @@ public class VerificationService {
             return;
         }
         for (User user : conflictsOfInterest) {
-            if (user.getUserId() == reviewerID) {
+            if (user.getUserId().equals(reviewerID)) {
                 throw new ConflictOfInterestException("The reviewer has COI with this paper");
             }
         }
