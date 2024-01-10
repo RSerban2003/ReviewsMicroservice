@@ -144,7 +144,7 @@ public class TracksService {
     public void insertTrackToOurDB(Long conferenceID,
                                    Long trackID) {
         Track toSave = new Track();
-        toSave.setTrackID(new TrackID(conferenceID,trackID));
+        toSave.setTrackID(new TrackID(conferenceID, trackID));
         toSave.setReviewersHaveBeenFinalized(false);
         toSave.setBiddingDeadline(null);
 

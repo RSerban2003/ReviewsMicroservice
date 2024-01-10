@@ -3,7 +3,6 @@ package nl.tudelft.sem.v20232024.team08b.application;
 import javassist.NotFoundException;
 import javax.validation.Valid;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
-import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
@@ -190,10 +189,20 @@ public class VerificationService {
         verifyTrackPhase(conferenceID, trackID, acceptablePhases);
     }
 
+    /**
+     * This method checks for the conflict of interests.
+     *
+     * @param paperID ID of a candidate paper to be reviewed
+     * @param reviewerID ID of a candidate reviewer
+     * @throws NotFoundException if there is no such a submission
+     * @throws ConflictOfInterestException if the reviewer cannot be assigned
+     */
     public void verifyCOI(Long paperID, Long reviewerID) throws NotFoundException, ConflictOfInterestException {
         Submission submission = externalRepository.getSubmission(paperID);
         List<@Valid User> conflictsOfInterest = submission.getConflictsOfInterest();
-        if(conflictsOfInterest==null) return;
+        if (conflictsOfInterest == null) {
+            return;
+        }
         for (User user : conflictsOfInterest) {
             if (user.getUserId() == reviewerID) {
                 throw new ConflictOfInterestException("The reviewer has COI with this paper");
@@ -201,11 +210,17 @@ public class VerificationService {
         }
     }
 
+    /**
+     * Checks for existance of a track in our database, if it does not exist it adds it.
+     *
+     * @param paperID paper ID to look for
+     * @throws NotFoundException if paper is not found in database
+     */
     public void verifyIfTrackExists(Long paperID) throws NotFoundException {
         Submission submission = externalRepository.getSubmission(paperID);
         Long trackID = submission.getTrackId();
         Long conferenceID = submission.getEventId();
-        if(trackRepository.findById(new TrackID(conferenceID,trackID)).isPresent()){
+        if (trackRepository.findById(new TrackID(conferenceID, trackID)).isPresent()) {
             return;
         }
         tracksService.insertTrackToOurDB(conferenceID, trackID);

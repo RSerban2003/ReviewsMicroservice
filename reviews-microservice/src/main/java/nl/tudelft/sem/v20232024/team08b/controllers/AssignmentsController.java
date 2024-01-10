@@ -5,7 +5,6 @@ import nl.tudelft.sem.v20232024.team08b.api.AssignmentsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Review;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,18 +39,17 @@ public class AssignmentsController implements AssignmentsAPI {
                                                Long reviewerID,
                                                Long paperID) {
         try {
-            assignmentsService.assignManually(requesterID,reviewerID,paperID);
+            assignmentsService.assignManually(requesterID, reviewerID, paperID);
             return ResponseEntity.ok().build();
         } catch (IllegalCallerException | NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
             // The requester must be a pc chair
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        } catch (ConflictOfInterestException e){
+        } catch (ConflictOfInterestException e) {
             // There is a COI
             return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // Internal server error
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -100,7 +98,7 @@ public class AssignmentsController implements AssignmentsAPI {
     public ResponseEntity<List<Long>> assignments(Long requesterID,
                                                   Long paperID) {
         try {
-            return ResponseEntity.ok(assignmentsService.assignments(requesterID,paperID));
+            return ResponseEntity.ok(assignmentsService.assignments(requesterID, paperID));
         } catch (IllegalCallerException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {

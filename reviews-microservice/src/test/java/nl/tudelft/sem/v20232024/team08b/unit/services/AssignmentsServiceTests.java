@@ -114,6 +114,13 @@ public class AssignmentsServiceTests {
         });
     }
 
+    @Test
+    void verifyIfUserCanAssignUndefined(){
+        assertThrows(IllegalAccessException.class, () ->{
+            assignmentsService.verifyIfUserCanAssign(requesterID, paperID, UserRole.AUTHOR);
+        });
+    }
+
 
     @Test
     void assignManuallySuccessfullyAssigned() throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
