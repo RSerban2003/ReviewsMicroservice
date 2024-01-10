@@ -66,6 +66,18 @@ public class TracksServicesTests {
         assertThrows(NotFoundException.class, () ->
                 tracksService.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID));
     }
+    @Test
+    void insertTrackToOurDB_ValidInput_SaveMethodCalled() {
+        Long conferenceID = 1L;
+        Long trackID = 2L;
+
+        assertDoesNotThrow(() -> tracksService.insertTrackToOurDB(conferenceID, trackID));
+
+        verify(trackRepository).save(argThat(track -> track.getTrackID().getConferenceID().equals(conferenceID)
+            && track.getTrackID().getTrackID().equals(trackID)
+            && !track.getReviewersHaveBeenFinalized()
+            && track.getBiddingDeadline() == null));
+    }
 
     void applyRole(UserRole role) {
         when(

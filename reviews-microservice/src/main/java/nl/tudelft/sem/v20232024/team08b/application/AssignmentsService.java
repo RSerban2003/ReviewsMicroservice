@@ -35,20 +35,25 @@ public class AssignmentsService {
         this.verificationService = verificationService;
     }
 
-    public void verifyIfRequesterCanAssign(Long requesterID, Long paperID) throws IllegalAccessException{
-
-        if(!verificationService.verifyRoleFromPaper(requesterID,paperID, UserRole.CHAIR)){
-            throw new IllegalAccessException("You are not PC chair for this track");
+    public boolean verifyIfUserCanAssign(Long userID, Long paperID, UserRole role)
+        throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
+        switch (role) {
+            case CHAIR:
+                if (!verificationService.verifyRoleFromPaper(userID, paperID, UserRole.CHAIR)) {
+                    throw new IllegalAccessException("You are not PC chair for this track");
+                }
+                break;
+            case REVIEWER:
+                if (!verificationService.verifyRoleFromPaper(userID, paperID, UserRole.REVIEWER)) {
+                    throw new NotFoundException("There is no such a user in this track");
+                }
+                verificationService.verifyCOI(paperID,userID);
+                break;
         }
+
+        return true;
     }
 
-    public void verifyIfReviewerCanBeAssigned(Long reviewerID, Long paperID)
-        throws NotFoundException, ConflictOfInterestException {
-        if(!verificationService.verifyRoleFromPaper(reviewerID,paperID, UserRole.REVIEWER)){
-            throw new NotFoundException("There is no such a user in this track");
-        }
-        verificationService.verifyCOI(paperID, reviewerID);
-    }
 
     public void assignManually(Long requesterID, Long reviewerID, Long paperID)
         throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
@@ -57,8 +62,8 @@ public class AssignmentsService {
         phases.add(phase);
         verificationService.verifyTrackPhaseThePaperIsIn(paperID, phases);
 
-        verifyIfRequesterCanAssign(requesterID, paperID);
-        verifyIfReviewerCanBeAssigned(reviewerID, paperID);
+        verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR);
+        verifyIfUserCanAssign(reviewerID,paperID, UserRole.REVIEWER);
         verificationService.verifyIfTrackExists(paperID);
 
         ReviewID reviewID = new ReviewID(paperID,reviewerID);

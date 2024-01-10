@@ -28,6 +28,8 @@ public class VerificationService {
 
     private final TrackRepository trackRepository;
 
+    private final TracksService tracksService;
+
     /**
      * Default constructor.
      *
@@ -38,11 +40,13 @@ public class VerificationService {
     @Autowired
     public VerificationService(ExternalRepository externalRepository,
                                ReviewRepository reviewRepository,
-                               TrackPhaseCalculator trackPhaseCalculator, TrackRepository trackRepository) {
+                               TrackPhaseCalculator trackPhaseCalculator, TrackRepository trackRepository,
+                               TracksService tracksService) {
         this.externalRepository = externalRepository;
         this.reviewRepository = reviewRepository;
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.trackRepository = trackRepository;
+        this.tracksService = tracksService;
     }
 
     /**
@@ -189,6 +193,7 @@ public class VerificationService {
     public void verifyCOI(Long paperID, Long reviewerID) throws NotFoundException, ConflictOfInterestException {
         Submission submission = externalRepository.getSubmission(paperID);
         List<@Valid User> conflictsOfInterest = submission.getConflictsOfInterest();
+        if(conflictsOfInterest==null) return;
         for (User user : conflictsOfInterest) {
             if (user.getUserId() == reviewerID) {
                 throw new ConflictOfInterestException("The reviewer has COI with this paper");
@@ -203,12 +208,7 @@ public class VerificationService {
         if(trackRepository.findById(new TrackID(conferenceID,trackID)).isPresent()){
             return;
         }
-        Track toSave = new Track();
-        toSave.setTrackID(new TrackID(conferenceID,trackID));
-        toSave.setReviewersHaveBeenFinalized(false);
-        toSave.setBiddingDeadline(null);
-
-        trackRepository.save(toSave);
+        tracksService.insertTrackToOurDB(conferenceID, trackID);
 
     }
 }

@@ -1,15 +1,23 @@
 package nl.tudelft.sem.v20232024.team08b.unit.services;
 
+import java.util.Optional;
 import javassist.NotFoundException;
+import javax.validation.Valid;
+import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.domain.Track;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.User;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,12 +34,16 @@ public class VerificationServiceTests {
     final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
     final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
+    final TracksService tracksService = Mockito.mock((TracksService.class));
+
+    final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final VerificationService verificationService = Mockito.spy(
             new VerificationService(
                     externalRepository,
                     reviewRepository,
                     trackPhaseCalculator,
-                    null
+                    trackRepository,
+                    tracksService
             )
     );
     private Submission fakeSubmission;
@@ -52,6 +64,68 @@ public class VerificationServiceTests {
 
         fakeRolesOfUser = new RolesOfUser();
         fakeRolesOfUser.setTracks(listOfTracks);
+    }
+
+    @Test
+    void verifyCOI() throws NotFoundException, ConflictOfInterestException {
+        when(externalRepository.getSubmission(1L)).thenReturn(fakeSubmission);
+        //empty coi's list
+        assertDoesNotThrow(() -> verificationService.verifyCOI(1L, 1L));
+        List<@Valid User> users = new ArrayList<>();
+        User u1 = new User();
+        User u2 = new User();
+        User u3 = new User();
+        u1.userId(5L);
+        u2.userId(6L);
+        u3.userId((7L));
+        users.add(u1);
+        users.add(u2);
+        users.add(u3);
+        fakeSubmission.setConflictsOfInterest(users);
+        //not in coi;s list
+        assertDoesNotThrow(() ->verificationService.verifyCOI(1L, 1L));
+        //coi exists
+        assertThrows(ConflictOfInterestException.class, () -> {
+            verificationService.verifyCOI(1L, 5L);
+        });
+    }
+
+    @Test
+    void verifyIfTrackExistsNoException() throws NotFoundException {
+        Long paperID = 1L;
+        Long trackID = 2L;
+        Long conferenceID = 3L;
+
+        Submission submission = new Submission();
+        submission.setTrackId(trackID);
+        submission.setEventId(conferenceID);
+
+        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(Optional.of(new Track()));
+        assertDoesNotThrow(() -> verificationService.verifyIfTrackExists(paperID));
+        verify(externalRepository).getSubmission(paperID);
+        verify(trackRepository).findById(new TrackID(conferenceID, trackID));
+        verifyNoInteractions(tracksService);
+    }
+
+    @Test
+    void verifyIfTrackExistsException() throws NotFoundException {
+        Long paperID = 1L;
+        Long trackID = 2L;
+        Long conferenceID = 3L;
+
+        Submission submission = new Submission();
+        submission.setTrackId(trackID);
+        submission.setEventId(conferenceID);
+
+        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(Optional.empty());
+        doNothing().when(tracksService).insertTrackToOurDB(conferenceID, trackID);
+        assertDoesNotThrow(() -> verificationService.verifyIfTrackExists(paperID));
+
+        verify(externalRepository).getSubmission(paperID);
+        verify(trackRepository).findById(new TrackID(conferenceID, trackID));
+        verify(tracksService).insertTrackToOurDB(conferenceID, trackID);
     }
 
     @Test

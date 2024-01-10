@@ -143,7 +143,12 @@ public class TracksService {
      */
     public void insertTrackToOurDB(Long conferenceID,
                                    Long trackID) {
-        return;
+        Track toSave = new Track();
+        toSave.setTrackID(new TrackID(conferenceID,trackID));
+        toSave.setReviewersHaveBeenFinalized(false);
+        toSave.setBiddingDeadline(null);
+
+        trackRepository.save(toSave);
     }
 
     /**
