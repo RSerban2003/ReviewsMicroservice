@@ -6,6 +6,7 @@ import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.User;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
@@ -296,5 +297,38 @@ public class VerificationServiceTests {
         );
         boolean result = verificationService.verifyRoleFromPaper(0L, 3L, UserRole.CHAIR);
         assertThat(result).isFalse();
+    }
+
+    @Test
+    void verifyIsAuthorToPaper_NoSuchPaper() throws NotFoundException {
+        when(externalRepository.getSubmission(3L)).thenThrow(
+                new NotFoundException("")
+        );
+        boolean result = verificationService.isAuthorToPaper(0L, 3L);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void verifyIsAuthorToPaper_NotAuthor() throws NotFoundException {
+        User user1 = new User();
+        User user2 = new User();
+        user1.setUserId(1L);
+        user2.setUserId(2L);
+        fakeSubmission.setAuthors(List.of(user1, user2));
+        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        boolean result = verificationService.isAuthorToPaper(0L, 3L);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void verifyIsAuthorToPaper() throws NotFoundException {
+        User user1 = new User();
+        User user2 = new User();
+        user1.setUserId(1L);
+        user2.setUserId(0L);
+        fakeSubmission.setAuthors(List.of(user1, user2));
+        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        boolean result = verificationService.isAuthorToPaper(0L, 3L);
+        assertThat(result).isTrue();
     }
 }

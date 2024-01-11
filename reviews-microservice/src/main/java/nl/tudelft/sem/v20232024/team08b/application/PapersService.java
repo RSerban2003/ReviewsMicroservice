@@ -154,12 +154,10 @@ public class PapersService {
      *
      * @param requesterID the ID of the user
      * @param paperID the ID of the paper
-     * @throws NotFoundException if the paper does not exist
      * @throws IllegalAccessException if the user does not have permission to view the status of the paper
      */
     private void verifyPermissionToViewStatus(Long requesterID,
-                                              Long paperID) throws NotFoundException,
-                                                                   IllegalAccessException {
+                                              Long paperID) throws IllegalAccessException {
 
         if (!(verificationService.isReviewerForPaper(requesterID, paperID) &&
                 verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) ||
