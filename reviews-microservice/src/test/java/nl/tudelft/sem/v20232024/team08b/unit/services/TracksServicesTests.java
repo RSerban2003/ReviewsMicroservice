@@ -58,7 +58,7 @@ public class TracksServicesTests {
     }
 
     @Test
-    void verifyIfUserCanAccessTrack_NoSuchTrack() {
+    void verifyIfUserCanAccessTrackNoSuchTrack() {
         when(
                 verificationService.verifyTrack(conferenceID, trackID)
         ).thenReturn(false);
@@ -68,7 +68,7 @@ public class TracksServicesTests {
     }
 
     @Test
-    void insertTrackToOurDB_ValidInput_SaveMethodCalled() {
+    void insertTrackToOurDBValidInput() {
         Long conferenceID = 1L;
         Long trackID = 2L;
 

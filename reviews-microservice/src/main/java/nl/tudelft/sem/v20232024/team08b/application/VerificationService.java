@@ -3,6 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.application;
 import javassist.NotFoundException;
 import javax.validation.Valid;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
@@ -27,7 +28,6 @@ public class VerificationService {
 
     private final TrackRepository trackRepository;
 
-    private final TracksService tracksService;
 
     /**
      * Default constructor.
@@ -39,13 +39,11 @@ public class VerificationService {
     @Autowired
     public VerificationService(ExternalRepository externalRepository,
                                ReviewRepository reviewRepository,
-                               TrackPhaseCalculator trackPhaseCalculator, TrackRepository trackRepository,
-                               TracksService tracksService) {
+                               TrackPhaseCalculator trackPhaseCalculator, TrackRepository trackRepository) {
         this.externalRepository = externalRepository;
         this.reviewRepository = reviewRepository;
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.trackRepository = trackRepository;
-        this.tracksService = tracksService;
     }
 
     /**
@@ -223,7 +221,12 @@ public class VerificationService {
         if (trackRepository.findById(new TrackID(conferenceID, trackID)).isPresent()) {
             return;
         }
-        tracksService.insertTrackToOurDB(conferenceID, trackID);
+        Track toSave = new Track();
+        toSave.setTrackID(new TrackID(conferenceID, trackID));
+        toSave.setReviewersHaveBeenFinalized(false);
+        toSave.setBiddingDeadline(null);
+
+        trackRepository.save(toSave);
 
     }
 }

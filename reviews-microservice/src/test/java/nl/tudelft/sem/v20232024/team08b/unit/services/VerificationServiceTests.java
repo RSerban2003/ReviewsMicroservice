@@ -3,11 +3,9 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 import java.util.Optional;
 import javassist.NotFoundException;
 import javax.validation.Valid;
-import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
@@ -34,7 +32,6 @@ public class VerificationServiceTests {
     final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
     final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
-    final TracksService tracksService = Mockito.mock((TracksService.class));
 
     final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final VerificationService verificationService = Mockito.spy(
@@ -42,8 +39,7 @@ public class VerificationServiceTests {
                     externalRepository,
                     reviewRepository,
                     trackPhaseCalculator,
-                    trackRepository,
-                    tracksService
+                    trackRepository
             )
     );
     private Submission fakeSubmission;
@@ -91,41 +87,34 @@ public class VerificationServiceTests {
     }
 
     @Test
-    void verifyIfTrackExistsNoException() throws NotFoundException {
-        Long paperID = 1L;
-        Long trackID = 2L;
-        Long conferenceID = 3L;
-
+    public void testVerifyIfTrackExists() throws NotFoundException {
+        Long paperID = 123L;
         Submission submission = new Submission();
-        submission.setTrackId(trackID);
-        submission.setEventId(conferenceID);
+        submission.setTrackId(456L);
+        submission.setEventId(789L);
 
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
-        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(Optional.of(new Track()));
-        assertDoesNotThrow(() -> verificationService.verifyIfTrackExists(paperID));
-        verify(externalRepository).getSubmission(paperID);
-        verify(trackRepository).findById(new TrackID(conferenceID, trackID));
-        verifyNoInteractions(tracksService);
+        when(trackRepository.findById(any())).thenReturn(Optional.of(new Track()));
+
+        verificationService.verifyIfTrackExists(paperID);
+
+        verify(externalRepository, times(1)).getSubmission(paperID);
+        verify(trackRepository, times(1)).findById(any());
+        verify(trackRepository, never()).save(any());
     }
 
     @Test
-    void verifyIfTrackExistsException() throws NotFoundException {
-        Long paperID = 1L;
-        Long trackID = 2L;
-        Long conferenceID = 3L;
-
+    public void testVerifyIfTrackDoesNotExist() throws NotFoundException {
+        Long paperID = 123L;
         Submission submission = new Submission();
-        submission.setTrackId(trackID);
-        submission.setEventId(conferenceID);
+        submission.setTrackId(456L);
+        submission.setEventId(789L);
 
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
-        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(Optional.empty());
-        doNothing().when(tracksService).insertTrackToOurDB(conferenceID, trackID);
-        assertDoesNotThrow(() -> verificationService.verifyIfTrackExists(paperID));
+        when(trackRepository.findById(any())).thenReturn(Optional.empty());
 
-        verify(externalRepository).getSubmission(paperID);
-        verify(trackRepository).findById(new TrackID(conferenceID, trackID));
-        verify(tracksService).insertTrackToOurDB(conferenceID, trackID);
+        verificationService.verifyIfTrackExists(paperID);
+
     }
 
     @Test
