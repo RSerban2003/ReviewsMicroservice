@@ -75,8 +75,8 @@ public class PapersService {
      * @param paperID ID of the paper being requested
      * @return the paper, if all conditions are met
      */
-    public nl.tudelft.sem.v20232024.team08b.dtos.review.Paper getPaper(Long reviewerID, Long paperID) throws NotFoundException,
-                                                                IllegalAccessException {
+    public nl.tudelft.sem.v20232024.team08b.dtos.review.Paper getPaper(Long reviewerID, Long paperID)
+            throws NotFoundException, IllegalAccessException {
         // Verify that user has permission to view the paper
         verifyPermissionToViewPaper(reviewerID, paperID);
 
