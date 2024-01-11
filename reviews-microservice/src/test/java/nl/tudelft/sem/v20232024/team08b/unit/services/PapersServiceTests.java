@@ -260,23 +260,6 @@ public class PapersServiceTests {
     }
 
     @Test
-    void getPaperStatus_Success() throws NotFoundException {
-        nl.tudelft.sem.v20232024.team08b.domain.Paper domainPaper = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
-        domainPaper.setStatus(PaperStatus.ACCEPTED);
-        Optional<nl.tudelft.sem.v20232024.team08b.domain.Paper> optionalPaper = Optional.of(domainPaper);
-        when(paperRepository.findById(paperID)).thenReturn(optionalPaper);
-
-        assertThat(papersService.getPaperStatus(paperID)).isEqualTo(PaperStatus.ACCEPTED);
-    }
-
-    @Test
-    void getPaperStatus_NoPaperFound() {
-        when(paperRepository.findById(paperID)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> papersService.getPaperStatus(paperID));
-    }
-
-    @Test
     void getState_Success() throws NotFoundException, IllegalAccessException {
         doNothing().when(papersService).verifyPermissionToViewStatus(reviewerID, paperID);
         nl.tudelft.sem.v20232024.team08b.domain.Paper domainPaper = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
@@ -297,6 +280,7 @@ public class PapersServiceTests {
     @Test
     void getState_NoPaperFound() throws IllegalAccessException {
         doNothing().when(papersService).verifyPermissionToViewStatus(reviewerID, paperID);
+        when(paperRepository.findById(paperID)).thenReturn(Optional.empty());
         when(paperRepository.findById(paperID)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> papersService.getState(reviewerID, paperID));

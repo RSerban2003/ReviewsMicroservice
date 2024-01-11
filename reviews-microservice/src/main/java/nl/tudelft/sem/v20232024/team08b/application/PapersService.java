@@ -6,6 +6,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
+import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +75,7 @@ public class PapersService {
      * @param paperID ID of the paper being requested
      * @return the paper, if all conditions are met
      */
-    public Paper getPaper(Long reviewerID, Long paperID) throws NotFoundException,
+    public nl.tudelft.sem.v20232024.team08b.dtos.review.Paper getPaper(Long reviewerID, Long paperID) throws NotFoundException,
                                                                 IllegalAccessException {
         // Verify that user has permission to view the paper
         verifyPermissionToViewPaper(reviewerID, paperID);
@@ -87,7 +88,7 @@ public class PapersService {
 
         Submission submission = externalRepository.getSubmission(paperID);
 
-        return new Paper(submission);
+        return new nl.tudelft.sem.v20232024.team08b.dtos.review.Paper(submission);
     }
 
     /**
@@ -169,24 +170,6 @@ public class PapersService {
     }
 
     /**
-     * Returns the status of a paper given by paperID.
-     * This could be NOT_DECIDED, ACCEPTED, REJECTED.
-     *
-     * @param paperID the ID of the paper
-     * @return the status of the paper
-     * @throws NotFoundException if the paper does not exist
-     */
-    public PaperStatus getPaperStatus(Long paperID) throws NotFoundException {
-        Optional<nl.tudelft.sem.v20232024.team08b.domain.Paper> optional = paperRepository.findById(paperID);
-        if (optional.isPresent()) {
-            return optional.get().getStatus();
-        } else {
-            throw new NotFoundException("The paper could not be found");
-        }
-
-    }
-
-    /**
      * Shows the status of a paper given by paperID to a user given by userID
      * after verifying if the user has the appropriate permissions.
      *
@@ -199,6 +182,11 @@ public class PapersService {
     public PaperStatus getState(Long requesterID,
                                 Long paperID) throws NotFoundException, IllegalAccessException {
         verifyPermissionToViewStatus(requesterID, paperID);
-        return getPaperStatus(paperID);
+        Optional<Paper> optional = paperRepository.findById(paperID);
+        if (optional.isPresent()) {
+            return optional.get().getStatus();
+        } else {
+            throw new NotFoundException("The paper could not be found");
+        }
     }
 }
