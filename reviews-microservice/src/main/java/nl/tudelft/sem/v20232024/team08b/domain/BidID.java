@@ -1,11 +1,15 @@
 package nl.tudelft.sem.v20232024.team08b.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class BidID implements Serializable {
-    private final Long paperID;
-    private final Long bidderID;
+    private Long paperID;
+    private Long bidderID;
 }

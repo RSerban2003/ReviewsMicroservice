@@ -37,7 +37,13 @@ public class BidsController implements BidsAPI {
      */
     @Override
     public ResponseEntity<List<BidByReviewer>> getBidsForPaper(Long requesterID, Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            return ResponseEntity.ok(bidsService.getBidsForPaper(requesterID, paperID));
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ForbiddenAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     /**
