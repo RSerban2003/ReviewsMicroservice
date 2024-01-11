@@ -58,7 +58,7 @@ public class TracksServicesTests {
     }
 
     @Test
-    void verifyIfUserCanAccessTrack_NoSuchTrack() {
+    void verifyIfUserCanAccessTrackNoSuchTrack() {
         when(
                 verificationService.verifyTrack(conferenceID, trackID)
         ).thenReturn(false);
@@ -66,6 +66,7 @@ public class TracksServicesTests {
         assertThrows(NotFoundException.class, () ->
                 tracksService.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID));
     }
+
 
     void applyRole(UserRole role) {
         when(
@@ -203,7 +204,7 @@ public class TracksServicesTests {
         );
 
         // Assume that insertion to our DB works fine
-        doNothing().when(tracksService).insertTrackToOurDB(conferenceID, trackID);
+        doNothing().when(verificationService).insertTrack(conferenceID, trackID);
 
         // Assume insertion to our DB works
         // Get the result and check if it is what DB returned
@@ -211,7 +212,7 @@ public class TracksServicesTests {
         assertThat(result).isEqualTo(track);
 
         // Verify that it was inserted to our DB
-        verify(tracksService).insertTrackToOurDB(conferenceID, trackID);
+        verify(verificationService).insertTrack(conferenceID, trackID);
     }
 
     @Test
@@ -226,7 +227,7 @@ public class TracksServicesTests {
         );
 
         // Assume that insertion to our DB works fine
-        doNothing().when(tracksService).insertTrackToOurDB(conferenceID, trackID);
+        doNothing().when(verificationService).insertTrack(conferenceID, trackID);
 
         // Assume error is thrown
         assertThrows(RuntimeException.class, () ->
