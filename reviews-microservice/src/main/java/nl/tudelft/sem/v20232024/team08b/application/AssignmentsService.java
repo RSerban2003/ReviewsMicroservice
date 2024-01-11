@@ -5,7 +5,7 @@ import java.util.List;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
@@ -78,10 +78,7 @@ public class AssignmentsService {
      */
     public void assignManually(Long requesterID, Long reviewerID, Long paperID)
         throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
-        List<TrackPhase> phases = new ArrayList<>();
-        TrackPhase phase = TrackPhase.ASSIGNING;
-        phases.add(phase);
-        verificationService.verifyTrackPhaseThePaperIsIn(paperID, phases);
+        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
 
         verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR);
         verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
@@ -102,10 +99,15 @@ public class AssignmentsService {
      * @return List of ID's of reviewers
      * @throws IllegalAccessException If the requester does not have permissions to see the assignments
      */
-    public List<Long> assignments(Long requesterID, Long paperID) throws IllegalAccessException {
+    public List<Long> assignments(Long requesterID, Long paperID) throws IllegalAccessException, NotFoundException {
+        if (!verificationService.verifyPaper(paperID)) {
+            throw new NotFoundException("this paper does not exist");
+        }
         if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
             throw new IllegalAccessException("Only pc chairs are allowed to do that");
         }
+        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING,
+            TrackPhase.FINAL, TrackPhase.REVIEWING));
         List<Long> userIds = new ArrayList<>();
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
         for (Review review : reviews) {

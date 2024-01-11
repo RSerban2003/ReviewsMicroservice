@@ -19,7 +19,7 @@ import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -151,14 +151,24 @@ public class AssignmentsServiceTests {
     @Test
     void assignmentsThrows() {
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
         assertThrows(IllegalAccessException.class, () -> {
             assignmentsService.assignments(requesterID, paperID);
         });
     }
 
     @Test
-    void assignmentsSuccessful() throws IllegalAccessException {
+    void assignmentsPaperNotFound() {
+        when(verificationService.verifyPaper(paperID)).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> {
+            assignmentsService.assignments(requesterID,paperID);
+        });
+    }
+
+    @Test
+    void assignmentsSuccessful() throws IllegalAccessException, NotFoundException {
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
         List<Review> reviews = new ArrayList<>();
         when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
         assertThat(assignmentsService.assignments(requesterID, paperID).size()).isEqualTo(0);

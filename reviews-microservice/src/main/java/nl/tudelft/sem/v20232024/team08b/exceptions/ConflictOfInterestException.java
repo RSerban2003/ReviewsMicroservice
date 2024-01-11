@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.dtos.review;
+package nl.tudelft.sem.v20232024.team08b.exceptions;
 
 public class ConflictOfInterestException extends Exception {
     public ConflictOfInterestException(String message) {

@@ -67,18 +67,6 @@ public class TracksServicesTests {
                 tracksService.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID));
     }
 
-    @Test
-    void insertTrackToOurDBValidInput() {
-        Long conferenceID = 1L;
-        Long trackID = 2L;
-
-        assertDoesNotThrow(() -> tracksService.insertTrackToOurDB(conferenceID, trackID));
-
-        verify(trackRepository).save(argThat(track -> track.getTrackID().getConferenceID().equals(conferenceID)
-            && track.getTrackID().getTrackID().equals(trackID)
-            && !track.getReviewersHaveBeenFinalized()
-            && track.getBiddingDeadline() == null));
-    }
 
     void applyRole(UserRole role) {
         when(
@@ -216,7 +204,7 @@ public class TracksServicesTests {
         );
 
         // Assume that insertion to our DB works fine
-        doNothing().when(tracksService).insertTrackToOurDB(conferenceID, trackID);
+        doNothing().when(verificationService).insertTrack(conferenceID, trackID);
 
         // Assume insertion to our DB works
         // Get the result and check if it is what DB returned
@@ -224,7 +212,7 @@ public class TracksServicesTests {
         assertThat(result).isEqualTo(track);
 
         // Verify that it was inserted to our DB
-        verify(tracksService).insertTrackToOurDB(conferenceID, trackID);
+        verify(verificationService).insertTrack(conferenceID, trackID);
     }
 
     @Test
@@ -239,7 +227,7 @@ public class TracksServicesTests {
         );
 
         // Assume that insertion to our DB works fine
-        doNothing().when(tracksService).insertTrackToOurDB(conferenceID, trackID);
+        doNothing().when(verificationService).insertTrack(conferenceID, trackID);
 
         // Assume error is thrown
         assertThrows(RuntimeException.class, () ->

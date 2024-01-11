@@ -14,7 +14,7 @@ import java.util.List;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.controllers.AssignmentsController;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

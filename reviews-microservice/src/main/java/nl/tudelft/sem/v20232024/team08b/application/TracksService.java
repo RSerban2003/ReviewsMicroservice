@@ -120,7 +120,7 @@ public class TracksService {
         // If it is not in the repository, we need to add it there, taking
         // information from the other microservices
         if (optional.isEmpty()) {
-            insertTrackToOurDB(conferenceID, trackID);
+            verificationService.insertTrack(conferenceID, trackID);
             optional = trackRepository.findById(id);
         }
 
@@ -133,23 +133,6 @@ public class TracksService {
         return optional.get();
     }
 
-    /**
-     * Assuming that a track exists in the other microservices, this method
-     * inserts such track into ours.
-     * TODO: implement this method. It should be implemented by another issue.
-     *
-     * @param conferenceID the ID of the conference the track is in.
-     * @param trackID the ID of the track itself
-     */
-    public void insertTrackToOurDB(Long conferenceID,
-                                   Long trackID) {
-        Track toSave = new Track();
-        toSave.setTrackID(new TrackID(conferenceID, trackID));
-        toSave.setReviewersHaveBeenFinalized(false);
-        toSave.setBiddingDeadline(null);
-
-        trackRepository.save(toSave);
-    }
 
     /**
      * Sets the bidding deadline of a track and saves it in the repository.

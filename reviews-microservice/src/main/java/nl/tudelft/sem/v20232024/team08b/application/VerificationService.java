@@ -5,7 +5,7 @@ import javax.validation.Valid;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -221,12 +221,22 @@ public class VerificationService {
         if (trackRepository.findById(new TrackID(conferenceID, trackID)).isPresent()) {
             return;
         }
+        insertTrack(conferenceID, trackID);
+
+    }
+
+    /**
+     * Inserts track to our database.
+     *
+     * @param conferenceID ID of a conference the track is in
+     * @param trackID ID of a track
+     */
+    public void insertTrack(Long conferenceID, Long trackID) {
         Track toSave = new Track();
         toSave.setTrackID(new TrackID(conferenceID, trackID));
         toSave.setReviewersHaveBeenFinalized(false);
         toSave.setBiddingDeadline(null);
 
         trackRepository.save(toSave);
-
     }
 }

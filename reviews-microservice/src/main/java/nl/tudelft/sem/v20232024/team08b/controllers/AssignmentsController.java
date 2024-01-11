@@ -3,7 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.AssignmentsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

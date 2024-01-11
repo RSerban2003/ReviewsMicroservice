@@ -6,7 +6,8 @@ import javax.validation.Valid;
 import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -100,7 +101,7 @@ public class VerificationServiceTests {
 
         verify(externalRepository, times(1)).getSubmission(paperID);
         verify(trackRepository, times(1)).findById(any());
-        verify(trackRepository, never()).save(any());
+        verify(verificationService, never()).insertTrack(anyLong(), anyLong());
     }
 
     @Test
@@ -114,7 +115,24 @@ public class VerificationServiceTests {
         when(trackRepository.findById(any())).thenReturn(Optional.empty());
 
         verificationService.verifyIfTrackExists(paperID);
+        verify(verificationService, times(1)).insertTrack(anyLong(), anyLong());
 
+    }
+
+    @Test
+    void testInsertTrack() {
+
+        Long conferenceID = 1L;
+        Long trackID = 2L;
+
+        verificationService.insertTrack(conferenceID, trackID);
+
+        Track expectedTrack = new Track();
+        expectedTrack.setTrackID(new TrackID(conferenceID, trackID));
+        expectedTrack.setReviewersHaveBeenFinalized(false);
+        expectedTrack.setBiddingDeadline(null);
+
+        verify(trackRepository).save(expectedTrack);
     }
 
     @Test
