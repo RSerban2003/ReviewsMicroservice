@@ -88,16 +88,30 @@ public class PapersController implements PapersAPI {
     }
 
     /**
-     * Responds with whether the paper has been accepted or rejected
-     * or if it hasn't been decided yet.
+     * Responds with the status of the paper (whether it was accepted, rejected or neither so far).
+     * The requesting user has to be a reviewer of the paper, an author of the paper,
+     * or a chair in the track of the paper.
      *
      * @param requesterID the ID of the requesting user
      * @param paperID the ID of the paper
-     * @return response entity with the result
+     * @return response entity with the status of the paper
      */
     @Override
     public ResponseEntity<PaperStatus> getState(Long requesterID,
                                                 Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            return ResponseEntity.ok(papersService.getState(requesterID, paperID));
+        } catch (NotFoundException e) {
+            // The requested paper was not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            // The requester must be a reviewer assigned to the given paper,
+            // or a chair of the track the paper is in,
+            // or an author of the paper.
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            // Internal server error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
