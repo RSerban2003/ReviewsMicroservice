@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 @Entity
 @Data
-@IdClass(BidId.class)
+@IdClass(BidID.class)
 @AllArgsConstructor
 @NoArgsConstructor
 public class Bid implements Serializable {
