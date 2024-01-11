@@ -197,7 +197,9 @@ public class VerificationService {
                     return true;
                 }
             }
-        } catch (NotFoundException e) {}
-        return false;
+            return false;
+        } catch (NotFoundException e) {
+            return false;
+        }
     }
 }
