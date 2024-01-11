@@ -52,7 +52,9 @@ public class TrackPhaseCalculator {
      * Method that gets bidding deadline of the track and returns it as a UNIX
      * timestamp, as Integer.
      * If the deadline is not set, returns NULL.
-     * TODO: implement this method as part of bidding deadline issue.
+     * Note that this method is not setting the default bidding deadline
+     * (if the optional is empty) which it might actually have to do.
+     * But it should be fine.
      *
      * @param conferenceID the ID of the conference the track is in
      * @param trackID the ID of the track
@@ -60,7 +62,12 @@ public class TrackPhaseCalculator {
      */
     public Long getBiddingDeadlineAsLong(Long conferenceID,
                                          Long trackID) {
-        return 1L;
+        Optional<Track> optional = trackRepository.findById(new TrackID(conferenceID, trackID));
+        if (optional.isEmpty()) {
+            return null;
+        } else {
+            return optional.get().getBiddingDeadline().getTime();
+        }
     }
 
     /**

@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import java.sql.Date;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -268,16 +269,6 @@ public class TrackPhaseCalculatorTests {
     }
 
     @Test
-    void getBiddingDeadlineAsLong() {
-        // TODO: implement this test when the method itself is implemented
-        assertThat(
-                trackPhaseCalculator.getBiddingDeadlineAsLong(0L, 0L)
-        ).isEqualTo(
-                1L
-        );
-    }
-
-    @Test
     void checkIfAllPapersFinalized_NoTrackPresent() throws NotFoundException {
         // Assume that such track exists
         when(
@@ -381,4 +372,29 @@ public class TrackPhaseCalculatorTests {
         assertThat(result).isTrue();
     }
 
+    @Test
+    void getBiddingDeadlineAsLong_NotInRepo() {
+        // Assume track is not in repo
+        when(trackRepository.findById(trackID)).thenReturn(Optional.empty());
+        Long result = trackPhaseCalculator.getBiddingDeadlineAsLong(
+                trackID.getConferenceID(),
+                trackID.getTrackID()
+        );
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void getBiddingDeadlineAsLong_Successful() {
+        java.util.Date date = Date.valueOf(LocalDate.of(2012, 10, 10));
+        Long dateUnix = date.getTime();
+        track.setBiddingDeadline(date);
+
+        // Assume track is in repo
+        when(trackRepository.findById(trackID)).thenReturn(Optional.of(track));
+        Long result = trackPhaseCalculator.getBiddingDeadlineAsLong(
+                trackID.getConferenceID(),
+                trackID.getTrackID()
+        );
+        assertThat(result).isEqualTo(dateUnix);
+    }
 }
