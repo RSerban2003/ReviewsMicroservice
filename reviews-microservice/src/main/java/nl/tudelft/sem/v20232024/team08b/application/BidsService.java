@@ -34,14 +34,24 @@ public class BidsService {
         this.verificationService = verificationService;
     }
 
+    /**
+     * Retrieves the bid for a paper by a reviewer.
+     *
+     * @param requesterID The ID of the requester.
+     * @param paperID     The ID of the paper.
+     * @param reviewerID  The ID of the reviewer.
+     * @return The bid for the paper.
+     * @throws NotFoundException        If the bid doesn't exist.
+     * @throws ForbiddenAccessException If the requester doesn't have the required role. They must be a chair or a reviewer of the track the paper is in.
+     */
     public Bid getBidForPaperByReviewer(Long requesterID, Long paperID, Long reviewerID)
             throws NotFoundException, ForbiddenAccessException {
         var bid = bidRepository.findById(new BidID(paperID, reviewerID));
         if (bid.isEmpty()) {
             throw new NotFoundException("The bid doesn't exist");
         }
-        if (verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)
-                || verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
+        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)
+                && !verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
             throw new ForbiddenAccessException();
         }
         return bid.get().getBid();
