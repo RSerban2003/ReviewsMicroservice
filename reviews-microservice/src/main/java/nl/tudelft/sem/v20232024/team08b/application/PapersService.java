@@ -156,13 +156,13 @@ public class PapersService {
      * @param paperID the ID of the paper
      * @throws IllegalAccessException if the user does not have permission to view the status of the paper
      */
-    private void verifyPermissionToViewStatus(Long requesterID,
-                                              Long paperID) throws IllegalAccessException {
+    public void verifyPermissionToViewStatus(Long requesterID,
+                                             Long paperID) throws IllegalAccessException {
 
         if (!(verificationService.isReviewerForPaper(requesterID, paperID) &&
-                verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) ||
+                verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) &&
             !(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR) &&
-                verificationService.isAuthorToPaper(requesterID, paperID)) ||
+                verificationService.isAuthorToPaper(requesterID, paperID)) &&
             !verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
             throw new IllegalAccessException("User does not have permission to view the status of this paper");
         }
@@ -176,7 +176,7 @@ public class PapersService {
      * @return the status of the paper
      * @throws NotFoundException if the paper does not exist
      */
-    private PaperStatus getPaperStatus(Long paperID) throws NotFoundException {
+    public PaperStatus getPaperStatus(Long paperID) throws NotFoundException {
         Optional<nl.tudelft.sem.v20232024.team08b.domain.Paper> optional = paperRepository.findById(paperID);
         if (optional.isPresent()) {
             return optional.get().getStatus();
