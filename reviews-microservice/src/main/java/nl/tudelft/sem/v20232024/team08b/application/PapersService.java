@@ -25,6 +25,7 @@ public class PapersService {
      *
      * @param externalRepository repository storing everything outside of
      *                           this microservice
+     * @param paperRepository repository storing papers
      * @param verificationService service that handles verification
      * @param paperPhaseCalculator class that calculates the phase of a paper
      */
@@ -159,12 +160,13 @@ public class PapersService {
      */
     public void verifyPermissionToViewStatus(Long requesterID,
                                              Long paperID) throws IllegalAccessException {
+        boolean isReviewer = verificationService.isReviewerForPaper(requesterID, paperID) &&
+                verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
+        boolean isAuthor = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR) &&
+                verificationService.isAuthorToPaper(requesterID, paperID);
+        boolean isChair = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
 
-        if (!(verificationService.isReviewerForPaper(requesterID, paperID) &&
-                verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) &&
-            !(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR) &&
-                verificationService.isAuthorToPaper(requesterID, paperID)) &&
-            !verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
+        if(!isReviewer && !isAuthor && !isChair) {
             throw new IllegalAccessException("User does not have permission to view the status of this paper");
         }
     }
