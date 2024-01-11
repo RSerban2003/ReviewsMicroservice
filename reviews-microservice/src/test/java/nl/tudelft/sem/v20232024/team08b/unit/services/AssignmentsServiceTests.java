@@ -161,7 +161,7 @@ public class AssignmentsServiceTests {
     void assignmentsPaperNotFound() {
         when(verificationService.verifyPaper(paperID)).thenReturn(false);
         assertThrows(NotFoundException.class, () -> {
-            assignmentsService.assignments(requesterID,paperID);
+            assignmentsService.assignments(requesterID, paperID);
         });
     }
 
