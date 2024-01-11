@@ -166,7 +166,7 @@ public class PapersService {
                 verificationService.isAuthorToPaper(requesterID, paperID);
         boolean isChair = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
 
-        if(!isReviewer && !isAuthor && !isChair) {
+        if (!isReviewer && !isAuthor && !isChair) {
             throw new IllegalAccessException("User does not have permission to view the status of this paper");
         }
     }
