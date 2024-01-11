@@ -54,8 +54,8 @@ public class BidsController implements BidsAPI {
     }
 
     /**
-     * Saves the preference (based on expertise) of the requester in regards to reviewing the
-     * given paper.
+     * Saves the preference (based on expertise) of the requester regarding
+     * reviewing the given paper.
      *
      * @param requesterID the ID of the requesting user
      * @param paperID the ID of the paper

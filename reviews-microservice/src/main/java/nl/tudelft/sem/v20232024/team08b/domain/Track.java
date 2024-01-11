@@ -1,38 +1,31 @@
 package nl.tudelft.sem.v20232024.team08b.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Track implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private TrackID trackID;
+
     @Basic(optional = false)
-    private Date biddingDeadLine;
+    private Date biddingDeadline;
+
+    // TODO: make sure that when reviewer selection has
+    //       been finalized, this is set to TRUE.
     @Basic(optional = false)
-    private TrackPhase currentPhase;
+    private Boolean reviewersHaveBeenFinalized = false;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Paper> papers;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    private Conference conference;
-
-
-    public Track(){}
-
 }

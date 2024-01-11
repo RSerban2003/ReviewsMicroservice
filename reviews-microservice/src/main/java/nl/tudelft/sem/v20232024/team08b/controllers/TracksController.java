@@ -1,5 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
+import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.TracksAPI;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
@@ -7,6 +8,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
@@ -70,7 +72,24 @@ public class TracksController implements TracksAPI {
                                                    Long conferenceID,
                                                    Long trackID,
                                                    Date newDeadline) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            tracksService.setBiddingDeadline(
+                    requesterID,
+                    conferenceID,
+                    trackID,
+                    newDeadline
+            );
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -85,7 +104,20 @@ public class TracksController implements TracksAPI {
     public ResponseEntity<Date> getBiddingDeadline(Long requesterID,
                                                    Long conferenceID,
                                                    Long trackID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            Date biddingDeadline = tracksService.getBiddingDeadline(
+                    requesterID,
+                    conferenceID,
+                    trackID
+            );
+            return ResponseEntity.ok(biddingDeadline);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -97,7 +129,22 @@ public class TracksController implements TracksAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<TrackPhase> getPhase(Long requesterID, Long conferenceID, Long trackID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<TrackPhase> getPhase(Long requesterID,
+                                               Long conferenceID,
+                                               Long trackID) {
+        try {
+            TrackPhase trackPhase = tracksService.getTrackPhase(
+                    requesterID,
+                    conferenceID,
+                    trackID
+            );
+            return ResponseEntity.ok(trackPhase);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
