@@ -1,7 +1,11 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
+import javax.validation.Valid;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.domain.Track;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -10,6 +14,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +28,9 @@ public class VerificationService {
     private final ReviewRepository reviewRepository;
     private final TrackPhaseCalculator trackPhaseCalculator;
 
+    private final TrackRepository trackRepository;
+
+
     /**
      * Default constructor.
      *
@@ -33,10 +41,11 @@ public class VerificationService {
     @Autowired
     public VerificationService(ExternalRepository externalRepository,
                                ReviewRepository reviewRepository,
-                               TrackPhaseCalculator trackPhaseCalculator) {
+                               TrackPhaseCalculator trackPhaseCalculator, TrackRepository trackRepository) {
         this.externalRepository = externalRepository;
         this.reviewRepository = reviewRepository;
         this.trackPhaseCalculator = trackPhaseCalculator;
+        this.trackRepository = trackRepository;
     }
 
     /**
@@ -201,5 +210,58 @@ public class VerificationService {
         } catch (NotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * This method checks for the conflict of interests.
+     *
+     * @param paperID ID of a candidate paper to be reviewed
+     * @param reviewerID ID of a candidate reviewer
+     * @throws NotFoundException if there is no such a submission
+     * @throws ConflictOfInterestException if the reviewer cannot be assigned
+     */
+    public void verifyCOI(Long paperID, Long reviewerID) throws NotFoundException, ConflictOfInterestException {
+        Submission submission = externalRepository.getSubmission(paperID);
+        List<@Valid User> conflictsOfInterest = submission.getConflictsOfInterest();
+        if (conflictsOfInterest == null) {
+            return;
+        }
+        for (User user : conflictsOfInterest) {
+            if (user.getUserId().equals(reviewerID)) {
+                throw new ConflictOfInterestException("The reviewer has COI with this paper");
+            }
+        }
+    }
+
+    /**
+     * Checks for existance of a track in our database, if it does not exist it adds it.
+     *
+     * @param paperID paper ID to look for
+     * @throws NotFoundException if paper is not found in database
+     */
+    public void verifyIfTrackExists(Long paperID) throws NotFoundException {
+        Submission submission = externalRepository.getSubmission(paperID);
+        Long trackID = submission.getTrackId();
+        Long conferenceID = submission.getEventId();
+        if (trackRepository.findById(new TrackID(conferenceID, trackID)).isPresent()) {
+            return;
+        }
+        insertTrack(conferenceID, trackID);
+
+    }
+
+    /**
+     * Inserts track to our database.
+     *
+     * @param conferenceID ID of a conference the track is in
+     * @param trackID ID of a track
+     */
+    public void insertTrack(Long conferenceID, Long trackID) {
+        Track toSave = new Track();
+        toSave.setTrackID(new TrackID(conferenceID, trackID));
+        toSave.setReviewersHaveBeenFinalized(false);
+        toSave.setBiddingDeadline(null);
+
+        trackRepository.save(toSave);
     }
 }
