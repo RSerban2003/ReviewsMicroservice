@@ -7,6 +7,7 @@ import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
@@ -40,7 +41,10 @@ public class AssignmentsController implements AssignmentsAPI {
                                                Long paperID) {
         try {
             assignmentsService.assignManually(requesterID, reviewerID, paperID);
-            return ResponseEntity.ok().build();
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
         } catch (IllegalCallerException | NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
