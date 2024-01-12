@@ -211,7 +211,7 @@ public class ReviewsService {
                                           Long reviewerID,
                                           Long paperID,
                                           String text) throws NotFoundException,
-                                                              IllegalAccessException{
+                                                              IllegalAccessException {
         verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
 
         Comment comment = new Comment(requesterID, text);
