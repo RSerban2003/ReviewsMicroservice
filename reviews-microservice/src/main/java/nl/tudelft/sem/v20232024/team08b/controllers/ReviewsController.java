@@ -148,7 +148,7 @@ public class ReviewsController implements ReviewsAPI {
     }
 
     /**
-     * Posts a *discussion* comment.
+     * Posts a confidential comment for a review during the discussion phase.
      *
      * @param requesterID the ID of the requesting user
      * @param reviewerID the ID of the reviewer
@@ -161,11 +161,26 @@ public class ReviewsController implements ReviewsAPI {
                                                           Long reviewerID,
                                                           Long paperID,
                                                           String comment) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, comment);
+        } catch (NotFoundException e) {
+            // The paper or reviewer was not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            // The requester does not have the necessary permissions
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            // Internal server error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .build();
     }
 
     /**
-     * Gets the discussion comments.
+     * Gets the confidential comments assigned to a review during the discussion phase.
      *
      * @param requesterID the ID of the requesting user
      * @param reviewerID the ID of the reviewer
@@ -176,6 +191,17 @@ public class ReviewsController implements ReviewsAPI {
     public ResponseEntity<List<DiscussionComment>> getDiscussionComments(Long requesterID,
                                                                          Long reviewerID,
                                                                          Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            return ResponseEntity.ok(reviewsService.getDiscussionComments(requesterID, reviewerID, paperID));
+        } catch (NotFoundException e) {
+            // The paper or reviewer was not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            // The requester does not have the necessary permissions
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            // Internal server error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

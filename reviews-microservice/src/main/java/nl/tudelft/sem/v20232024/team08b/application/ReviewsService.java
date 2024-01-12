@@ -1,14 +1,17 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.domain.Comment;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -164,5 +167,114 @@ public class ReviewsService {
 
         // Map the review from local domain object to a DTO and return it
         return new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(review);
+    }
+
+    /**
+     * Verifies if the user has permission to submit a confidential comment on a review.
+     *
+     * @param requesterID The ID of the user submitting the comment
+     * @param reviewerID The ID of the reviewer associated with the paper
+     * @param paperID The ID of the paper being reviewed
+     * @throws NotFoundException if the paper does not exist
+     * @throws IllegalAccessException if the user does not have the required permissions
+     */
+    public void verifySubmitConfidentialComment(Long requesterID,
+                                            Long reviewerID,
+                                            Long paperID) throws NotFoundException,
+            IllegalAccessException,
+            IllegalCallerException {
+        boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
+        boolean isAssignedToPaper = verificationService.isReviewerForPaper(reviewerID, paperID);
+
+        if(!verificationService.verifyPaper(paperID)) {
+            throw new NotFoundException("Paper does not exist");
+        }
+
+        if(!isReviewer || !isAssignedToPaper) {
+            throw new IllegalAccessException("The user does not have permission to view these comments");
+        }
+
+        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING));
+    }
+
+    /**
+     * Submits a confidential comment to a review.
+     *
+     * @param requesterID The ID of the user submitting the comment
+     * @param reviewerID The ID of the reviewer associated with the paper
+     * @param paperID The ID of the paper being commented on
+     * @param text The confidential comment text
+     * @throws NotFoundException if the paper does not exist
+     * @throws IllegalAccessException if the user does not have the required permissions
+     */
+    public void submitConfidentialComment(Long requesterID,
+                                          Long reviewerID,
+                                          Long paperID,
+                                          String text) throws NotFoundException,
+                                                              IllegalAccessException{
+        verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
+
+        Comment comment = new Comment(requesterID, text);
+
+        ReviewID reviewID = new ReviewID(reviewerID, paperID);
+        Review review = reviewRepository.getOne(reviewID);
+        review.getConfidentialComments().add(comment);
+        reviewRepository.save(review);
+    }
+
+    /**
+     * Verifies if the user has the permission to view discussion comments on a review.
+     *
+     * @param requesterID The ID of the user requesting to view the comments
+     * @param reviewerID The ID of the reviewer associated with the paper
+     * @param paperID The ID of the paper
+     * @throws NotFoundException if the paper does not exist
+     * @throws IllegalAccessException if the user does not have the required permissions
+     */
+    public void verifyGetDiscussionComments(Long requesterID,
+                                               Long reviewerID,
+                                               Long paperID) throws NotFoundException,
+                                                                    IllegalAccessException,
+                                                                    IllegalCallerException {
+        boolean isChair = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
+        boolean isAssignedToPaper = verificationService.isReviewerForPaper(reviewerID, paperID);
+
+        if(!verificationService.verifyPaper(paperID)) {
+            throw new NotFoundException("Paper does not exist");
+        }
+
+        if(!isChair && !(isReviewer && isAssignedToPaper)) {
+            throw new IllegalAccessException("The user does not have permission to view these comments");
+        }
+
+        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING));
+    }
+
+    /**
+     * Retrieves discussion comments for a specific paper.
+     *
+     * @param requesterID The ID of the user requesting the comments
+     * @param reviewerID The ID of the reviewer associated with the paper
+     * @param paperID The ID of the paper whose comments are being retrieved
+     * @throws NotFoundException if the review or paper does not exist
+     * @throws IllegalAccessException if the user does not have the necessary permissions
+     */
+    public List<DiscussionComment> getDiscussionComments(Long requesterID,
+                                                         Long reviewerID,
+                                                         Long paperID) throws NotFoundException,
+                                                                              IllegalAccessException {
+        verifyGetDiscussionComments(requesterID, reviewerID, paperID);
+
+        ReviewID reviewID = new ReviewID(reviewerID, paperID);
+        Review review = reviewRepository.getOne(reviewID);
+        //Retrieve the list of Comments assigned to the Review
+        List<Comment> comments = review.getConfidentialComments();
+        //Parse the list of Comments into a list of DiscussionComments
+        List<DiscussionComment> discussionComments = new ArrayList<>();
+        for(Comment comment : comments) {
+            discussionComments.add(new DiscussionComment(comment));
+        }
+        return discussionComments;
     }
 }
