@@ -3,11 +3,14 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.BidsService;
 import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
+import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.BidID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
@@ -31,7 +34,9 @@ public class BidsServiceTests {
     private final BidRepository bidRepository = Mockito.mock(BidRepository.class);
     private final VerificationService verificationService = Mockito.mock(VerificationService.class);
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
-    private final BidsService bidsService = new BidsService(bidRepository, verificationService, externalRepository);
+    private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
+    private final BidsService bidsService = new BidsService(bidRepository, verificationService,
+            externalRepository, trackPhaseCalculator);
 
     @Test
     public void testGetBidForPaperByReviewer() throws NotFoundException, ForbiddenAccessException {
@@ -116,5 +121,47 @@ public class BidsServiceTests {
         when(externalRepository.getSubmission(paperID)).thenThrow(NotFoundException.class);
 
         Assertions.assertThrows(NotFoundException.class, () -> bidsService.getBidsForPaper(requesterID, paperID));
+    }
+
+    @Test
+    void testBidValidRequestSavesBid() throws ForbiddenAccessException, NotFoundException, ConflictException {
+        Long requesterID = 1L;
+        Long paperID = 5L;
+        var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
+        Submission submission = new Submission();
+        submission.setTrackId(10L);
+        submission.setEventId(15L);
+        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId())).thenReturn(TrackPhase.BIDDING);
+
+        bidsService.bid(requesterID, paperID, bid);
+
+        verify(bidRepository, times(1)).save(new Bid(paperID, requesterID, bid));
+    }
+
+    @Test
+    void testBidNotAllowedRoleThrowsForbiddenAccessException() throws NotFoundException {
+        Long requesterID = 1L;
+        Long paperID = 5L;
+        var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
+        Submission submission = new Submission();
+        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+
+        assertThrows(ForbiddenAccessException.class, () -> bidsService.bid(requesterID, paperID, bid));
+    }
+
+    @Test
+    void testBid_NotAllowedPhaseThrowsConflictException() throws NotFoundException {
+        Long requesterID = 1L;
+        Long paperID = 1L;
+        var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
+        Submission submission = new Submission();
+        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId())).thenReturn(TrackPhase.REVIEWING);
+
+        assertThrows(ConflictException.class, () -> bidsService.bid(requesterID, paperID, bid));
     }
 }

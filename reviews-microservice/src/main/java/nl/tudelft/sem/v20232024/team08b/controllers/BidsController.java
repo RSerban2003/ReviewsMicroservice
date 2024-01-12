@@ -5,6 +5,7 @@ import nl.tudelft.sem.v20232024.team08b.api.BidsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.BidsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -77,9 +78,16 @@ public class BidsController implements BidsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<Void> bid(Long requesterID,
-                                    Long paperID,
-                                    Bid bid) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<Void> bid(Long requesterID, Long paperID, Bid bid) {
+        try {
+            bidsService.bid(requesterID, paperID, bid);
+            return ResponseEntity.ok().build();
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ForbiddenAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (ConflictException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
     }
 }

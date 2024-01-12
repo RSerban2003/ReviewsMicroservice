@@ -20,12 +20,14 @@ import nl.tudelft.sem.v20232024.team08b.application.BidsService;
 import nl.tudelft.sem.v20232024.team08b.controllers.BidsController;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -35,19 +37,19 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class BidsControllerTests {
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private BidsController bidsController;
-    private BidsService bidsService = Mockito.mock(BidsService.class);
+    private final BidsService bidsService = Mockito.mock(BidsService.class);
     private MockMvc mockMvc;
 
     @BeforeEach
     public void setup() {
-        bidsController = new BidsController(bidsService);
+        BidsController bidsController = new BidsController(bidsService);
         mockMvc = MockMvcBuilders.standaloneSetup(bidsController).build();
     }
 
@@ -124,5 +126,75 @@ public class BidsControllerTests {
 
         mockMvc.perform(get("/papers/{paperID}/bids", 1L).param("requesterID", String.valueOf(6L)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testBidSuccess() throws Exception {
+        Long requesterID = 1L;
+        Long paperID = 2L;
+        var bid = Bid.CAN_REVIEW;
+
+        doNothing().when(bidsService).bid(eq(requesterID), eq(paperID), eq(bid));
+
+        mockMvc.perform(put("/papers/{paperID}/bids", paperID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bid)))
+                .andExpect(status().isOk());
+
+        verify(bidsService, times(1)).bid(eq(requesterID), eq(paperID), eq(bid));
+    }
+
+    @Test
+    public void testBidNotFound() throws Exception {
+        Long requesterID = 1L;
+        Long paperID = 2L;
+        Bid bid = Bid.CAN_REVIEW;
+
+        doThrow(NotFoundException.class)
+                .when(bidsService).bid(eq(requesterID), eq(paperID), eq(bid));
+
+        mockMvc.perform(put("/papers/{paperID}/bids", paperID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bid)))
+                .andExpect(status().isNotFound());
+
+        verify(bidsService, times(1)).bid(eq(requesterID), eq(paperID), eq(bid));
+    }
+
+    @Test
+    public void testBidForbidden() throws Exception {
+        Long requesterID = 1L;
+        Long paperID = 2L;
+        Bid bid = Bid.CAN_REVIEW;
+
+        doThrow(new ForbiddenAccessException())
+                .when(bidsService).bid(eq(requesterID), eq(paperID), eq(bid));
+
+        mockMvc.perform(put("/papers/{paperID}/bids", paperID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bid)))
+                .andExpect(status().isForbidden());
+
+        verify(bidsService, times(1)).bid(eq(requesterID), eq(paperID), eq(bid));
+    }
+
+    @Test
+    public void testBidConflict() throws Exception {
+        Long requesterID = 1L;
+        Long paperID = 2L;
+        Bid bid = Bid.CAN_REVIEW;
+
+        doThrow(new ConflictException()).when(bidsService).bid(eq(requesterID), eq(paperID), eq(bid));
+
+        mockMvc.perform(put("/papers/{paperID}/bids", paperID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bid)))
+                .andExpect(status().isConflict());
+
+        verify(bidsService, times(1)).bid(eq(requesterID), eq(paperID), eq(bid));
     }
 }
