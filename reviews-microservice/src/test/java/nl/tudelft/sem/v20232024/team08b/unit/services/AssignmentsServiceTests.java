@@ -1,37 +1,38 @@
 package nl.tudelft.sem.v20232024.team08b.unit.services;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
-import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
+import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
+import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
+import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
+
 public class AssignmentsServiceTests {
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
-    private final VerificationService verificationService = Mockito.mock(VerificationService.class);
+    private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
+    private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
+    private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
     private final BidRepository bidRepository = Mockito.mock(BidRepository.class);
 
     private AssignmentsService assignmentsService;
@@ -47,7 +48,9 @@ public class AssignmentsServiceTests {
             new AssignmentsService(
                 bidRepository,
                 reviewRepository,
-                verificationService
+                papersVerification,
+                tracksVerification,
+                usersVerification
             )
         );
 
@@ -59,57 +62,57 @@ public class AssignmentsServiceTests {
     @Test
     void verifyIfRequesterCanAssignRequesterIsChair()
         throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
             .thenReturn(true);
 
         assertTrue(assignmentsService.verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR));
 
-        verify(verificationService).verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        verify(usersVerification).verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
     }
 
     @Test
     void verifyIfRequesterCanAssignRequesterIsNotChair() {
 
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
             .thenReturn(false);
         assertThrows(IllegalAccessException.class, () ->
             assignmentsService.verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR)
         );
 
-        verify(verificationService).verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        verify(usersVerification).verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
     }
 
     @Test
     void verifyIfReviewerCanBeAssignedUserNotInTrack() throws NotFoundException, ConflictOfInterestException {
 
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
+        when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
             .thenReturn(false);
         assertThrows(NotFoundException.class, () ->
             assignmentsService.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER)
         );
 
-        verify(verificationService, never()).verifyCOI(anyLong(), anyLong());
+        verify(papersVerification, never()).verifyCOI(anyLong(), anyLong());
     }
 
     @Test
     void verifyIfReviewerCanBeAssignedUserInTrackNoConflictOfInterest()
         throws NotFoundException, ConflictOfInterestException, IllegalAccessException {
 
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
+        when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
             .thenReturn(true);
-        doNothing().when(verificationService).verifyCOI(anyLong(), anyLong());
+        doNothing().when(papersVerification).verifyCOI(anyLong(), anyLong());
         assertTrue(assignmentsService.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER));
 
-        verify(verificationService).verifyCOI(paperID, reviewerID);
+        verify(papersVerification).verifyCOI(paperID, reviewerID);
     }
 
     @Test
     void verifyIfReviewerCanBeAssignedUserInTrackConflictOfInterest()
         throws NotFoundException, ConflictOfInterestException {
 
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
+        when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
             .thenReturn(true);
-        doThrow(new ConflictOfInterestException("there is coi")).when(verificationService).verifyCOI(anyLong(), anyLong());
+        doThrow(new ConflictOfInterestException("there is coi")).when(papersVerification).verifyCOI(anyLong(), anyLong());
         assertThrows(ConflictOfInterestException.class, () -> {
             assignmentsService.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
         });
@@ -129,19 +132,19 @@ public class AssignmentsServiceTests {
         List<TrackPhase> phases = new ArrayList<>();
         TrackPhase phase = TrackPhase.ASSIGNING;
         phases.add(phase);
-        doNothing().when(verificationService).verifyTrackPhaseThePaperIsIn(paperID, phases);
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
-        when(verificationService.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(true);
-        doNothing().when(verificationService).verifyIfTrackExists(paperID);
+        doNothing().when(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, phases);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        doNothing().when(tracksVerification).verifyIfTrackExists(paperID);
 
         // Execute the method
         assertDoesNotThrow(() -> assignmentsService.assignManually(requesterID, reviewerID, paperID));
 
         // Verify statements
-        verify(verificationService).verifyTrackPhaseThePaperIsIn(paperID, phases);
+        verify(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, phases);
         verify(assignmentsService).verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR);
         verify(assignmentsService).verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
-        verify(verificationService).verifyIfTrackExists(paperID);
+        verify(tracksVerification).verifyIfTrackExists(paperID);
 
         // Verify that reviewRepository.save is called with the correct argument
         verify(reviewRepository).save(argThat(review -> review.getReviewID().getPaperID().equals(paperID)
@@ -149,9 +152,23 @@ public class AssignmentsServiceTests {
     }
 
     @Test
-    void assignmentsThrows() {
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
-        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+    void assignmentsWrongPhase() throws NotFoundException, IllegalAccessException {
+        List phases = List.of(TrackPhase.ASSIGNING, TrackPhase.FINAL, TrackPhase.REVIEWING);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        doThrow(
+                new IllegalAccessException("Wrong phase")
+        ).when(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, phases);
+
+        assertThrows(IllegalAccessException.class, () -> {
+            assignmentsService.assignments(requesterID, paperID);
+        });
+    }
+
+    @Test
+    void assignmentsWrongRole() {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
         assertThrows(IllegalAccessException.class, () -> {
             assignmentsService.assignments(requesterID, paperID);
         });
@@ -159,7 +176,7 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignmentsPaperNotFound() {
-        when(verificationService.verifyPaper(paperID)).thenReturn(false);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(false);
         assertThrows(NotFoundException.class, () -> {
             assignmentsService.assignments(requesterID, paperID);
         });
@@ -167,8 +184,8 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignmentsSuccessful() throws IllegalAccessException, NotFoundException {
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
-        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
         List<Review> reviews = new ArrayList<>();
         when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
         assertThat(assignmentsService.assignments(requesterID, paperID).size()).isEqualTo(0);

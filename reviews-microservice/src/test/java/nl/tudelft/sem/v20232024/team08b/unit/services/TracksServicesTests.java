@@ -2,8 +2,9 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
-import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
+import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
@@ -24,21 +25,22 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class TracksServicesTests {
-    private final VerificationService verificationService = Mockito.mock(VerificationService.class);
+    private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
+    private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     private final TracksService tracksService = Mockito.spy(
             new TracksService(
-                    verificationService,
                     trackPhaseCalculator,
                     trackRepository,
-                    externalRepository
+                    externalRepository,
+                    tracksVerification,
+                    usersVerification
             )
     );
     private Long requesterID = 0L;
@@ -48,81 +50,6 @@ public class TracksServicesTests {
     @BeforeEach
     void init() {
         track = new Track();
-        // Assume that the user has no role
-        when(
-                verificationService.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)
-        ).thenReturn(false);
-        when(
-                verificationService.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)
-        ).thenReturn(false);
-    }
-
-    @Test
-    void verifyIfUserCanAccessTrackNoSuchTrack() {
-        when(
-                verificationService.verifyTrack(conferenceID, trackID)
-        ).thenReturn(false);
-
-        assertThrows(NotFoundException.class, () ->
-                tracksService.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID));
-    }
-
-
-    void applyRole(UserRole role) {
-        when(
-                verificationService.verifyRoleFromTrack(requesterID, conferenceID, trackID, role)
-        ).thenReturn(true);
-    }
-
-    @Test
-    void verifyIfUserCanAccessTrack_Reviewer() {
-        when(
-                verificationService.verifyTrack(conferenceID, trackID)
-        ).thenReturn(true);
-
-        // Assume the user is a reviewer
-        applyRole(UserRole.REVIEWER);
-
-        assertDoesNotThrow(() ->
-                tracksService.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID));
-    }
-
-    @Test
-    void verifyIfUserCanAccessTrack_Chair() {
-        when(
-                verificationService.verifyTrack(conferenceID, trackID)
-        ).thenReturn(true);
-
-        // Assume the user is a chair
-        applyRole(UserRole.CHAIR);
-
-        assertDoesNotThrow(() ->
-                tracksService.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID));
-    }
-
-    @Test
-    void verifyIfUserCanAccessTrack_Author() {
-        when(
-                verificationService.verifyTrack(conferenceID, trackID)
-        ).thenReturn(true);
-
-        // Assume the user is a chair
-        applyRole(UserRole.AUTHOR);
-
-        assertDoesNotThrow(() ->
-                tracksService.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID));
-    }
-
-    @Test
-    void verifyIfUserCanAccessTrack_NoOne() {
-        when(
-                verificationService.verifyTrack(conferenceID, trackID)
-        ).thenReturn(true);
-
-        // Assume the user is neither chair nor reviewer
-
-        assertThrows(IllegalAccessException.class, () ->
-                tracksService.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID));
     }
 
     @Test
@@ -131,13 +58,13 @@ public class TracksServicesTests {
         when(trackPhaseCalculator.getTrackPhase(conferenceID, trackID)).thenReturn(TrackPhase.BIDDING);
 
         // Assume that the provided input to function is valid
-        doNothing().when(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        doNothing().when(tracksVerification).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
 
         // Make sure, that the service returns the same result that the calculator returns
         assertThat(
                 tracksService.getTrackPhase(requesterID, conferenceID, trackID)
         ).isEqualTo(TrackPhase.BIDDING);
-        verify(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        verify(tracksVerification).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
     }
 
     @Test
@@ -172,7 +99,7 @@ public class TracksServicesTests {
 
     @Test
     void getTrackWithInsertionToOurRepo_NoSuchTrack() throws NotFoundException {
-        when(verificationService.verifyTrack(conferenceID, trackID)).thenReturn(false);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () ->
                 tracksService.getTrackWithInsertionToOurRepo(conferenceID, trackID)
@@ -182,7 +109,7 @@ public class TracksServicesTests {
     @Test
     void getTrackWithInsertionToOurRepo_PresentInRepo() throws NotFoundException {
         // Assume such track exists
-        when(verificationService.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
 
         // Assume it is also present in the DB
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(Optional.of(track));
@@ -195,7 +122,7 @@ public class TracksServicesTests {
     @Test
     void getTrackWithInsertionToOurRepo_NotPresentInRepo() throws NotFoundException {
         // Assume such track exists
-        when(verificationService.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
 
         // Assume it is not present in the DB at first, and then after insertion, it becomes present
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
@@ -204,7 +131,7 @@ public class TracksServicesTests {
         );
 
         // Assume that insertion to our DB works fine
-        doNothing().when(verificationService).insertTrack(conferenceID, trackID);
+        doNothing().when(tracksVerification).insertTrack(conferenceID, trackID);
 
         // Assume insertion to our DB works
         // Get the result and check if it is what DB returned
@@ -212,13 +139,13 @@ public class TracksServicesTests {
         assertThat(result).isEqualTo(track);
 
         // Verify that it was inserted to our DB
-        verify(verificationService).insertTrack(conferenceID, trackID);
+        verify(tracksVerification).insertTrack(conferenceID, trackID);
     }
 
     @Test
     void getTrackWithInsertionToOurRepo_NotPresentInRepoAndErrorLater() throws NotFoundException {
         // Assume such track exists
-        when(verificationService.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
 
         // Assume it is not present in the DB at first, and then after insertion, it still isn't present
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
@@ -227,7 +154,7 @@ public class TracksServicesTests {
         );
 
         // Assume that insertion to our DB works fine
-        doNothing().when(verificationService).insertTrack(conferenceID, trackID);
+        doNothing().when(tracksVerification).insertTrack(conferenceID, trackID);
 
         // Assume error is thrown
         assertThrows(RuntimeException.class, () ->
@@ -238,7 +165,7 @@ public class TracksServicesTests {
     @Test
     void getBiddingDeadline_AlreadyPresentInRepo() throws NotFoundException, IllegalAccessException {
         // Assume the user is allowed to access the track
-        doNothing().when(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        doNothing().when(tracksVerification).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
 
         // Assume the track is in our local DB
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(Optional.of(track));
@@ -253,13 +180,13 @@ public class TracksServicesTests {
         assertThat(result).isEqualTo(biddingDeadline);
 
         // Verify user access to track was checked
-        verify(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        verify(tracksVerification).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
     }
 
     @Test
     void getBiddingDeadline_NotPresentInRepo() throws NotFoundException, IllegalAccessException {
         // Assume the user is allowed to access the track
-        doNothing().when(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        doNothing().when(tracksVerification).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
 
         // Assume the track is not in our local DB
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(Optional.empty());
@@ -285,10 +212,10 @@ public class TracksServicesTests {
     void setBiddingDeadline_NotChair() throws NotFoundException, IllegalAccessException {
         Date date = java.sql.Date.valueOf(LocalDate.of(2012, 10, 2));
         // Assume the user is allowed to access the track
-        doNothing().when(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        doNothing().when(tracksVerification).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
 
         // Assume the user is not a chair
-        when(verificationService.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR))
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR))
                 .thenReturn(false);
         assertThrows(IllegalAccessException.class, () ->
                 tracksService.setBiddingDeadline(requesterID, conferenceID, trackID, date)
@@ -301,14 +228,14 @@ public class TracksServicesTests {
         List<TrackPhase> goodPhases = List.of(TrackPhase.BIDDING, TrackPhase.SUBMITTING);
 
         // Assume the user is allowed to access the track
-        doNothing().when(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        doNothing().when(tracksVerification).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
 
         // Assume the user is a chair
-        when(verificationService.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR))
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR))
                 .thenReturn(true);
 
         // Assume phase is right
-        doNothing().when(verificationService).verifyTrackPhase(conferenceID, trackID, goodPhases);
+        doNothing().when(tracksVerification).verifyTrackPhase(conferenceID, trackID, goodPhases);
 
         // Assume the repository returns our fake track
         doReturn(track).when(tracksService).getTrackWithInsertionToOurRepo(conferenceID, trackID);
@@ -321,10 +248,10 @@ public class TracksServicesTests {
         tracksService.setBiddingDeadline(requesterID, conferenceID, trackID, date);
 
         // Make sure user access was verified
-        verify(tracksService).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        verify(tracksVerification).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
 
         // Make sure phase was checked
-        verify(verificationService).verifyTrackPhase(conferenceID, trackID, goodPhases);
+        verify(tracksVerification).verifyTrackPhase(conferenceID, trackID, goodPhases);
 
         // Make sure our track was saved
         verify(trackRepository).save(track);
