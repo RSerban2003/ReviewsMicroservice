@@ -2,8 +2,8 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.BidsService;
-import nl.tudelft.sem.v20232024.team08b.application.VerificationService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.BidID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
@@ -32,10 +32,10 @@ import static org.mockito.Mockito.*;
 
 public class BidsServiceTests {
     private final BidRepository bidRepository = Mockito.mock(BidRepository.class);
-    private final VerificationService verificationService = Mockito.mock(VerificationService.class);
+    private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
-    private final BidsService bidsService = new BidsService(bidRepository, verificationService,
+    private final BidsService bidsService = new BidsService(bidRepository, usersVerification,
             externalRepository, trackPhaseCalculator);
 
     @Test
@@ -47,8 +47,8 @@ public class BidsServiceTests {
         Bid bid = new Bid(paperID, reviewerID, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
 
         when(bidRepository.findById(bidID)).thenReturn(Optional.of(bid));
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
 
         var result = bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID);
 
@@ -66,7 +66,7 @@ public class BidsServiceTests {
 
         assertThrows(NotFoundException.class, () -> bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID));
         verify(bidRepository, times(1)).findById(bidID);
-        verify(verificationService, never()).verifyRoleFromPaper(anyLong(), anyLong(), any(UserRole.class));
+        verify(usersVerification, never()).verifyRoleFromPaper(anyLong(), anyLong(), any(UserRole.class));
     }
 
     @Test
@@ -77,8 +77,8 @@ public class BidsServiceTests {
         BidID bidID = new BidID(paperID, reviewerID);
 
         when(bidRepository.findById(bidID)).thenReturn(Optional.of(new Bid()));
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
 
         assertThrows(ForbiddenAccessException.class,
                 () -> bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID));
@@ -91,7 +91,7 @@ public class BidsServiceTests {
         bids.add(new Bid(1L, 5L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW));
         bids.add(new Bid(1L, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.NOT_REVIEW));
         when(externalRepository.getSubmission(1L)).thenReturn(new Submission());
-        when(verificationService.verifyRoleFromPaper(6L, 1L, UserRole.CHAIR)).thenReturn(true);
+        when(usersVerification.verifyRoleFromPaper(6L, 1L, UserRole.CHAIR)).thenReturn(true);
         when(bidRepository.findByPaperID(1L)).thenReturn(bids);
 
         List<BidByReviewer> result = bidsService.getBidsForPaper(6L, 1L);
@@ -111,7 +111,7 @@ public class BidsServiceTests {
         Long requesterID = 1L;
         Long paperID = 1L;
         when(externalRepository.getSubmission(paperID)).thenReturn(new Submission());
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
 
         Assertions.assertThrows(ForbiddenAccessException.class, () -> bidsService.getBidsForPaper(requesterID, paperID));
     }
@@ -133,7 +133,7 @@ public class BidsServiceTests {
         Long paperID = 5L;
         Long requesterID = 1L;
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
         when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId()))
                 .thenReturn(TrackPhase.BIDDING);
@@ -151,7 +151,7 @@ public class BidsServiceTests {
         var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
         Submission submission = new Submission();
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
 
         assertThrows(ForbiddenAccessException.class, () -> bidsService.bid(requesterID, paperID, bid));
     }
@@ -163,7 +163,7 @@ public class BidsServiceTests {
 
         Submission submission = new Submission();
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
         when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId()))
                 .thenReturn(TrackPhase.REVIEWING);

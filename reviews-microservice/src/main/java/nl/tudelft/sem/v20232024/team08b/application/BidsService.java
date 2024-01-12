@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.BidID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 public class BidsService {
     private final BidRepository bidRepository;
-    private final VerificationService verificationService;
+    private final UsersVerification usersVerification;
     private final ExternalRepository externalRepository;
     private final TrackPhaseCalculator trackPhaseCalculator;
 
@@ -28,19 +29,19 @@ public class BidsService {
      * Default constructor for the service.
      *
      * @param bidRepository repository storing the bids
-     * @param verificationService service responsible for verification
+     * @param usersVerification service responsible for verification
      * @param externalRepository repository responsible for external requests to other microservices
      * @param trackPhaseCalculator calculator for the phase of the track
      */
     @Autowired
     public BidsService(
             BidRepository bidRepository,
-            VerificationService verificationService,
+            UsersVerification usersVerification,
             ExternalRepository externalRepository,
             TrackPhaseCalculator trackPhaseCalculator
     ) {
         this.bidRepository = bidRepository;
-        this.verificationService = verificationService;
+        this.usersVerification = usersVerification;
         this.externalRepository = externalRepository;
         this.trackPhaseCalculator = trackPhaseCalculator;
     }
@@ -62,8 +63,8 @@ public class BidsService {
         if (bid.isEmpty()) {
             throw new NotFoundException("The bid doesn't exist");
         }
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)
-                && !verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
+        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)
+                && !usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
             throw new ForbiddenAccessException();
         }
         return bid.get().getBid();
@@ -81,7 +82,7 @@ public class BidsService {
     public List<BidByReviewer> getBidsForPaper(Long requesterID, Long paperID)
             throws NotFoundException, ForbiddenAccessException {
         externalRepository.getSubmission(paperID);
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
+        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
             throw new ForbiddenAccessException();
         }
         var bids = bidRepository.findByPaperID(paperID);
@@ -101,7 +102,7 @@ public class BidsService {
     public void bid(Long requesterID, Long paperID, Bid bid)
             throws ForbiddenAccessException, NotFoundException, ConflictException {
         var paper = externalRepository.getSubmission(paperID);
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) {
+        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) {
             throw new ForbiddenAccessException();
         }
         if (trackPhaseCalculator.getTrackPhase(paper.getEventId(), paper.getTrackId()) != TrackPhase.BIDDING) {
