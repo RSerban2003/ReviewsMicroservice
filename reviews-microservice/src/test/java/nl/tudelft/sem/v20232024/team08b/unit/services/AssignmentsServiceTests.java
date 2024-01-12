@@ -2,6 +2,8 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
+import nl.tudelft.sem.v20232024.team08b.application.TracksService;
+import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
@@ -11,7 +13,9 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -32,6 +36,10 @@ public class AssignmentsServiceTests {
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
     private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
+    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
+    private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
+    private final TracksService tracksService = Mockito.mock(TracksService.class);
 
     private AssignmentsService assignmentsService;
 
@@ -47,7 +55,11 @@ public class AssignmentsServiceTests {
                 reviewRepository,
                 papersVerification,
                 tracksVerification,
-                usersVerification
+                    usersVerification,
+                    externalRepository,
+                    trackPhaseCalculator,
+                    trackRepository,
+                    tracksService
             )
         );
 

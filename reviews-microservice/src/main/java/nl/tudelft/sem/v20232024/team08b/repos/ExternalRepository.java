@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.repos;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
@@ -9,11 +10,13 @@ import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class ExternalRepository {
-    private final int ourID = -1;
+    private final Long ourID = -1L;
     private final String submissionsURL = "https://localhost:8081";
-    private final String usersURL = "https://localhost:8080";
+    private final String usersURL = "https://localhost:8082";
     private final ObjectMapper objectMapper;
     private final HttpRequestSender httpRequestSender;
 
@@ -96,6 +99,36 @@ public class ExternalRepository {
             return track;
         } catch (NotFoundException e) {
             throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse the HTTP response");
+        }
+    }
+
+    /**
+     * Gets all submissions in a track using the default requester ID (ourID).
+     *
+     * @param trackID the ID of the track
+     * @return a list of submissions in the track
+     */
+    public List<Submission> getSubmissionsInTrack(TrackID trackID) {
+        return getSubmissionsInTrack(trackID, ourID);
+    }
+
+    /**
+     * Gets all submissions in a track.
+     *
+     * @param trackID     the ID of the track
+     * @param requesterID the ID of the requester
+     * @return a list of submissions in the track
+     */
+    public List<Submission> getSubmissionsInTrack(TrackID trackID, Long requesterID) {
+        try {
+            String url = submissionsURL + "/submission/event/" + trackID.getConferenceID()
+                    + "/track/" + trackID.getTrackID() + "/" + requesterID;
+            String response = httpRequestSender.sendGetRequest(url);
+            List<Submission> submissions;
+            submissions = objectMapper.readValue(response, List.class);
+            return submissions;
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse the HTTP response");
         }
