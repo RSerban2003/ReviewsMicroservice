@@ -9,6 +9,7 @@ import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -81,7 +82,10 @@ public class BidsController implements BidsAPI {
     public ResponseEntity<Void> bid(Long requesterID, Long paperID, Bid bid) {
         try {
             bidsService.bid(requesterID, paperID, bid);
-            return ResponseEntity.ok().build();
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ForbiddenAccessException e) {

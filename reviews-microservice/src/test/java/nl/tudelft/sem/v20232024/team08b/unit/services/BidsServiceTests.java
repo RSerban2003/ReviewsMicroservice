@@ -56,6 +56,23 @@ public class BidsServiceTests {
     }
 
     @Test
+    public void testGetBidForPaperByChair() throws NotFoundException, ForbiddenAccessException {
+        Long requesterID = 1L;
+        Long paperID = 2L;
+        Long reviewerID = 3L;
+        BidID bidID = new BidID(paperID, reviewerID);
+        Bid bid = new Bid(paperID, reviewerID, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+
+        when(bidRepository.findById(bidID)).thenReturn(Optional.of(bid));
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
+
+        var result = bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID);
+
+        assertEquals(bid.getBid(), result);
+    }
+
+    @Test
     public void testGetBidForPaperByReviewerBidNotFound() {
         Long requesterID = 1L;
         Long paperID = 2L;

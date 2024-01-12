@@ -146,7 +146,8 @@ public class BidsControllerTests {
                         .param("requesterID", requesterID.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(bid)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
 
         verify(bidsService, times(1)).bid(eq(requesterID), eq(paperID), eq(bid));
     }
