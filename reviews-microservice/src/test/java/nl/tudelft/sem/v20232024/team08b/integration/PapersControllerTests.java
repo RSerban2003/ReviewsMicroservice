@@ -5,6 +5,7 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.controllers.PapersController;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,8 @@ public class PapersControllerTests {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private Paper fakePaper;
     private PaperSummary fakeTitleAndAbstract;
+
+    private PaperStatus fakeStatus;
     private Long requesterID;
     private Long paperID;
 
@@ -47,6 +50,8 @@ public class PapersControllerTests {
         fakeTitleAndAbstract = new PaperSummary();
         fakeTitleAndAbstract.setTitle("Title");
         fakeTitleAndAbstract.setAbstractSection("Abstract");
+
+        fakeStatus = PaperStatus.NOT_DECIDED;
 
         requesterID = 1L;
         paperID = 2L;
@@ -170,5 +175,60 @@ public class PapersControllerTests {
     @Test
     void getTitleAndAbstract_InternalError() throws Exception {
         getTitleAndAbstractWithException(new RuntimeException(""), 500);
+    }
+
+    @Test
+    public void getStateSuccessfully() throws Exception {
+
+        when(paperService.getState(requesterID, paperID)).thenReturn(fakeStatus);
+
+        String expectedJSON = objectMapper.writeValueAsString(fakeStatus);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/papers/" + paperID.toString() + "/status")
+                                .param("requesterID", requesterID.toString())
+                                .param("paperID", paperID.toString())
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andExpect(MockMvcResultMatchers.status().is(200))
+                .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
+
+        verify(paperService).getState(requesterID, paperID);
+    }
+
+    /**
+     * Simulates an exception inside getState function
+     * and checks for correct status code.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    public void getStateWithException(Exception exception, int expected) throws Exception {
+
+        doThrow(exception).when(paperService).getState(requesterID, paperID);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/" + paperID.toString() + "/status")
+                        .param("requesterID", requesterID.toString())
+                        .param("paperID", paperID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        verify(paperService).getState(requesterID, paperID);
+    }
+
+    @Test
+    void getState_NoSuchPaper() throws Exception {
+        getStateWithException(new NotFoundException(""), 404);
+    }
+
+    @Test
+    void getState_IllegalAccess() throws Exception {
+        getStateWithException(new IllegalAccessException(""), 403);
+    }
+
+    @Test
+    void getState_InternalError() throws Exception {
+        getStateWithException(new RuntimeException(""), 500);
     }
 }

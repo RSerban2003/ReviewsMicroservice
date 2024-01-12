@@ -379,4 +379,37 @@ public class VerificationServiceTests {
         boolean result = verificationService.verifyRoleFromPaper(0L, 3L, UserRole.CHAIR);
         assertThat(result).isFalse();
     }
+
+    @Test
+    void verifyIsAuthorToPaper_NoSuchPaper() throws NotFoundException {
+        when(externalRepository.getSubmission(3L)).thenThrow(
+                new NotFoundException("")
+        );
+        boolean result = verificationService.isAuthorToPaper(0L, 3L);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void verifyIsAuthorToPaper_NotAuthor() throws NotFoundException {
+        User user1 = new User();
+        User user2 = new User();
+        user1.setUserId(1L);
+        user2.setUserId(2L);
+        fakeSubmission.setAuthors(List.of(user1, user2));
+        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        boolean result = verificationService.isAuthorToPaper(0L, 3L);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void verifyIsAuthorToPaper() throws NotFoundException {
+        User user1 = new User();
+        User user2 = new User();
+        user1.setUserId(1L);
+        user2.setUserId(0L);
+        fakeSubmission.setAuthors(List.of(user1, user2));
+        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        boolean result = verificationService.isAuthorToPaper(0L, 3L);
+        assertThat(result).isTrue();
+    }
 }
