@@ -80,11 +80,13 @@ public class BidsServiceTests {
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
         when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
 
-        assertThrows(ForbiddenAccessException.class, () -> bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID));
+        assertThrows(ForbiddenAccessException.class,
+                () -> bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID));
     }
 
     @Test
-    void testGetBidsForPaperValidRequesterAndPaperReturnsBidsByReviewer() throws NotFoundException, ForbiddenAccessException {
+    void testGetBidsForPaperValidRequesterAndPaperReturnsBidsByReviewer()
+            throws NotFoundException, ForbiddenAccessException {
         List<Bid> bids = new ArrayList<>();
         bids.add(new Bid(1L, 5L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW));
         bids.add(new Bid(1L, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.NOT_REVIEW));
@@ -125,16 +127,18 @@ public class BidsServiceTests {
 
     @Test
     void testBidValidRequestSavesBid() throws ForbiddenAccessException, NotFoundException, ConflictException {
-        Long requesterID = 1L;
-        Long paperID = 5L;
-        var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
         Submission submission = new Submission();
         submission.setTrackId(10L);
         submission.setEventId(15L);
+        Long paperID = 5L;
+        Long requesterID = 1L;
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
-        when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId())).thenReturn(TrackPhase.BIDDING);
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
+                .thenReturn(true);
+        when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId()))
+                .thenReturn(TrackPhase.BIDDING);
 
+        var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
         bidsService.bid(requesterID, paperID, bid);
 
         verify(bidRepository, times(1)).save(new Bid(paperID, requesterID, bid));
@@ -156,12 +160,15 @@ public class BidsServiceTests {
     void testBid_NotAllowedPhaseThrowsConflictException() throws NotFoundException {
         Long requesterID = 1L;
         Long paperID = 1L;
-        var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
+
         Submission submission = new Submission();
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
-        when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId())).thenReturn(TrackPhase.REVIEWING);
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
+                .thenReturn(true);
+        when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId()))
+                .thenReturn(TrackPhase.REVIEWING);
 
+        var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
         assertThrows(ConflictException.class, () -> bidsService.bid(requesterID, paperID, bid));
     }
 }

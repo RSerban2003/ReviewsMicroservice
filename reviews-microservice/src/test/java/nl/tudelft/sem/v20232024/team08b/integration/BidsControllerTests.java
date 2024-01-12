@@ -62,7 +62,8 @@ public class BidsControllerTests {
         Bid bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
         when(bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID)).thenReturn(bid);
 
-        mockMvc.perform(get("/papers/{paperID}/bids/by-reviewer/{reviewerID}", paperID, reviewerID).param("requesterID", requesterID.toString())).andExpect(status().isOk())
+        mockMvc.perform(get("/papers/{paperID}/bids/by-reviewer/{reviewerID}", paperID, reviewerID)
+                        .param("requesterID", requesterID.toString())).andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(bid)));
 
     }
@@ -73,12 +74,15 @@ public class BidsControllerTests {
         Long paperID = 2L;
         Long reviewerID = 3L;
 
-        when(bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID)).thenThrow(new NotFoundException(""));
+        when(bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID))
+                .thenThrow(new NotFoundException(""));
 
-        mockMvc.perform(get("/papers/{paperID}/bids/by-reviewer/{reviewerID}", paperID, reviewerID).param("requesterID", requesterID.toString()))
+        mockMvc.perform(get("/papers/{paperID}/bids/by-reviewer/{reviewerID}", paperID, reviewerID)
+                        .param("requesterID", requesterID.toString()))
                 .andExpect(status().isNotFound());
 
-        verify(bidsService, times(1)).getBidForPaperByReviewer(requesterID, paperID, reviewerID);
+        verify(bidsService, times(1))
+                .getBidForPaperByReviewer(requesterID, paperID, reviewerID);
     }
 
     @Test
@@ -87,9 +91,11 @@ public class BidsControllerTests {
         Long paperID = 2L;
         Long reviewerID = 3L;
 
-        when(bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID)).thenThrow(new ForbiddenAccessException());
+        when(bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID))
+                .thenThrow(new ForbiddenAccessException());
 
-        mockMvc.perform(get("/papers/{paperID}/bids/by-reviewer/{reviewerID}", paperID, reviewerID).param("requesterID", requesterID.toString()))
+        mockMvc.perform(get("/papers/{paperID}/bids/by-reviewer/{reviewerID}", paperID, reviewerID)
+                        .param("requesterID", requesterID.toString()))
                 .andExpect(status().isForbidden());
     }
 

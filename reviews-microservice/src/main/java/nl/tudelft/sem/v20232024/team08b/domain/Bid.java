@@ -22,5 +22,6 @@ public class Bid implements Serializable {
     @Id
     private Long bidderID;
 
+    @SuppressWarnings("PMD")
     private nl.tudelft.sem.v20232024.team08b.dtos.review.Bid bid;
 }
