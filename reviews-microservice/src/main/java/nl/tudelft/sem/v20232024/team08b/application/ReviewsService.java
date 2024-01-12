@@ -186,11 +186,11 @@ public class ReviewsService {
         boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         boolean isAssignedToPaper = verificationService.isReviewerForPaper(reviewerID, paperID);
 
-        if(!verificationService.verifyPaper(paperID)) {
+        if (!verificationService.verifyPaper(paperID)) {
             throw new NotFoundException("Paper does not exist");
         }
 
-        if(!isReviewer || !isAssignedToPaper) {
+        if (!isReviewer || !isAssignedToPaper) {
             throw new IllegalAccessException("The user does not have permission to view these comments");
         }
 
@@ -240,11 +240,11 @@ public class ReviewsService {
         boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         boolean isAssignedToPaper = verificationService.isReviewerForPaper(reviewerID, paperID);
 
-        if(!verificationService.verifyPaper(paperID)) {
+        if (!verificationService.verifyPaper(paperID)) {
             throw new NotFoundException("Paper does not exist");
         }
 
-        if(!isChair && !(isReviewer && isAssignedToPaper)) {
+        if (!isChair && !(isReviewer && isAssignedToPaper)) {
             throw new IllegalAccessException("The user does not have permission to view these comments");
         }
 
@@ -272,7 +272,7 @@ public class ReviewsService {
         List<Comment> comments = review.getConfidentialComments();
         //Parse the list of Comments into a list of DiscussionComments
         List<DiscussionComment> discussionComments = new ArrayList<>();
-        for(Comment comment : comments) {
+        for (Comment comment : comments) {
             discussionComments.add(new DiscussionComment(comment));
         }
         return discussionComments;
