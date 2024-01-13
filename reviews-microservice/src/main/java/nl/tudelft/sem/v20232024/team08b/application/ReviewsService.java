@@ -224,8 +224,7 @@ public class ReviewsService {
 
         Comment comment = new Comment(requesterID, text);
 
-        ReviewID reviewID = new ReviewID(reviewerID, paperID);
-        Review review = reviewRepository.getOne(reviewID);
+        Review review = getReview(reviewerID, paperID);
         review.getConfidentialComments().add(comment);
         reviewRepository.save(review);
     }
@@ -273,8 +272,7 @@ public class ReviewsService {
                                                                               IllegalAccessException {
         verifyGetDiscussionComments(requesterID, reviewerID, paperID);
 
-        ReviewID reviewID = new ReviewID(reviewerID, paperID);
-        Review review = reviewRepository.getOne(reviewID);
+        Review review = getReview(reviewerID, paperID);
         //Retrieve the list of Comments assigned to the Review
         List<Comment> comments = review.getConfidentialComments();
         //Parse the list of Comments into a list of DiscussionComments
