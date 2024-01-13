@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
+
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -255,5 +257,60 @@ public class ReviewsControllerTests {
 
         // Make sure the required call to the service was made
         verify(papersService).getPaperPhase(requesterID, paperID);
+    }
+
+    @Test
+    void getReviewers_Successful() throws Exception {
+        List<Long> fakeReviewersIDs = List.of(1L, 2L, 3L);
+        long requesterID = 1L;
+        long paperID = 2L;
+        String fakeReviewersIDsJSON = objectMapper.writeValueAsString(fakeReviewersIDs);
+
+        doReturn(fakeReviewersIDs).when(reviewsService).getReviewersFromPaper(requesterID, paperID);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/papers/{paperID}/reviewers", Long.toString(paperID))
+                                .param("requesterID", Long.toString(requesterID))
+                ).andExpect(MockMvcResultMatchers.status().is(200))
+                .andExpect(MockMvcResultMatchers.content().json(fakeReviewersIDsJSON));
+
+        verify(reviewsService).getReviewersFromPaper(requesterID, paperID);
+    }
+
+    /**
+     * Simulates an exception inside getReviewers function and checks if
+     * correct status code was returned.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    public void getReviewers_WithException(Exception exception, int expected) throws Exception {
+        long requesterID = 1L;
+        long paperID = 2L;
+
+        doThrow(exception).when(reviewsService).getReviewersFromPaper(requesterID, paperID);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/{paperID}/reviewers", Long.toString(paperID))
+                        .param("requesterID", Long.toString(requesterID))
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        verify(reviewsService).getReviewersFromPaper(requesterID, paperID);
+    }
+
+    @Test
+    void getReviewers_NoSuchPaper() throws Exception {
+        getReviewers_WithException(new NotFoundException(""), 404);
+    }
+
+    @Test
+    void getReviewers_IllegalAccess() throws Exception {
+        getReviewers_WithException(new IllegalAccessException(""), 403);
+    }
+
+    @Test
+    void getReviewers_UnknownError() throws Exception {
+        getReviewers_WithException(new RuntimeException(""), 500);
     }
 }
