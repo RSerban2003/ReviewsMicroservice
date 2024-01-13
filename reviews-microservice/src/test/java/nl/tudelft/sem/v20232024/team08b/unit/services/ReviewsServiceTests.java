@@ -13,6 +13,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -299,5 +301,43 @@ public class ReviewsServiceTests {
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
 
         assertThrows(NotFoundException.class, () -> reviewsService.getReview(requesterID, reviewerID, paperID));
+    }
+
+    @Test
+    void testGetReviewersFromPaperSuccess() throws NotFoundException, IllegalAccessException {
+        ReviewID id1 = new ReviewID(paperID, 1L);
+        ReviewID id2 = new ReviewID(paperID, 2L);
+        List<Review> mockReviews = List.of(
+                new Review(id1, null, null, null, null, null),
+                new Review(id2, null, null, null, null, null)
+        );
+
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(mockReviews);
+
+        List<Long> reviewers = reviewsService.getReviewersFromPaper(requesterID, paperID);
+        Assertions.assertEquals(List.of(1L, 2L), reviewers);
+    }
+
+    @Test
+    void testGetReviewersFromPaperAccessException() {
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+
+        Exception e = assertThrows(IllegalAccessException.class, () -> {
+            reviewsService.getReviewersFromPaper(requesterID, paperID);
+        });
+        assertEquals("Not a chair or reviewer of paper", e.getMessage());
+    }
+
+    @Test
+    void testGetReviewersFromPaperInvalidTrackPhase() throws NotFoundException, IllegalAccessException {
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        doThrow(new IllegalStateException()).when(verificationService)
+                .verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
+
+        assertThrows(IllegalStateException.class, () -> {
+            reviewsService.getReviewersFromPaper(requesterID, paperID);
+        });
     }
 }
