@@ -69,10 +69,6 @@ public class BidsServiceTests {
 
         when(bidRepository.findByPaperID(1L)).thenReturn(bids);
 
-
-        // Verify that verification was called
-        verify(bidsVerification).verifyPermissionToAccessAllBids(6L, 1L);
-
         var expected = new ArrayList<BidByReviewer>();
         expected.add(new BidByReviewer(4L,
                 nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.NOT_REVIEW));
@@ -83,6 +79,9 @@ public class BidsServiceTests {
         Assertions.assertEquals(expected.size(), expectedResult.size());
         Assertions.assertTrue(expected.containsAll(expectedResult));
         Assertions.assertTrue(expectedResult.containsAll(expected));
+
+        // Verify that verification was called
+        verify(bidsVerification).verifyPermissionToAccessAllBids(6L, 1L);
     }
 
     @Test
