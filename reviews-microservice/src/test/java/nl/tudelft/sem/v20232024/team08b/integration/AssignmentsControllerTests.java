@@ -25,8 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -271,5 +270,58 @@ public class AssignmentsControllerTests {
 
         verify(assignmentsService, times(1)).finalization(eq(3L),
                 eq(new TrackID(1L, 2L)));
+    }
+    void testRemoveSuccessful() throws Exception {
+
+        doNothing().when(assignmentsService).remove(requesterID, paperID, reviewerID);
+
+        mockMvc.perform(delete("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().is(200))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
+
+
+        verify(assignmentsService, times(1)).remove(requesterID, paperID, reviewerID);
+    }
+
+    @Test
+    void testRemoveNotFound() throws Exception {
+
+
+        doThrow(new NotFoundException("")).when(assignmentsService).remove(requesterID, paperID, reviewerID);
+
+        mockMvc.perform(delete("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+
+        verify(assignmentsService, times(1)).remove(requesterID, paperID, reviewerID);
+    }
+
+    @Test
+    void testRemoveForbidden() throws Exception {
+
+        doThrow(new IllegalAccessException()).when(assignmentsService).remove(requesterID, paperID, reviewerID);
+
+        mockMvc.perform(delete("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+
+        verify(assignmentsService, times(1)).remove(requesterID, paperID, reviewerID);
+    }
+
+    @Test
+    void testRemoveInternalServerError() throws Exception {
+
+        doThrow(new RuntimeException()).when(assignmentsService).remove(requesterID, paperID, reviewerID);
+
+        mockMvc.perform(delete("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError());
+
+        verify(assignmentsService, times(1)).remove(requesterID, paperID, reviewerID);
     }
 }
