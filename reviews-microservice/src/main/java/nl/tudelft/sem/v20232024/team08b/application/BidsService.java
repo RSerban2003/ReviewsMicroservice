@@ -1,48 +1,38 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.application.verification.BidsVerification;
+import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.BidID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class BidsService {
     private final BidRepository bidRepository;
-    private final VerificationService verificationService;
-    private final ExternalRepository externalRepository;
-    private final TrackPhaseCalculator trackPhaseCalculator;
+    private final BidsVerification bidsVerification;
 
     /**
      * Default constructor for the service.
      *
      * @param bidRepository repository storing the bids
-     * @param verificationService service responsible for verification
-     * @param externalRepository repository responsible for external requests to other microservices
-     * @param trackPhaseCalculator calculator for the phase of the track
+     * @param bidsVerification service responsible for bid verification
      */
     @Autowired
     public BidsService(
             BidRepository bidRepository,
-            VerificationService verificationService,
-            ExternalRepository externalRepository,
-            TrackPhaseCalculator trackPhaseCalculator
+            BidsVerification bidsVerification
     ) {
         this.bidRepository = bidRepository;
-        this.verificationService = verificationService;
-        this.externalRepository = externalRepository;
-        this.trackPhaseCalculator = trackPhaseCalculator;
+        this.bidsVerification = bidsVerification;
     }
 
     /**
@@ -53,18 +43,17 @@ public class BidsService {
      * @param reviewerID  The ID of the reviewer.
      * @return The bid for the paper.
      * @throws NotFoundException        If the bid doesn't exist.
-     * @throws ForbiddenAccessException If the requester doesn't have the required role.
-     *      They must be a chair or a reviewer of the track the paper is in.
+     * @throws ForbiddenAccessException If the requester doesn't have the required role. They must
+     *                                  be a chair or a reviewer of the track the paper is in.
      */
-    public Bid getBidForPaperByReviewer(Long requesterID, Long paperID, Long reviewerID)
+    public nl.tudelft.sem.v20232024.team08b.dtos.review.Bid getBidForPaperByReviewer(Long requesterID,
+                                                                                     Long paperID,
+                                                                                     Long reviewerID)
             throws NotFoundException, ForbiddenAccessException {
-        var bid = bidRepository.findById(new BidID(paperID, reviewerID));
+        bidsVerification.verifyPermissionToAccessBid(requesterID, paperID);
+        Optional<Bid> bid = bidRepository.findById(new BidID(paperID, reviewerID));
         if (bid.isEmpty()) {
             throw new NotFoundException("The bid doesn't exist");
-        }
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)
-                && !verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
-            throw new ForbiddenAccessException();
         }
         return bid.get().getBid();
     }
@@ -80,10 +69,7 @@ public class BidsService {
      */
     public List<BidByReviewer> getBidsForPaper(Long requesterID, Long paperID)
             throws NotFoundException, ForbiddenAccessException {
-        externalRepository.getSubmission(paperID);
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
-            throw new ForbiddenAccessException();
-        }
+        bidsVerification.verifyPermissionToAccessAllBids(requesterID, paperID);
         var bids = bidRepository.findByPaperID(paperID);
         return bids.stream().map(bid -> new BidByReviewer(bid.getBidderID(), bid.getBid())).collect(Collectors.toList());
     }
@@ -96,17 +82,13 @@ public class BidsService {
      * @param bid         the preference of the reviewer in regard to reviewing the paper
      * @throws ForbiddenAccessException if the requester is not a reviewer of the track the paper is in
      * @throws NotFoundException        if the paper/track doesn't exist
-     * @throws ConflictException        if the bidding phase has passed or it hasn't started
+     * @throws ConflictException        if the bidding phase has passed or if it hasn't started
      */
-    public void bid(Long requesterID, Long paperID, Bid bid)
+    public void bid(Long requesterID,
+                    Long paperID,
+                    nl.tudelft.sem.v20232024.team08b.dtos.review.Bid bid)
             throws ForbiddenAccessException, NotFoundException, ConflictException {
-        var paper = externalRepository.getSubmission(paperID);
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) {
-            throw new ForbiddenAccessException();
-        }
-        if (trackPhaseCalculator.getTrackPhase(paper.getEventId(), paper.getTrackId()) != TrackPhase.BIDDING) {
-            throw new ConflictException();
-        }
-        bidRepository.save(new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, requesterID, bid));
+        bidsVerification.verifyPermissionToAddBid(requesterID, paperID);
+        bidRepository.save(new Bid(paperID, requesterID, bid));
     }
 }

@@ -2,6 +2,9 @@ package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.domain.Comment;
+import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
+import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
+import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
@@ -18,19 +21,25 @@ import java.util.Optional;
 @Service
 public class ReviewsService {
     private final ReviewRepository reviewRepository;
-    private final VerificationService verificationService;
-
+    private final PapersVerification papersVerification;
+    private final TracksVerification tracksVerification;
+    private final UsersVerification usersVerification;
     /**
      * Default constructor for the service.
      *
      * @param reviewRepository repository storing the reviews
-     * @param verificationService service that handles authentication
-     */
+     * @param tracksVerification object responsible for verifying track information
+     * @param usersVerification object responsible for verifying user information
+     * */
     @Autowired
     public ReviewsService(ReviewRepository reviewRepository,
-                          VerificationService verificationService) {
+                          PapersVerification papersVerification,
+                          TracksVerification tracksVerification,
+                          UsersVerification usersVerification) {
         this.reviewRepository = reviewRepository;
-        this.verificationService = verificationService;
+        this.papersVerification = papersVerification;
+        this.tracksVerification = tracksVerification;
+        this.usersVerification = usersVerification;
     }
 
     /**
@@ -48,22 +57,22 @@ public class ReviewsService {
                                                 Long paperID) throws NotFoundException,
                                                                      IllegalAccessException {
         // Check if such paper exists
-        if (!verificationService.verifyPaper(paperID)) {
+        if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("No such paper exists");
         }
 
         // Check if such user exists and has correct privileges
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) {
+        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)) {
             throw new IllegalAccessException("No such user exists");
         }
 
         // Check if the user is allowed to review this paper
-        if (!verificationService.isReviewerForPaper(requesterID, paperID)) {
+        if (!usersVerification.isReviewerForPaper(requesterID, paperID)) {
             throw new IllegalAccessException("The user is not a reviewer for this paper.");
         }
 
         // Verify that the current phase is the submitting phase
-        verificationService.verifyTrackPhaseThePaperIsIn(paperID,
+        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID,
                 List.of(TrackPhase.SUBMITTING)
         );
     }
@@ -117,24 +126,24 @@ public class ReviewsService {
     public void verifyIfUserCanAccessReview(Long requesterID,
                                            Long reviewerID,
                                            Long paperID) throws NotFoundException, IllegalAccessException {
-        if (!verificationService.verifyPaper(paperID)) {
+        if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("No such paper exists");
         }
 
-        boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
-        boolean isChair = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
-        boolean isAuthor = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR);
+        boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
+        boolean isChair = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        boolean isAuthor = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.AUTHOR);
 
         // Check if such review even exists (the method throws if it doesn't)
         getReview(reviewerID, paperID);
 
         if (isAuthor) {
             // If the requesting user is author, then he can only access the paper during final phase
-            verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.FINAL));
+            tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.FINAL));
         } else if (isChair || isReviewer) {
             // If the requesting user is chair or reviewer, they cannot access the review before the
             // reviewing phase
-            verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
+            tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
         } else {
             throw new IllegalAccessException("The requester is not a member of the track");
         }
@@ -183,10 +192,10 @@ public class ReviewsService {
                                             Long paperID) throws NotFoundException,
             IllegalAccessException,
             IllegalCallerException {
-        boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
-        boolean isAssignedToPaper = verificationService.isReviewerForPaper(reviewerID, paperID);
+        boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
+        boolean isAssignedToPaper = usersVerification.isReviewerForPaper(reviewerID, paperID);
 
-        if (!verificationService.verifyPaper(paperID)) {
+        if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("Paper does not exist");
         }
 
@@ -194,7 +203,7 @@ public class ReviewsService {
             throw new IllegalAccessException("The user does not have permission to view these comments");
         }
 
-        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING));
+        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING));
     }
 
     /**
@@ -236,11 +245,11 @@ public class ReviewsService {
                                                Long paperID) throws NotFoundException,
                                                                     IllegalAccessException,
                                                                     IllegalCallerException {
-        boolean isChair = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
-        boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
-        boolean isAssignedToPaper = verificationService.isReviewerForPaper(reviewerID, paperID);
+        boolean isChair = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
+        boolean isAssignedToPaper = usersVerification.isReviewerForPaper(reviewerID, paperID);
 
-        if (!verificationService.verifyPaper(paperID)) {
+        if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("Paper does not exist");
         }
 
@@ -248,7 +257,7 @@ public class ReviewsService {
             throw new IllegalAccessException("The user does not have permission to view these comments");
         }
 
-        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING));
+        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING));
     }
 
     /**
