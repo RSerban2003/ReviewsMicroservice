@@ -192,8 +192,8 @@ public class AssignmentsService {
                      numberOfPapers.set(minIndex,Integer.MAX_VALUE);
                  }
                  ReviewID reviewID1 = new ReviewID(paper.getId(), users.get(min0).getId());
-                 ReviewID reviewID2 = new ReviewID(paper.getId(), users.get(min0).getId());
-                 ReviewID reviewID3 = new ReviewID(paper.getId(), users.get(min0).getId());
+                 ReviewID reviewID2 = new ReviewID(paper.getId(), users.get(min1).getId());
+                 ReviewID reviewID3 = new ReviewID(paper.getId(), users.get(min2).getId());
                  Review toSave1 = new Review();
                  Review toSave2 = new Review();
                  Review toSave3 = new Review();
