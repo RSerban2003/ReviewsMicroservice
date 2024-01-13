@@ -306,4 +306,71 @@ public class ReviewsServiceTests {
 
         assertThrows(NotFoundException.class, () -> reviewsService.getReview(requesterID, reviewerID, paperID));
     }
+
+    @Test
+    void verifySubmitConfidentialComment_NotFoundException() {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID));
+    }
+
+    @Test
+    void verifySubmitConfidentialComment_IllegalAccessException() {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        assertThrows(IllegalAccessException.class, () -> reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID));
+    }
+
+    @Test
+    void verifySubmitConfidentialComment_Successful() throws NotFoundException, IllegalAccessException {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
+    }
+
+    @Test
+    void verifyGetDiscussionComments_NotFoundException() {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID));
+    }
+
+    @Test
+    void verifyGetDiscussionComments_IllegalAccessException() {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        assertThrows(IllegalAccessException.class, () -> reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID));
+    }
+
+    @Test
+    void verifyGetDiscussionComments_Successful_isReviewer() throws NotFoundException, IllegalAccessException {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID);
+    }
+
+    @Test
+    void verifyGetDiscussionComments_Successful_isChair() throws NotFoundException, IllegalAccessException {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID);
+    }
 }

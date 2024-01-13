@@ -190,8 +190,7 @@ public class ReviewsService {
     public void verifySubmitConfidentialComment(Long requesterID,
                                             Long reviewerID,
                                             Long paperID) throws NotFoundException,
-            IllegalAccessException,
-            IllegalCallerException {
+                                                                 IllegalAccessException {
         boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         boolean isAssignedToPaper = usersVerification.isReviewerForPaper(reviewerID, paperID);
 
@@ -243,8 +242,7 @@ public class ReviewsService {
     public void verifyGetDiscussionComments(Long requesterID,
                                                Long reviewerID,
                                                Long paperID) throws NotFoundException,
-                                                                    IllegalAccessException,
-                                                                    IllegalCallerException {
+                                                                    IllegalAccessException {
         boolean isChair = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
         boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         boolean isAssignedToPaper = usersVerification.isReviewerForPaper(reviewerID, paperID);
