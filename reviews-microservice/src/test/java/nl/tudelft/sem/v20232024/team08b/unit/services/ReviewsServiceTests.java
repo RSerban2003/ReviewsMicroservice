@@ -313,7 +313,8 @@ public class ReviewsServiceTests {
         when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
         when(papersVerification.verifyPaper(paperID)).thenReturn(false);
 
-        assertThrows(NotFoundException.class, () -> reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID));
+        assertThrows(NotFoundException.class, () ->
+                reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID));
     }
 
     @Test
@@ -322,7 +323,8 @@ public class ReviewsServiceTests {
         when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
-        assertThrows(IllegalAccessException.class, () -> reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID));
+        assertThrows(IllegalAccessException.class, () ->
+                reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID));
     }
 
     @Test
@@ -341,7 +343,8 @@ public class ReviewsServiceTests {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
         when(papersVerification.verifyPaper(paperID)).thenReturn(false);
 
-        assertThrows(NotFoundException.class, () -> reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID));
+        assertThrows(NotFoundException.class, () ->
+                reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID));
     }
 
     @Test
@@ -351,7 +354,8 @@ public class ReviewsServiceTests {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
-        assertThrows(IllegalAccessException.class, () -> reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID));
+        assertThrows(IllegalAccessException.class, () ->
+                reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID));
     }
 
     @Test
