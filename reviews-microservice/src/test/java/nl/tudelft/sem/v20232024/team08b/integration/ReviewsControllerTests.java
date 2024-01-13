@@ -310,11 +310,11 @@ public class ReviewsControllerTests {
         doNothing().when(reviewsService).submitConfidentialComment(requesterID, reviewerID, paperID, text);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders
-                                .post("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
-                                .param("requesterID", requesterID.toString())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(text)
+                MockMvcRequestBuilders
+                        .post("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(text)
                 )
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
