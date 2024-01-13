@@ -192,7 +192,8 @@ public class ReviewsController implements ReviewsAPI {
                                                                          Long reviewerID,
                                                                          Long paperID) {
         try {
-            return ResponseEntity.ok(reviewsService.getDiscussionComments(requesterID, reviewerID, paperID));
+            return ResponseEntity
+                    .ok(reviewsService.getDiscussionComments(requesterID, reviewerID, paperID));
         } catch (NotFoundException e) {
             // The paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
