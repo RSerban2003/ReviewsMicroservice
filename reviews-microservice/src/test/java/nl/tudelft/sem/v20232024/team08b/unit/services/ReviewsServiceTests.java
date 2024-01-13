@@ -346,7 +346,8 @@ public class ReviewsServiceTests {
         doThrow(new NotFoundException(""))
                 .when(reviewsService).verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
 
-        assertThrows(NotFoundException.class, () -> reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, "text"));
+        assertThrows(NotFoundException.class, () ->
+                reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, "text"));
     }
 
     @Test
@@ -356,12 +357,12 @@ public class ReviewsServiceTests {
         doThrow(new IllegalAccessException(""))
                 .when(reviewsService).verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
 
-        assertThrows(IllegalAccessException.class, () -> reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, "text"));
+        assertThrows(IllegalAccessException.class, () ->
+                reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, "text"));
     }
 
     @Test
     void submitConfidentialComment_Successful() throws NotFoundException, IllegalAccessException {
-        Comment comment = new Comment(requesterID, "text");
 
         reviewsService = spy(reviewsService);
 
@@ -369,6 +370,7 @@ public class ReviewsServiceTests {
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
 
         reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, "text");
+        Comment comment = new Comment(requesterID, "text");
         assertThat(fakeReview.getConfidentialComments().contains(comment));
         verify(reviewRepository).save(fakeReview);
 
@@ -433,7 +435,8 @@ public class ReviewsServiceTests {
         doThrow(new IllegalAccessException(""))
                 .when(reviewsService).verifyGetDiscussionComments(requesterID, reviewerID, paperID);
 
-        assertThrows(IllegalAccessException.class, () -> reviewsService.getDiscussionComments(requesterID, reviewerID, paperID));
+        assertThrows(IllegalAccessException.class, () ->
+                reviewsService.getDiscussionComments(requesterID, reviewerID, paperID));
     }
 
     @Test
