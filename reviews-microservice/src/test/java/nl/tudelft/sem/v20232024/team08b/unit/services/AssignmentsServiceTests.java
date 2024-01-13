@@ -1,14 +1,17 @@
 package nl.tudelft.sem.v20232024.team08b.unit.services;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -187,6 +190,103 @@ public class AssignmentsServiceTests {
         assertThat(assignmentsService.assignments(requesterID, paperID).size()).isEqualTo(2);
         reviews.add(r3);
         assertThat(assignmentsService.assignments(requesterID, paperID).size()).isEqualTo(3);
+    }
+
+    @Test
+    void testRemovePaperDoesNotExist() {
+        when(verificationService.verifyPaper(paperID)).thenReturn(false);
+
+        // Assert that NotFoundException is thrown with the expected message
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> assignmentsService.remove(requesterID, paperID, reviewerID));
+        assertEquals("this paper does not exist", exception.getMessage());
+
+        // Ensure no interactions with other methods
+        verify(verificationService, times(1)).verifyPaper(paperID);
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
+
+    @Test
+    void testRemoveNotPCChair() {
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+
+        IllegalAccessException exception = assertThrows(IllegalAccessException.class,
+            () -> assignmentsService.remove(requesterID, paperID, reviewerID));
+        assertEquals("Only pc chairs are allowed to do that", exception.getMessage());
+
+        verify(verificationService, times(1)).verifyPaper(paperID);
+        verify(verificationService, times(1))
+            .verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
+
+    @Test
+    void testRemoveNoReviewersAssigned() throws NotFoundException, IllegalAccessException {
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+
+        doNothing().when(verificationService).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(new ArrayList<>());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> assignmentsService.remove(requesterID, paperID, reviewerID));
+        assertEquals("there are no reviewers assigned to this paper", exception.getMessage());
+
+        verify(verificationService, times(1)).verifyPaper(paperID);
+        verify(verificationService, times(1))
+            .verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        verify(verificationService, times(1))
+            .verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+        verify(reviewRepository, times(1)).findByReviewIDPaperID(paperID);
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
+
+    @Test
+    void testRemoveReviewerNotFound() throws NotFoundException, IllegalAccessException {
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+
+        doNothing().when(verificationService).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+
+        List<Review> reviews = new ArrayList<>();
+        Review review = new Review();
+        review.setReviewID(new ReviewID(paperID, 10L));
+        reviews.add(review);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+            () -> assignmentsService.remove(requesterID, paperID, reviewerID));
+        assertEquals("There is no such a assignment", exception.getMessage());
+
+        verify(verificationService, times(1)).verifyPaper(paperID);
+        verify(verificationService, times(1))
+            .verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        verify(verificationService, times(1))
+            .verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+        verify(reviewRepository, times(1)).findByReviewIDPaperID(paperID);
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
+
+    @Test
+    void testRemove() throws NotFoundException, IllegalAccessException {
+        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        doNothing().when(verificationService).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+
+        List<Review> reviews = new ArrayList<>();
+        Review review = new Review();
+        review.setReviewID(new ReviewID(paperID, reviewerID));
+        reviews.add(review);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
+
+        assignmentsService.remove(requesterID, paperID, reviewerID);
+
+        verify(reviewRepository, times(1)).delete(review);
     }
 
 
