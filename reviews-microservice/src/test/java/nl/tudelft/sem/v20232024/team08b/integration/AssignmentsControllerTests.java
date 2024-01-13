@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @AutoConfigureMockMvc
@@ -173,7 +174,9 @@ public class AssignmentsControllerTests {
         mockMvc.perform(delete("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
                 .param("requesterID", String.valueOf(requesterID))
                 .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(MockMvcResultMatchers.status().is(200))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
+
 
         verify(assignmentsService, times(1)).remove(requesterID, paperID, reviewerID);
     }

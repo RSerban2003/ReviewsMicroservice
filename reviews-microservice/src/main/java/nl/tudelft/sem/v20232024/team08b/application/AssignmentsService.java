@@ -135,7 +135,7 @@ public class AssignmentsService {
         }
         verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
-        if (reviews == null || reviews.size() == 0) {
+        if (reviews.size() == 0) {
             throw new NotFoundException("there are no reviewers assigned to this paper");
         }
         for (Review r : reviews) {
