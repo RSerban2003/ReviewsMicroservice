@@ -1,17 +1,19 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
-import java.util.ArrayList;
-import java.util.List;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AssignmentsService {
@@ -145,5 +147,9 @@ public class AssignmentsService {
             }
         }
         throw new NotFoundException("There is no such a assignment");
+    }
+
+    public List<PaperSummaryWithID> getAssignedPaper(Long requesterID) {
+        
     }
 }

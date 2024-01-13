@@ -148,6 +148,9 @@ public class AssignmentsController implements AssignmentsAPI {
      */
     @Override
     public ResponseEntity<List<PaperSummaryWithID>> getAssignedPapers(Long requesterID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(null);
     }
 }
