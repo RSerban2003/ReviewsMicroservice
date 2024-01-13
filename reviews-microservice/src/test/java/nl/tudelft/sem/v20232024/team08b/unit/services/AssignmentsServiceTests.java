@@ -1,5 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.unit.services;
 
+import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -33,6 +34,7 @@ public class AssignmentsServiceTests {
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
     private final VerificationService verificationService = Mockito.mock(VerificationService.class);
     private final BidRepository bidRepository = Mockito.mock(BidRepository.class);
+    private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
 
     private AssignmentsService assignmentsService;
 
@@ -47,8 +49,8 @@ public class AssignmentsServiceTests {
             new AssignmentsService(
                 bidRepository,
                 reviewRepository,
-                verificationService
-            )
+                verificationService,
+                trackRepository)
         );
 
         fakeSubmission = new Submission();
