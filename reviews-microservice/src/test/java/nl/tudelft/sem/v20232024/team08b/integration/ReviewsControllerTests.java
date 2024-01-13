@@ -252,6 +252,57 @@ public class ReviewsControllerTests {
     }
 
     @Test
+    void getReviewers_Successful() throws Exception {
+        List<Long> fakeReviewersIDs = List.of(1L, 2L, 3L);
+
+        String fakeReviewersIDsJSON = objectMapper.writeValueAsString(fakeReviewersIDs);
+
+        doReturn(fakeReviewersIDs).when(reviewsService).getReviewersFromPaper(requesterID, paperID);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/papers/{paperID}/reviewers", Long.toString(paperID))
+                                .param("requesterID", Long.toString(requesterID))
+                ).andExpect(MockMvcResultMatchers.status().is(200))
+                .andExpect(MockMvcResultMatchers.content().json(fakeReviewersIDsJSON));
+
+        verify(reviewsService).getReviewersFromPaper(requesterID, paperID);
+    }
+
+    /**
+     * Simulates an exception inside getReviewers function and checks if
+     * correct status code was returned.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    public void getReviewers_WithException(Exception exception, int expected) throws Exception {
+        doThrow(exception).when(reviewsService).getReviewersFromPaper(requesterID, paperID);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/{paperID}/reviewers", Long.toString(paperID))
+                        .param("requesterID", Long.toString(requesterID))
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        verify(reviewsService).getReviewersFromPaper(requesterID, paperID);
+    }
+
+    @Test
+    void getReviewers_NoSuchPaper() throws Exception {
+        getReviewers_WithException(new NotFoundException(""), 404);
+    }
+
+    @Test
+    void getReviewers_IllegalAccess() throws Exception {
+        getReviewers_WithException(new IllegalAccessException(""), 403);
+    }
+
+    @Test
+    void getReviewers_UnknownError() throws Exception {
+        getReviewers_WithException(new RuntimeException(""), 500);
+    }
+
+    @Test
     public void submitConfidentialCommentSuccessfully() throws Exception {
 
         String text = "text";
@@ -259,11 +310,11 @@ public class ReviewsControllerTests {
         doNothing().when(reviewsService).submitConfidentialComment(requesterID, reviewerID, paperID, text);
 
         mockMvc.perform(
-                MockMvcRequestBuilders
-                        .post("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
-                        .param("requesterID", requesterID.toString())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(text)
+                        MockMvcRequestBuilders
+                                .post("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
+                                .param("requesterID", requesterID.toString())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(text)
                 )
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
@@ -272,8 +323,8 @@ public class ReviewsControllerTests {
     }
 
     /**
-     * Simulates an exception inside submitConfidentialComment function
-     * and checks for correct status code.
+     * Simulates an exception inside getReviewers function and checks if
+     * correct status code was returned.
      *
      * @param exception the exception to be thrown
      * @param expected the expected status code

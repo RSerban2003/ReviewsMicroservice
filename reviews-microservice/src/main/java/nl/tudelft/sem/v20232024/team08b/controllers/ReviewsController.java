@@ -107,7 +107,19 @@ public class ReviewsController implements ReviewsAPI {
     @Override
     public ResponseEntity<List<Long>> getReviewers(Long requesterID,
                                                    Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+
+        try {
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(reviewsService.getReviewersFromPaper(requesterID, paperID));
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

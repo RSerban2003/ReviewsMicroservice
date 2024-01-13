@@ -114,6 +114,32 @@ public class ReviewsService {
     }
 
     /**
+     * This method is designed to retrieve a list of reviewer IDs associated with a given paper.
+     * It is intended for use by users who are either chairs or reviewers of the paper in question.
+     *
+     * @param requesterID the ID of the user making the request
+     * @param paperID the ID of the paper for which reviewers are being requested
+     * @return The method returns a list of Long values, each representing the ID of a reviewer associated with the paper.
+     * @throws NotFoundException if the paper is not found
+     * @throws IllegalAccessException if the requester is neither a chair nor a reviewer of the paper
+     */
+    public List<Long> getReviewersFromPaper(long requesterID, long paperID)
+            throws NotFoundException, IllegalAccessException {
+        boolean isChair = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
+        if (!isChair && !isReviewer) {
+            throw new IllegalAccessException("Not a chair or reviewer of paper");
+        }
+        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
+        List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
+        List<Long> reviewers = new ArrayList<>();
+        for (Review review : reviews) {
+            reviewers.add(review.getReviewID().getReviewerID());
+        }
+        return reviewers;
+    }
+
+    /**
      * Verifies if a user can access a review. The user either has to be a chair
      * of the track of the review, or the reviewer himself.
      *
