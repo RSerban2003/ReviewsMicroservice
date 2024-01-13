@@ -103,7 +103,7 @@ public class AssignmentsController implements AssignmentsAPI {
                                                   Long paperID) {
         try {
             return ResponseEntity.ok(assignmentsService.assignments(requesterID, paperID));
-        } catch (IllegalCallerException | NotFoundException e) {
+        } catch (IllegalCallerException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
             // The requester must be a pc chair
@@ -126,21 +126,7 @@ public class AssignmentsController implements AssignmentsAPI {
     public ResponseEntity<Void> remove(Long requesterID,
                                        Long paperID,
                                        Long reviewerID) {
-        try {
-            assignmentsService.remove(requesterID, paperID, reviewerID);
-            return ResponseEntity
-                .ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .build();
-        } catch (IllegalCallerException | NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (IllegalAccessException e) {
-            // The requester must be a pc chair
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        } catch (Exception e) {
-            // Internal server error
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     /**

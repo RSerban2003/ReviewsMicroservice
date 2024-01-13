@@ -123,35 +123,4 @@ public class AssignmentsService {
         }
         return userIds;
     }
-
-
-    /**
-     * Removes assignment from paper.
-     *
-     * @param requesterID ID of a user making the request
-     * @param paperID ID of a paper for which there is an assignment
-     * @param reviewerID ID of a reviewer assigned to the paper
-     * @throws NotFoundException when the paper does not exist or there is no such an assignment
-     * @throws IllegalAccessException when the requester is not a pc chair
-     */
-    public void remove(Long requesterID, Long paperID, Long reviewerID) throws NotFoundException, IllegalAccessException {
-        if (!verificationService.verifyPaper(paperID)) {
-            throw new NotFoundException("this paper does not exist");
-        }
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
-            throw new IllegalAccessException("Only pc chairs are allowed to do that");
-        }
-        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
-        List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
-        if (reviews.size() == 0) {
-            throw new NotFoundException("there are no reviewers assigned to this paper");
-        }
-        for (Review r : reviews) {
-            if (r.getReviewID().getReviewerID().equals(reviewerID)) {
-                reviewRepository.delete(r);
-                return;
-            }
-        }
-        throw new NotFoundException("There is no such a assignment");
-    }
 }
