@@ -5,7 +5,6 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.controllers.ReviewsController;
-import nl.tudelft.sem.v20232024.team08b.domain.Comment;
 import nl.tudelft.sem.v20232024.team08b.domain.ConfidenceScore;
 import nl.tudelft.sem.v20232024.team08b.domain.RecommendationScore;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
@@ -260,10 +259,11 @@ public class ReviewsControllerTests {
         doNothing().when(reviewsService).submitConfidentialComment(requesterID, reviewerID, paperID, text);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
-                                .param("requesterID", requesterID.toString())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(text)
+                MockMvcRequestBuilders
+                        .post("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(text)
                 )
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
@@ -286,15 +286,17 @@ public class ReviewsControllerTests {
         doThrow(exception).when(reviewsService).submitConfidentialComment(requesterID, reviewerID, paperID, text);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.post("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
-                                .param("requesterID", requesterID.toString())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(text)
+                MockMvcRequestBuilders
+                        .post("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(text)
                 )
                 .andExpect(MockMvcResultMatchers.status().is(expected));
 
         verify(reviewsService).submitConfidentialComment(requesterID, reviewerID, paperID, "text");
     }
+
     @Test
     void submitConfidentialComment_NoSuchPaper() throws Exception {
         submitConfidentialCommentWithException(new NotFoundException(""), 404);
@@ -322,9 +324,10 @@ public class ReviewsControllerTests {
         String expectedJSON = objectMapper.writeValueAsString(comments);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
-                                .param("requesterID", requesterID.toString())
-                                .contentType(MediaType.APPLICATION_JSON)
+                MockMvcRequestBuilders
+                        .get("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
@@ -345,9 +348,10 @@ public class ReviewsControllerTests {
         doThrow(exception).when(reviewsService).getDiscussionComments(requesterID, reviewerID, paperID);
 
         mockMvc.perform(
-                        MockMvcRequestBuilders.get("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
-                                .param("requesterID", requesterID.toString())
-                                .contentType(MediaType.APPLICATION_JSON)
+                MockMvcRequestBuilders
+                        .get("/papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments", paperID, reviewerID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(MockMvcResultMatchers.status().is(expected));
 
