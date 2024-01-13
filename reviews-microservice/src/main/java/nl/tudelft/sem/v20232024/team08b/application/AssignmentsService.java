@@ -9,7 +9,6 @@ import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
-import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import java.util.List;
 @Service
 public class AssignmentsService {
     private final ReviewRepository reviewRepository;
-    private final BidRepository bidRepository;
     private final PapersVerification papersVerification;
     private final TracksVerification tracksVerification;
     private final UsersVerification usersVerification;
@@ -28,19 +26,16 @@ public class AssignmentsService {
     /**
      * Default constructor for the service.
      *
-     * @param bidRepository repository storing the bids
      * @param reviewRepository repository storing the reviews
      * @param papersVerification object responsible for verifying paper information
      * @param tracksVerification object responsible for verifying track information
      * @param usersVerification object responsible for verifying user information
      */
     @Autowired
-    public AssignmentsService(BidRepository bidRepository,
-                              ReviewRepository reviewRepository,
+    public AssignmentsService(ReviewRepository reviewRepository,
                               PapersVerification papersVerification,
                               TracksVerification tracksVerification,
                               UsersVerification usersVerification) {
-        this.bidRepository = bidRepository;
         this.reviewRepository = reviewRepository;
         this.papersVerification = papersVerification;
         this.tracksVerification = tracksVerification;

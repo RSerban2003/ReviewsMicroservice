@@ -16,10 +16,10 @@ import java.util.List;
 
 @Service
 public class TracksVerification {
-    private TrackRepository trackRepository;
-    private ExternalRepository externalRepository;
-    private TrackPhaseCalculator trackPhaseCalculator;
-    private UsersVerification usersVerification;
+    private final TrackRepository trackRepository;
+    private final ExternalRepository externalRepository;
+    private final TrackPhaseCalculator trackPhaseCalculator;
+    private final UsersVerification usersVerification;
 
     /**
      * Default constructor for the track verification.
@@ -41,7 +41,7 @@ public class TracksVerification {
     }
 
     /**
-     * Checks for existance of a track in our database, if it does not exist it adds it.
+     * Checks for existence of a track in our database, if it does not exist it adds it.
      *
      * @param paperID paper ID to look for
      * @throws NotFoundException if paper is not found in database

@@ -82,7 +82,7 @@ public class BidsService {
      * @param bid         the preference of the reviewer in regard to reviewing the paper
      * @throws ForbiddenAccessException if the requester is not a reviewer of the track the paper is in
      * @throws NotFoundException        if the paper/track doesn't exist
-     * @throws ConflictException        if the bidding phase has passed or it hasn't started
+     * @throws ConflictException        if the bidding phase has passed or if it hasn't started
      */
     public void bid(Long requesterID,
                     Long paperID,

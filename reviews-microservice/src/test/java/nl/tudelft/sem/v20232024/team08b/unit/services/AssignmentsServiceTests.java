@@ -11,7 +11,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
-import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +32,6 @@ public class AssignmentsServiceTests {
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
     private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
-    private final BidRepository bidRepository = Mockito.mock(BidRepository.class);
 
     private AssignmentsService assignmentsService;
 
@@ -46,7 +44,6 @@ public class AssignmentsServiceTests {
     void setUp() {
         assignmentsService = Mockito.spy(
             new AssignmentsService(
-                bidRepository,
                 reviewRepository,
                 papersVerification,
                 tracksVerification,
