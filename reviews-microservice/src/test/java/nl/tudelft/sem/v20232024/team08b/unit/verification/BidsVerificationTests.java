@@ -25,9 +25,9 @@ public class BidsVerificationTests {
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
 
     private final BidsVerification bidsVerification = new BidsVerification(
-      usersVerification,
-      trackPhaseCalculator,
-      externalRepository
+            usersVerification,
+            trackPhaseCalculator,
+            externalRepository
     );
 
     Long requesterID = 1L;

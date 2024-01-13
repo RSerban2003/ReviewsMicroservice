@@ -33,6 +33,13 @@ public class BidsVerification {
         this.externalRepository = externalRepository;
     }
 
+    /**
+     * Verifies permission for the requester to access a particular bid for a paper.
+     *
+     * @param requesterID the requesting user
+     * @param paperID the paper whose bid is asked about
+     * @throws ForbiddenAccessException if the user is not a chair or reviewer
+     */
     public void verifyPermissionToAccessBid(Long requesterID, Long paperID) throws ForbiddenAccessException {
         boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         boolean isChair = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
@@ -40,6 +47,14 @@ public class BidsVerification {
             throw new ForbiddenAccessException();
         }
     }
+
+    /**
+     * Verifies permission for the requester to access all bids of a paper.
+     *
+     * @param requesterID the requesting user
+     * @param paperID the paper whose bids are asked about
+     * @throws ForbiddenAccessException if the user is not a chair or reviewer
+     */
     public void verifyPermissionToAccessAllBids(Long requesterID, Long paperID) throws NotFoundException,
                                                                                        ForbiddenAccessException {
         externalRepository.getSubmission(paperID);
@@ -48,6 +63,17 @@ public class BidsVerification {
             throw new ForbiddenAccessException();
         }
     }
+
+    /**
+     * Verifies permission for the requester to add a bid for a
+     * paper.
+     *
+     * @param requesterID the ID of the requesting user
+     * @param paperID the paper which is bid for
+     * @throws NotFoundException if no such paper was found
+     * @throws ForbiddenAccessException if the requester is not a reviewer
+     * @throws ConflictException if the track phase is incorrect
+     */
     public void verifyPermissionToAddBid(Long requesterID, Long paperID) throws NotFoundException,
                                                                                 ForbiddenAccessException,
                                                                                 ConflictException {

@@ -58,6 +58,7 @@ public class BidsServiceTests {
         verify(bidRepository, times(1)).findById(bidID);
         verify(bidsVerification).verifyPermissionToAccessBid(requesterID, paperID);
     }
+
     @Test
     void testGetBidsForPaperValidRequesterAndPaperReturnsBidsByReviewer()
             throws NotFoundException, ForbiddenAccessException {
@@ -68,7 +69,6 @@ public class BidsServiceTests {
 
         when(bidRepository.findByPaperID(1L)).thenReturn(bids);
 
-        List<BidByReviewer> result = bidsService.getBidsForPaper(6L, 1L);
 
         // Verify that verification was called
         verify(bidsVerification).verifyPermissionToAccessAllBids(6L, 1L);
@@ -78,9 +78,11 @@ public class BidsServiceTests {
                 nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.NOT_REVIEW));
         expected.add(new BidByReviewer(5L,
                 nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW));
-        Assertions.assertEquals(expected.size(), result.size());
-        Assertions.assertTrue(expected.containsAll(result));
-        Assertions.assertTrue(result.containsAll(expected));
+
+        List<BidByReviewer> expectedResult = bidsService.getBidsForPaper(6L, 1L);
+        Assertions.assertEquals(expected.size(), expectedResult.size());
+        Assertions.assertTrue(expected.containsAll(expectedResult));
+        Assertions.assertTrue(expectedResult.containsAll(expected));
     }
 
     @Test
