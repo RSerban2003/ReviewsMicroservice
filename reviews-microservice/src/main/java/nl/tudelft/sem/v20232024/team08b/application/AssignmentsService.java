@@ -40,7 +40,8 @@ public class AssignmentsService {
                               PapersVerification papersVerification,
                               TracksVerification tracksVerification,
                               UsersVerification usersVerification,
-                              ExternalRepository externalRepository) {
+                              ExternalRepository externalRepository)
+    { 
         this.reviewRepository = reviewRepository;
         this.papersVerification = papersVerification;
         this.tracksVerification = tracksVerification;
@@ -161,8 +162,15 @@ public class AssignmentsService {
         throw new NotFoundException("There is no such a assignment");
     }
 
+    /**
+     * Gets the assigned paper for a reviewer.
+     *
+     * @param requesterID ID of a user making a request
+     * @return the PaperSummaryWithID objects related to the requester
+     * @throws NotFoundException if user is not found
+     */
     public List<PaperSummaryWithID> getAssignedPaper(Long requesterID) throws NotFoundException {
-        if(!usersVerification.verifyIfUserExists(requesterID)) {
+        if (!usersVerification.verifyIfUserExists(requesterID)) {
             throw new NotFoundException("User does not exist!");
         }
         List<ReviewID> reviewIDS = reviewRepository.findByReviewIDReviewerID(requesterID);
