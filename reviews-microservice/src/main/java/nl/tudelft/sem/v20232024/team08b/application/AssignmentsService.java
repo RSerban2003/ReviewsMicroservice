@@ -40,8 +40,7 @@ public class AssignmentsService {
                               PapersVerification papersVerification,
                               TracksVerification tracksVerification,
                               UsersVerification usersVerification,
-                              ExternalRepository externalRepository)
-    { 
+                              ExternalRepository externalRepository) { 
         this.reviewRepository = reviewRepository;
         this.papersVerification = papersVerification;
         this.tracksVerification = tracksVerification;
