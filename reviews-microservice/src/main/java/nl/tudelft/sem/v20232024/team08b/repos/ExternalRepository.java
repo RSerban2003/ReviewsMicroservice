@@ -110,7 +110,7 @@ public class ExternalRepository {
      * @param trackID the ID of the track
      * @return a list of submissions in the track
      */
-    public List<Submission> getSubmissionsInTrack(TrackID trackID) {
+    public List<Submission> getSubmissionsInTrack(TrackID trackID) throws NotFoundException {
         return getSubmissionsInTrack(trackID, ourID);
     }
 
@@ -121,7 +121,7 @@ public class ExternalRepository {
      * @param requesterID the ID of the requester
      * @return a list of submissions in the track
      */
-    public List<Submission> getSubmissionsInTrack(TrackID trackID, Long requesterID) {
+    public List<Submission> getSubmissionsInTrack(TrackID trackID, Long requesterID) throws NotFoundException {
         try {
             String url = submissionsURL + "/submission/event/" + trackID.getConferenceID()
                     + "/track/" + trackID.getTrackID() + "/" + requesterID;
@@ -129,6 +129,8 @@ public class ExternalRepository {
             List<Submission> submissions;
             submissions = objectMapper.readValue(response, List.class);
             return submissions;
+        } catch (NotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse the HTTP response");
         }

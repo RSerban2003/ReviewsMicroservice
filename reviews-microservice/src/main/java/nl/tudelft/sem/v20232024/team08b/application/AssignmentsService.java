@@ -148,6 +148,17 @@ public class AssignmentsService {
         return userIds;
     }
 
+    /**
+     * This method finalizes the assignment of reviewers, so they can no longer be changed
+     * manually or automatically. It moves the track into the REVIEWING phase.
+     *
+     * @param requesterID ID of a requester
+     * @param trackID     ID of a track
+     * @throws ForbiddenAccessException If the requester is not a PC chair
+     * @throws NotFoundException        If the track does not exist
+     * @throws ConflictException        If there is less than 3 reviewers assigned to a paper
+     *                                  or the track is not in ASSIGNING phase
+     */
     public void finalization(Long requesterID, TrackID trackID)
             throws ForbiddenAccessException, NotFoundException, ConflictException {
         // Ensure the track exists

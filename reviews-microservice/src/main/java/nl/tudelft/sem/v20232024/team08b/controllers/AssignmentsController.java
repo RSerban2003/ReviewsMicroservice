@@ -92,7 +92,7 @@ public class AssignmentsController implements AssignmentsAPI {
     public ResponseEntity<Void> finalization(Long requesterID, Long conferenceID, Long trackID) {
         try {
             assignmentsService.finalization(requesterID, new TrackID(conferenceID, trackID));
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
         } catch (ConflictException e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (NotFoundException e) {
