@@ -36,7 +36,7 @@ public class UsersVerification {
      * @param userID the ID of the user
      * @return true, iff the given user exists
      */
-    public boolean verifyIfUserExists(Long userID){
+    public boolean verifyIfUserExists(Long userID) {
         try {
             // getRolesOfUser method will throw an error when this user does not exist
             externalRepository.getRolesOfUser(userID);
