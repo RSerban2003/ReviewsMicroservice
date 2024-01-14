@@ -179,7 +179,7 @@ public interface ReviewsAPI {
             @Content(schema = @Schema())})
     })
     @PostMapping(path = "/reviews/by-reviewer/{reviewerID}/discussion-comments", consumes = "application/json")
-    public ResponseEntity<Void> submitConfidentialComment(
+    public ResponseEntity<Void> submitDiscussionComment(
         @RequestParam @Parameter(description = "The ID of a user making the request") Long requesterID,
         @PathVariable @Parameter(description = "The ID of a reviewer in charge of this paper") Long reviewerID,
         @PathVariable @Parameter(description = "The ID of a paper to which to add the comment to") Long paperID,
