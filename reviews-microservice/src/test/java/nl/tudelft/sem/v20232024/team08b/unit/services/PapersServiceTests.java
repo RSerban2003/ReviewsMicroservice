@@ -11,6 +11,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,6 +28,7 @@ public class PapersServiceTests {
     private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
+    private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
 
     private PapersService papersService;
 
