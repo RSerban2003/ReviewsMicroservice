@@ -233,7 +233,6 @@ public class AssignmentsServiceTests {
     void testGetAssignedPaperWithAssignedPapers() throws NotFoundException {
         ReviewID reviewID = new ReviewID();
         reviewID.setPaperID(paperID);
-
         Paper paper = new Paper();
         paper.setTitle("Sample Title");
         paper.setAbstractSection("Sample Abstract");
