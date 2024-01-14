@@ -165,7 +165,7 @@ public class AssignmentsService {
         if(!usersVerification.verifyIfUserExists(requesterID)) {
             throw new NotFoundException("User does not exist!");
         }
-        List<ReviewID> reviewIDS = reviewRepository.findByPaperIDReviewerID(requesterID);
+        List<ReviewID> reviewIDS = reviewRepository.findByReviewIDReviewerID(requesterID);
         List<PaperSummaryWithID> list = new ArrayList<>();
         for (ReviewID reviewID : reviewIDS) {
             Long paperID = reviewID.getPaperID();

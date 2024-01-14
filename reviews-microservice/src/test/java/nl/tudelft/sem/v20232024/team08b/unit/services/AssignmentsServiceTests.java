@@ -223,7 +223,7 @@ public class AssignmentsServiceTests {
     @Test
     void testGetAssignedPaperNoAssignedPapers() throws NotFoundException {
         when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(true);
-        when(reviewRepository.findByPaperIDReviewerID(requesterID)).thenReturn(Collections.emptyList());
+        when(reviewRepository.findByReviewIDReviewerID(requesterID)).thenReturn(Collections.emptyList());
 
         List<PaperSummaryWithID> result = assignmentsService.getAssignedPaper(requesterID);
         Assertions.assertTrue(result.isEmpty());
@@ -246,7 +246,7 @@ public class AssignmentsServiceTests {
         submission.setKeywords(new ArrayList<>());
 
         when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(true);
-        when(reviewRepository.findByPaperIDReviewerID(requesterID)).thenReturn(reviewIDs);
+        when(reviewRepository.findByReviewIDReviewerID(requesterID)).thenReturn(reviewIDs);
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
 
         List<PaperSummaryWithID> result = assignmentsService.getAssignedPaper(requesterID);
