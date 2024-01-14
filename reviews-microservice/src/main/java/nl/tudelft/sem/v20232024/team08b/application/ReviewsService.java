@@ -123,12 +123,12 @@ public class ReviewsService {
      */
     public List<Long> getReviewersFromPaper(long requesterID, long paperID)
             throws NotFoundException, IllegalAccessException {
-        boolean isChair = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
-        boolean isReviewer = verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
+        boolean isChair = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         if (!isChair && !isReviewer) {
             throw new IllegalAccessException("Not a chair or reviewer of paper");
         }
-        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
+        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
         List<Long> reviewers = new ArrayList<>();
         for (Review review : reviews) {
