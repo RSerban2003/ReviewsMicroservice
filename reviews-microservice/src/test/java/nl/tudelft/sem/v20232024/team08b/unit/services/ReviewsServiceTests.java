@@ -459,7 +459,7 @@ public class ReviewsServiceTests {
     }
 
     @Test
-    void testGetReviewersFromPaperSuccess() throws NotFoundException, IllegalAccessException {
+    void testGetReviewersFromPaperSuccessChair() throws NotFoundException, IllegalAccessException {
         ReviewID id1 = new ReviewID(paperID, 1L);
         ReviewID id2 = new ReviewID(paperID, 2L);
         List<Review> mockReviews = List.of(
@@ -468,6 +468,22 @@ public class ReviewsServiceTests {
         );
 
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(mockReviews);
+
+        List<Long> reviewers = reviewsService.getReviewersFromPaper(requesterID, paperID);
+        Assertions.assertEquals(List.of(1L, 2L), reviewers);
+    }
+
+    @Test
+    void testGetReviewersFromPaperSuccessReviewer() throws NotFoundException, IllegalAccessException {
+        ReviewID id1 = new ReviewID(paperID, 1L);
+        ReviewID id2 = new ReviewID(paperID, 2L);
+        List<Review> mockReviews = List.of(
+                new Review(id1, null, null, null, null, null),
+                new Review(id2, null, null, null, null, null)
+        );
+
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
         when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(mockReviews);
 
         List<Long> reviewers = reviewsService.getReviewersFromPaper(requesterID, paperID);

@@ -34,13 +34,13 @@ public class BidsVerification {
     }
 
     /**
-     * Verifies permission for the requester to access a particular bid for a paper.
+     * Verifies permission for the requester to access the bids of some given paper.
      *
      * @param requesterID the requesting user
      * @param paperID the paper whose bid is asked about
      * @throws ForbiddenAccessException if the user is not a chair or reviewer
      */
-    public void verifyPermissionToAccessBid(Long requesterID, Long paperID) throws ForbiddenAccessException {
+    public void verifyPermissionToAccessBidsOfPaper(Long requesterID, Long paperID) throws ForbiddenAccessException {
         boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         boolean isChair = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
         if (!isReviewer && !isChair) {
@@ -65,7 +65,7 @@ public class BidsVerification {
     }
 
     /**
-     * Verifies permission for the requester to add a bid for a
+     * Verifies permission for the requester to submit a bid for a
      * paper.
      *
      * @param requesterID the ID of the requesting user
@@ -74,7 +74,7 @@ public class BidsVerification {
      * @throws ForbiddenAccessException if the requester is not a reviewer
      * @throws ConflictException if the track phase is incorrect
      */
-    public void verifyPermissionToAddBid(Long requesterID, Long paperID) throws NotFoundException,
+    public void verifyPermissionToSubmitBid(Long requesterID, Long paperID) throws NotFoundException,
                                                                                 ForbiddenAccessException,
                                                                                 ConflictException {
         boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);

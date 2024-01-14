@@ -50,7 +50,7 @@ public class BidsService {
                                                                                      Long paperID,
                                                                                      Long reviewerID)
             throws NotFoundException, ForbiddenAccessException {
-        bidsVerification.verifyPermissionToAccessBid(requesterID, paperID);
+        bidsVerification.verifyPermissionToAccessBidsOfPaper(requesterID, paperID);
         Optional<Bid> bid = bidRepository.findById(new BidID(paperID, reviewerID));
         if (bid.isEmpty()) {
             throw new NotFoundException("The bid doesn't exist");
@@ -88,7 +88,7 @@ public class BidsService {
                     Long paperID,
                     nl.tudelft.sem.v20232024.team08b.dtos.review.Bid bid)
             throws ForbiddenAccessException, NotFoundException, ConflictException {
-        bidsVerification.verifyPermissionToAddBid(requesterID, paperID);
+        bidsVerification.verifyPermissionToSubmitBid(requesterID, paperID);
         bidRepository.save(new Bid(paperID, requesterID, bid));
     }
 }

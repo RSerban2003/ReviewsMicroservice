@@ -36,12 +36,11 @@ public class BidsServiceTests {
         Bid bid = new Bid(paperID, reviewerID, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
 
         when(bidRepository.findById(bidID)).thenReturn(Optional.of(bid));
-        doNothing().when(bidsVerification).verifyPermissionToAccessBid(paperID, paperID);
+        doNothing().when(bidsVerification).verifyPermissionToAccessBidsOfPaper(paperID, paperID);
 
         var result = bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID);
 
         assertEquals(bid.getBid(), result);
-        verify(bidsVerification).verifyPermissionToAccessBid(requesterID, paperID);
     }
 
     @Test
@@ -52,11 +51,25 @@ public class BidsServiceTests {
         BidID bidID = new BidID(paperID, reviewerID);
 
         when(bidRepository.findById(bidID)).thenReturn(Optional.empty());
-        doNothing().when(bidsVerification).verifyPermissionToAccessBid(paperID, paperID);
+        doNothing().when(bidsVerification).verifyPermissionToAccessBidsOfPaper(paperID, paperID);
 
         assertThrows(NotFoundException.class, () -> bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID));
         verify(bidRepository, times(1)).findById(bidID);
-        verify(bidsVerification).verifyPermissionToAccessBid(requesterID, paperID);
+    }
+
+    @Test
+    public void testGetBidForPaperByReviewerForbiddenAccess() throws ForbiddenAccessException {
+        doThrow(new ForbiddenAccessException()).when(bidsVerification)
+                .verifyPermissionToAccessBidsOfPaper(1L, 2L);
+        assertThrows(ForbiddenAccessException.class, () -> bidsService.getBidForPaperByReviewer(1L, 2L, 3L));
+
+    }
+
+    @Test
+    void testGetBidsForPaperForbiddenAccess() throws NotFoundException, ForbiddenAccessException {
+        doThrow(new ForbiddenAccessException())
+                .when(bidsVerification).verifyPermissionToAccessAllBids(6L, 1L);
+        assertThrows(ForbiddenAccessException.class, () -> bidsService.getBidsForPaper(6L, 1L));
     }
 
     @Test
@@ -79,21 +92,28 @@ public class BidsServiceTests {
         Assertions.assertEquals(expected.size(), expectedResult.size());
         Assertions.assertTrue(expected.containsAll(expectedResult));
         Assertions.assertTrue(expectedResult.containsAll(expected));
-
-        // Verify that verification was called
-        verify(bidsVerification).verifyPermissionToAccessAllBids(6L, 1L);
     }
 
     @Test
     void testBidValidRequestSavesBid() throws ForbiddenAccessException, NotFoundException, ConflictException {
         Long paperID = 5L;
         Long requesterID = 1L;
-        doNothing().when(bidsVerification).verifyPermissionToAddBid(requesterID, paperID);
+        doNothing().when(bidsVerification).verifyPermissionToSubmitBid(requesterID, paperID);
 
         var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
         bidsService.bid(requesterID, paperID, bid);
 
         verify(bidRepository, times(1)).save(new Bid(paperID, requesterID, bid));
-        verify(bidsVerification).verifyPermissionToAddBid(requesterID, paperID);
+    }
+
+    @Test
+    void testBidForbiddedAccess() throws ForbiddenAccessException, NotFoundException, ConflictException {
+        Long paperID = 5L;
+        Long requesterID = 1L;
+        var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
+
+        doThrow(new ForbiddenAccessException())
+                .when(bidsVerification).verifyPermissionToSubmitBid(requesterID, paperID);
+        assertThrows(ForbiddenAccessException.class, () -> bidsService.bid(requesterID, paperID, bid));
     }
 }
