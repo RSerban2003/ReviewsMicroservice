@@ -152,7 +152,7 @@ public class PapersVerification {
      * @returns true if the paper is in the required phase, false otherwise
      * @throws NotFoundException if the paper does not exist.
      */
-    public boolean verifyPhasePaperIsIn (Long paperID, PaperPhase paperPhase) throws NotFoundException {
+    public boolean verifyPhasePaperIsIn(Long paperID, PaperPhase paperPhase) throws NotFoundException {
         return paperPhaseCalculator.getPaperPhase(paperID) == paperPhase;
     }
 
