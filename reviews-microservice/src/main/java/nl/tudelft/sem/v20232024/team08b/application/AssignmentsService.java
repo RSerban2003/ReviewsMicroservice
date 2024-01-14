@@ -1,6 +1,9 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
+import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
+import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
@@ -8,6 +11,9 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,22 +24,27 @@ import java.util.List;
 @Service
 public class AssignmentsService {
     private final ReviewRepository reviewRepository;
-    private final BidRepository bidRepository;
-
-    private final VerificationService verificationService;
+    private final PapersVerification papersVerification;
+    private final TracksVerification tracksVerification;
+    private final UsersVerification usersVerification;
 
     /**
      * Default constructor for the service.
      *
-     * @param bidRepository repository storing the bids
      * @param reviewRepository repository storing the reviews
+     * @param papersVerification object responsible for verifying paper information
+     * @param tracksVerification object responsible for verifying track information
+     * @param usersVerification object responsible for verifying user information
      */
     @Autowired
-    public AssignmentsService(BidRepository bidRepository,
-                              ReviewRepository reviewRepository, VerificationService verificationService) {
-        this.bidRepository = bidRepository;
+    public AssignmentsService(ReviewRepository reviewRepository,
+                              PapersVerification papersVerification,
+                              TracksVerification tracksVerification,
+                              UsersVerification usersVerification) {
         this.reviewRepository = reviewRepository;
-        this.verificationService = verificationService;
+        this.papersVerification = papersVerification;
+        this.tracksVerification = tracksVerification;
+        this.usersVerification = usersVerification;
     }
 
     /**
@@ -51,15 +62,15 @@ public class AssignmentsService {
         throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
         switch (role) {
             case CHAIR:
-                if (!verificationService.verifyRoleFromPaper(userID, paperID, UserRole.CHAIR)) {
+                if (!usersVerification.verifyRoleFromPaper(userID, paperID, UserRole.CHAIR)) {
                     throw new IllegalAccessException("You are not PC chair for this track");
                 }
                 break;
             case REVIEWER:
-                if (!verificationService.verifyRoleFromPaper(userID, paperID, UserRole.REVIEWER)) {
+                if (!usersVerification.verifyRoleFromPaper(userID, paperID, UserRole.REVIEWER)) {
                     throw new NotFoundException("There is no such a user in this track");
                 }
-                verificationService.verifyCOI(paperID, userID);
+                papersVerification.verifyCOI(paperID, userID);
                 break;
             default:
                 throw new IllegalAccessException("You are not pc chair for this track");
@@ -80,11 +91,11 @@ public class AssignmentsService {
      */
     public void assignManually(Long requesterID, Long reviewerID, Long paperID)
         throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
-        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
 
         verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR);
         verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
-        verificationService.verifyIfTrackExists(paperID);
+        tracksVerification.verifyIfTrackExists(paperID);
 
         ReviewID reviewID = new ReviewID(paperID, reviewerID);
         Review toSave = new Review();
@@ -102,13 +113,13 @@ public class AssignmentsService {
      * @throws IllegalAccessException If the requester does not have permissions to see the assignments
      */
     public List<Long> assignments(Long requesterID, Long paperID) throws IllegalAccessException, NotFoundException {
-        if (!verificationService.verifyPaper(paperID)) {
+        if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("this paper does not exist");
         }
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
+        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
             throw new IllegalAccessException("Only pc chairs are allowed to do that");
         }
-        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING,
+        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING,
             TrackPhase.FINAL, TrackPhase.REVIEWING));
         List<Long> userIds = new ArrayList<>();
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
@@ -129,13 +140,13 @@ public class AssignmentsService {
      * @throws IllegalAccessException when the requester is not a pc chair
      */
     public void remove(Long requesterID, Long paperID, Long reviewerID) throws NotFoundException, IllegalAccessException {
-        if (!verificationService.verifyPaper(paperID)) {
+        if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("this paper does not exist");
         }
-        if (!verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
+        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
             throw new IllegalAccessException("Only pc chairs are allowed to do that");
         }
-        verificationService.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
         if (reviews.size() == 0) {
             throw new NotFoundException("there are no reviewers assigned to this paper");
