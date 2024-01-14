@@ -307,7 +307,7 @@ public class ReviewsControllerTests {
 
         String text = "text";
 
-        doNothing().when(reviewsService).submitConfidentialComment(requesterID, reviewerID, paperID, text);
+        doNothing().when(reviewsService).submitDiscussionComment(requesterID, reviewerID, paperID, text);
 
         mockMvc.perform(
                 MockMvcRequestBuilders
@@ -319,7 +319,7 @@ public class ReviewsControllerTests {
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
 
-        verify(reviewsService).submitConfidentialComment(requesterID, reviewerID, paperID, "text");
+        verify(reviewsService).submitDiscussionComment(requesterID, reviewerID, paperID, "text");
     }
 
     /**
@@ -334,7 +334,7 @@ public class ReviewsControllerTests {
 
         String text = "text";
 
-        doThrow(exception).when(reviewsService).submitConfidentialComment(requesterID, reviewerID, paperID, text);
+        doThrow(exception).when(reviewsService).submitDiscussionComment(requesterID, reviewerID, paperID, text);
 
         mockMvc.perform(
                 MockMvcRequestBuilders
@@ -345,7 +345,7 @@ public class ReviewsControllerTests {
                 )
                 .andExpect(MockMvcResultMatchers.status().is(expected));
 
-        verify(reviewsService).submitConfidentialComment(requesterID, reviewerID, paperID, "text");
+        verify(reviewsService).submitDiscussionComment(requesterID, reviewerID, paperID, "text");
     }
 
     @Test

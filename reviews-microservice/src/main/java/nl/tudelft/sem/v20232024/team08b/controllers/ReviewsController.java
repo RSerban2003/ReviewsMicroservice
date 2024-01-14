@@ -160,7 +160,7 @@ public class ReviewsController implements ReviewsAPI {
     }
 
     /**
-     * Posts a confidential comment for a review during the discussion phase.
+     * Posts a discussion comment for a review during the discussion phase.
      *
      * @param requesterID the ID of the requesting user
      * @param reviewerID the ID of the reviewer
@@ -169,12 +169,12 @@ public class ReviewsController implements ReviewsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<Void> submitConfidentialComment(Long requesterID,
-                                                          Long reviewerID,
-                                                          Long paperID,
-                                                          String comment) {
+    public ResponseEntity<Void> submitDiscussionComment(Long requesterID,
+                                                        Long reviewerID,
+                                                        Long paperID,
+                                                        String comment) {
         try {
-            reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, comment);
+            reviewsService.submitDiscussionComment(requesterID, reviewerID, paperID, comment);
         } catch (NotFoundException e) {
             // The paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -192,7 +192,7 @@ public class ReviewsController implements ReviewsAPI {
     }
 
     /**
-     * Gets the confidential comments assigned to a review during the discussion phase.
+     * Gets the discussion comments assigned to a review during the discussion phase.
      *
      * @param requesterID the ID of the requesting user
      * @param reviewerID the ID of the reviewer

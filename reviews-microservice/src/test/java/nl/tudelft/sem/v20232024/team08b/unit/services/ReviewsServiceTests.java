@@ -319,7 +319,7 @@ public class ReviewsServiceTests {
         when(papersVerification.verifyPaper(paperID)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () ->
-                reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID));
+                reviewsService.verifySubmitDiscussionComment(requesterID, reviewerID, paperID));
     }
 
     @Test
@@ -329,7 +329,7 @@ public class ReviewsServiceTests {
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
         assertThrows(IllegalAccessException.class, () ->
-                reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID));
+                reviewsService.verifySubmitDiscussionComment(requesterID, reviewerID, paperID));
     }
 
     @Test
@@ -338,7 +338,7 @@ public class ReviewsServiceTests {
         when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
-        reviewsService.verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
+        reviewsService.verifySubmitDiscussionComment(requesterID, reviewerID, paperID);
     }
 
     @Test
@@ -346,10 +346,10 @@ public class ReviewsServiceTests {
         reviewsService = Mockito.spy(reviewsService);
 
         doThrow(new NotFoundException(""))
-                .when(reviewsService).verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
+                .when(reviewsService).verifySubmitDiscussionComment(requesterID, reviewerID, paperID);
 
         assertThrows(NotFoundException.class, () ->
-                reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, "text"));
+                reviewsService.submitDiscussionComment(requesterID, reviewerID, paperID, "text"));
     }
 
     @Test
@@ -357,10 +357,10 @@ public class ReviewsServiceTests {
         reviewsService = Mockito.spy(reviewsService);
 
         doThrow(new IllegalAccessException(""))
-                .when(reviewsService).verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
+                .when(reviewsService).verifySubmitDiscussionComment(requesterID, reviewerID, paperID);
 
         assertThrows(IllegalAccessException.class, () ->
-                reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, "text"));
+                reviewsService.submitDiscussionComment(requesterID, reviewerID, paperID, "text"));
     }
 
     @Test
@@ -368,10 +368,10 @@ public class ReviewsServiceTests {
 
         reviewsService = spy(reviewsService);
 
-        doNothing().when(reviewsService).verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
+        doNothing().when(reviewsService).verifySubmitDiscussionComment(requesterID, reviewerID, paperID);
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
 
-        reviewsService.submitConfidentialComment(requesterID, reviewerID, paperID, "text");
+        reviewsService.submitDiscussionComment(requesterID, reviewerID, paperID, "text");
         Comment comment = new Comment(requesterID, "text");
         assertThat(fakeReview.getConfidentialComments().contains(comment));
         verify(reviewRepository).save(fakeReview);

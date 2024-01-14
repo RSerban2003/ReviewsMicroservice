@@ -213,9 +213,9 @@ public class ReviewsService {
      * @throws NotFoundException if the paper does not exist
      * @throws IllegalAccessException if the user does not have the required permissions
      */
-    public void verifySubmitConfidentialComment(Long requesterID,
-                                            Long reviewerID,
-                                            Long paperID) throws NotFoundException,
+    public void verifySubmitDiscussionComment(Long requesterID,
+                                              Long reviewerID,
+                                              Long paperID) throws NotFoundException,
                                                                  IllegalAccessException {
         boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         boolean isAssignedToPaper = usersVerification.isReviewerForPaper(reviewerID, paperID);
@@ -225,7 +225,7 @@ public class ReviewsService {
         }
 
         if (!isReviewer || !isAssignedToPaper) {
-            throw new IllegalAccessException("The user does not have permission to view these comments");
+            throw new IllegalAccessException("The user does not have permission to submit this comment");
         }
 
         tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING));
@@ -241,12 +241,12 @@ public class ReviewsService {
      * @throws NotFoundException if the paper does not exist
      * @throws IllegalAccessException if the user does not have the required permissions
      */
-    public void submitConfidentialComment(Long requesterID,
-                                          Long reviewerID,
-                                          Long paperID,
-                                          String text) throws NotFoundException,
+    public void submitDiscussionComment(Long requesterID,
+                                        Long reviewerID,
+                                        Long paperID,
+                                        String text) throws NotFoundException,
                                                               IllegalAccessException {
-        verifySubmitConfidentialComment(requesterID, reviewerID, paperID);
+        verifySubmitDiscussionComment(requesterID, reviewerID, paperID);
 
         Comment comment = new Comment(requesterID, text);
 
