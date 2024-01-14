@@ -220,6 +220,16 @@ public class TracksService {
         setBiddingDeadlineCommon(conferenceID, trackID, newDeadline);
     }
 
+    /**
+     * Gets the analytics of a track. Analytics that provide a summary for a particular track of
+     * the amount of papers that have been accepted, rejected and those that haven't yet been decided
+     *
+     * @param trackID     the ID of the track
+     * @param requesterID the ID of the requester
+     * @return the numbers of accepted, rejected and undecided papers
+     * @throws NotFoundException        if the track does not exist
+     * @throws ForbiddenAccessException if the requester is not a chair of the track
+     */
     public TrackAnalytics getAnalytics(TrackID trackID, Long requesterID)
             throws NotFoundException, ForbiddenAccessException {
         // Ensure the requester is a chair of the track
@@ -235,16 +245,17 @@ public class TracksService {
         for (var submission : submissions) {
             PaperStatus status;
             try {
-                status = papersService.getState(submission.getSubmissionId(), requesterID);
+                status = papersService.getState(requesterID, submission.getSubmissionId());
             } catch (IllegalAccessException e) {
                 // We have already checked that the requester is a chair of the track
                 // so this shouldn't happen
                 throw new RuntimeException(e);
             }
+
             switch (status) {
                 case ACCEPTED -> accepted++;
                 case REJECTED -> rejected++;
-                case NOT_DECIDED -> undecided++;
+                default -> undecided++;
             }
         }
         return new TrackAnalytics(accepted, rejected, undecided);
