@@ -8,6 +8,7 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerificati
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
@@ -228,7 +229,8 @@ public class ReviewsService {
             throw new IllegalAccessException("The user does not have permission to submit this comment");
         }
 
-        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING));
+        papersVerification.verifyPhasePaperIsIn(paperID, PaperPhase.IN_DISCUSSION);
+
     }
 
     /**
@@ -280,7 +282,7 @@ public class ReviewsService {
             throw new IllegalAccessException("The user does not have permission to view these comments");
         }
 
-        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING));
+        papersVerification.verifyPhasePaperIsIn(paperID, PaperPhase.IN_DISCUSSION);
     }
 
     /**

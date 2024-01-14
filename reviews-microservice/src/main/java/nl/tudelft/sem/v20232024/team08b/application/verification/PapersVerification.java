@@ -1,6 +1,8 @@
 package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -19,6 +21,7 @@ public class PapersVerification {
     private final ExternalRepository externalRepository;
     private final UsersVerification usersVerification;
     private final TracksVerification tracksVerification;
+    private final PaperPhaseCalculator paperPhaseCalculator;
 
     /**
      * Default constructor for this verification service.
@@ -30,10 +33,12 @@ public class PapersVerification {
     @Autowired
     public PapersVerification(ExternalRepository externalRepository,
                               UsersVerification usersVerification,
-                              TracksVerification tracksVerification) {
+                              TracksVerification tracksVerification,
+                              PaperPhaseCalculator paperPhaseCalculator) {
         this.externalRepository = externalRepository;
         this.usersVerification = usersVerification;
         this.tracksVerification = tracksVerification;
+        this.paperPhaseCalculator = paperPhaseCalculator;
     }
 
     /**
@@ -137,6 +142,18 @@ public class PapersVerification {
                 List.of(TrackPhase.SUBMITTING, TrackPhase.REVIEWING, TrackPhase.FINAL)
         );
         verifyPermissionToAccessPaper(reviewerID, paperID);
+    }
+
+    /**
+     * Verifies whether the paper is in a specified phase.
+     *
+     * @param paperID - The ID of the paper
+     * @param paperPhase - The phase to check against
+     * @returns true if the paper is in the required phase, false otherwise
+     * @throws NotFoundException if the paper does not exist.
+     */
+    public boolean verifyPhasePaperIsIn (Long paperID, PaperPhase paperPhase) throws NotFoundException {
+        return paperPhaseCalculator.getPaperPhase(paperID) == paperPhase;
     }
 
 }
