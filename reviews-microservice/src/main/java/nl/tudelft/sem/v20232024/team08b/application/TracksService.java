@@ -6,8 +6,11 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerificat
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,7 @@ public class TracksService {
     private final TrackPhaseCalculator trackPhaseCalculator;
     private final TrackRepository trackRepository;
     private final ExternalRepository externalRepository;
+    private final PapersService papersService;
 
 
     /**
@@ -34,18 +38,22 @@ public class TracksService {
      *                             of a track
      * @param trackRepository repository storing the tracks
      * @param externalRepository class, that talks to outside microservices
+     * @param tracksVerification object responsible for verifying track information
+     * @param usersVerification object responsible for verifying user information
+     * @param papersService service responsible for papers
      */
     @Autowired
     public TracksService(TrackPhaseCalculator trackPhaseCalculator,
                          TrackRepository trackRepository,
                          ExternalRepository externalRepository,
                          TracksVerification tracksVerification,
-                         UsersVerification usersVerification) {
+                         UsersVerification usersVerification, PapersService papersService) {
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.trackRepository = trackRepository;
         this.externalRepository = externalRepository;
         this.tracksVerification = tracksVerification;
         this.usersVerification = usersVerification;
+        this.papersService = papersService;
     }
 
     /**
@@ -210,5 +218,35 @@ public class TracksService {
                 List.of(TrackPhase.BIDDING, TrackPhase.SUBMITTING));
 
         setBiddingDeadlineCommon(conferenceID, trackID, newDeadline);
+    }
+
+    public TrackAnalytics getAnalytics(TrackID trackID, Long requesterID)
+            throws NotFoundException, ForbiddenAccessException {
+        // Ensure the requester is a chair of the track
+        if (!usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
+                trackID.getTrackID(), UserRole.CHAIR)) {
+            throw new ForbiddenAccessException();
+        }
+
+        var submissions = externalRepository.getSubmissionsInTrack(trackID, requesterID);
+        var accepted = 0;
+        var rejected = 0;
+        var undecided = 0;
+        for (var submission : submissions) {
+            PaperStatus status;
+            try {
+                status = papersService.getState(submission.getSubmissionId(), requesterID);
+            } catch (IllegalAccessException e) {
+                // We have already checked that the requester is a chair of the track
+                // so this shouldn't happen
+                throw new RuntimeException(e);
+            }
+            switch (status) {
+                case ACCEPTED -> accepted++;
+                case REJECTED -> rejected++;
+                case NOT_DECIDED -> undecided++;
+            }
+        }
+        return new TrackAnalytics(accepted, rejected, undecided);
     }
 }

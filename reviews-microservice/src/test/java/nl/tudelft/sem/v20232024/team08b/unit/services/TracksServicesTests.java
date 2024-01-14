@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.unit.services;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
@@ -34,15 +35,19 @@ public class TracksServicesTests {
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final PapersService papersService = Mockito.mock(PapersService.class);
+
     private final TracksService tracksService = Mockito.spy(
             new TracksService(
                     trackPhaseCalculator,
                     trackRepository,
                     externalRepository,
                     tracksVerification,
-                    usersVerification
+                    usersVerification,
+                    papersService
             )
     );
+
     private Long requesterID = 0L;
     private Long conferenceID = 1L;
     private Long trackID = 2L;
