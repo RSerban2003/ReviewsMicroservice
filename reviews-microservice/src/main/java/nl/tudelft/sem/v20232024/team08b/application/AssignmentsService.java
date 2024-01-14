@@ -150,6 +150,11 @@ public class AssignmentsService {
     }
 
     public List<PaperSummaryWithID> getAssignedPaper(Long requesterID) {
-        
+        List<ReviewID> reviewIDS = reviewRepository.findByPaperIDReviewerID(requesterID);
+        List<PaperSummaryWithID> list = new ArrayList<>();
+        for (ReviewID reviewID : reviewIDS) {
+            Long paperID = reviewID.getPaperID();
+        }
+        return list;
     }
 }
