@@ -39,7 +39,7 @@ public class BidsVerificationTests {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
 
-        assertDoesNotThrow(() -> bidsVerification.verifyPermissionToAccessBid(requesterID, paperID));
+        assertDoesNotThrow(() -> bidsVerification.verifyPermissionToAccessBidsOfPaper(requesterID, paperID));
     }
 
     @Test
@@ -48,7 +48,7 @@ public class BidsVerificationTests {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
 
-        assertDoesNotThrow(() -> bidsVerification.verifyPermissionToAccessBid(requesterID, paperID));
+        assertDoesNotThrow(() -> bidsVerification.verifyPermissionToAccessBidsOfPaper(requesterID, paperID));
     }
 
     @Test
@@ -58,7 +58,7 @@ public class BidsVerificationTests {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
 
         assertThrows(ForbiddenAccessException.class,
-                () -> bidsVerification.verifyPermissionToAccessBid(requesterID, paperID));
+                () -> bidsVerification.verifyPermissionToAccessBidsOfPaper(requesterID, paperID));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class BidsVerificationTests {
                 .thenReturn(true);
         when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId()))
                 .thenReturn(TrackPhase.BIDDING);
-        assertDoesNotThrow(() -> bidsVerification.verifyPermissionToAddBid(requesterID, paperID));
+        assertDoesNotThrow(() -> bidsVerification.verifyPermissionToSubmitBid(requesterID, paperID));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class BidsVerificationTests {
         when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId()))
                 .thenReturn(TrackPhase.BIDDING);
         assertThrows(ForbiddenAccessException.class,
-                () -> bidsVerification.verifyPermissionToAddBid(requesterID, paperID));
+                () -> bidsVerification.verifyPermissionToSubmitBid(requesterID, paperID));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class BidsVerificationTests {
         when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId()))
                 .thenReturn(TrackPhase.REVIEWING);
         assertThrows(ConflictException.class,
-                () -> bidsVerification.verifyPermissionToAddBid(requesterID, paperID));
+                () -> bidsVerification.verifyPermissionToSubmitBid(requesterID, paperID));
     }
 
 }

@@ -36,12 +36,12 @@ public class BidsServiceTests {
         Bid bid = new Bid(paperID, reviewerID, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
 
         when(bidRepository.findById(bidID)).thenReturn(Optional.of(bid));
-        doNothing().when(bidsVerification).verifyPermissionToAccessBid(paperID, paperID);
+        doNothing().when(bidsVerification).verifyPermissionToAccessBidsOfPaper(paperID, paperID);
 
         var result = bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID);
 
         assertEquals(bid.getBid(), result);
-        verify(bidsVerification).verifyPermissionToAccessBid(requesterID, paperID);
+        verify(bidsVerification).verifyPermissionToAccessBidsOfPaper(requesterID, paperID);
     }
 
     @Test
@@ -52,11 +52,11 @@ public class BidsServiceTests {
         BidID bidID = new BidID(paperID, reviewerID);
 
         when(bidRepository.findById(bidID)).thenReturn(Optional.empty());
-        doNothing().when(bidsVerification).verifyPermissionToAccessBid(paperID, paperID);
+        doNothing().when(bidsVerification).verifyPermissionToAccessBidsOfPaper(paperID, paperID);
 
         assertThrows(NotFoundException.class, () -> bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID));
         verify(bidRepository, times(1)).findById(bidID);
-        verify(bidsVerification).verifyPermissionToAccessBid(requesterID, paperID);
+        verify(bidsVerification).verifyPermissionToAccessBidsOfPaper(requesterID, paperID);
     }
 
     @Test
@@ -88,12 +88,12 @@ public class BidsServiceTests {
     void testBidValidRequestSavesBid() throws ForbiddenAccessException, NotFoundException, ConflictException {
         Long paperID = 5L;
         Long requesterID = 1L;
-        doNothing().when(bidsVerification).verifyPermissionToAddBid(requesterID, paperID);
+        doNothing().when(bidsVerification).verifyPermissionToSubmitBid(requesterID, paperID);
 
         var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;
         bidsService.bid(requesterID, paperID, bid);
 
         verify(bidRepository, times(1)).save(new Bid(paperID, requesterID, bid));
-        verify(bidsVerification).verifyPermissionToAddBid(requesterID, paperID);
+        verify(bidsVerification).verifyPermissionToSubmitBid(requesterID, paperID);
     }
 }
