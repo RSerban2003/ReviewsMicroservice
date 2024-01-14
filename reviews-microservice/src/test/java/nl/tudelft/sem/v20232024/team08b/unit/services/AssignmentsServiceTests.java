@@ -233,7 +233,6 @@ public class AssignmentsServiceTests {
     void testGetAssignedPaperWithAssignedPapers() throws NotFoundException {
         ReviewID reviewID = new ReviewID();
         reviewID.setPaperID(paperID);
-        List<ReviewID> reviewIDs = Collections.singletonList(reviewID);
 
         Paper paper = new Paper();
         paper.setTitle("Sample Title");
@@ -246,6 +245,7 @@ public class AssignmentsServiceTests {
         submission.setKeywords(new ArrayList<>());
 
         when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(true);
+        List<ReviewID> reviewIDs = Collections.singletonList(reviewID);
         when(reviewRepository.findByReviewIDReviewerID(requesterID)).thenReturn(reviewIDs);
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
 
