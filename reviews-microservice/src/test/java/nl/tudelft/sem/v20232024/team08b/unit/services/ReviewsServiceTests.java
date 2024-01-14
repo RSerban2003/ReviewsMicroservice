@@ -544,8 +544,18 @@ public class ReviewsServiceTests {
     }
 
     @Test
-    void verifySubmitConfidentialComment_IllegalAccessException() {
+    void verifySubmitConfidentialComment_IllegalAccessException_NotReviewer() {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        assertThrows(IllegalAccessException.class, () ->
+                reviewsService.verifySubmitDiscussionComment(requesterID, reviewerID, paperID));
+    }
+
+    @Test
+    void verifySubmitConfidentialComment_IllegalAccessException_NotAssigned() {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
         when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
@@ -614,6 +624,28 @@ public class ReviewsServiceTests {
     void verifyGetDiscussionComments_IllegalAccessException() {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
         when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        assertThrows(IllegalAccessException.class, () ->
+                reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID));
+    }
+
+    @Test
+    void verifyGetDiscussionComments_IllegalAccessException_NotChairNotAssigned() {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        assertThrows(IllegalAccessException.class, () ->
+                reviewsService.verifyGetDiscussionComments(requesterID, reviewerID, paperID));
+    }
+
+    @Test
+    void verifyGetDiscussionComments_IllegalAccessException_NotChairNotReviewer() {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
+        when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(true);
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
