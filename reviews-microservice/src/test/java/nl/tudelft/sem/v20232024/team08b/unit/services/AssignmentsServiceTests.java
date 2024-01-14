@@ -7,22 +7,26 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerificat
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
@@ -32,6 +36,7 @@ public class AssignmentsServiceTests {
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
     private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
+    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
 
     private AssignmentsService assignmentsService;
 
@@ -47,7 +52,8 @@ public class AssignmentsServiceTests {
                 reviewRepository,
                 papersVerification,
                 tracksVerification,
-                usersVerification
+                usersVerification,
+                externalRepository
             )
         );
 
@@ -203,7 +209,52 @@ public class AssignmentsServiceTests {
         assertThat(assignmentsService.assignments(requesterID, paperID).size()).isEqualTo(3);
     }
 
+    @Test
+    void testGetAssignedPaperUserDoesNotExist() {
+        Long requesterID = 1L;
+        when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(false);
 
+        Exception e = assertThrows(NotFoundException.class, () -> {
+            assignmentsService.getAssignedPaper(requesterID);
+        });
+        assertEquals("User does not exist!", e.getMessage());
+    }
 
+    @Test
+    void testGetAssignedPaperNoAssignedPapers() throws NotFoundException {
+        when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(true);
+        when(reviewRepository.findByPaperIDReviewerID(requesterID)).thenReturn(Collections.emptyList());
 
+        List<PaperSummaryWithID> result = assignmentsService.getAssignedPaper(requesterID);
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetAssignedPaperWithAssignedPapers() throws NotFoundException {
+        ReviewID reviewID = new ReviewID();
+        reviewID.setPaperID(paperID);
+        List<ReviewID> reviewIDs = Collections.singletonList(reviewID);
+
+        Paper paper = new Paper();
+        paper.setTitle("Sample Title");
+        paper.setAbstractSection("Sample Abstract");
+
+        Submission submission = new Submission();
+        submission.setTitle("Sample Title");
+        submission.setAbstract("Sample Abstract");
+        submission.setPaper(new byte[0]);
+        submission.setKeywords(new ArrayList<>());
+
+        when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(true);
+        when(reviewRepository.findByPaperIDReviewerID(requesterID)).thenReturn(reviewIDs);
+        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+
+        List<PaperSummaryWithID> result = assignmentsService.getAssignedPaper(requesterID);
+
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        assertEquals(paperID, result.get(0).getPaperID());
+        assertEquals(paper.getTitle(), result.get(0).getTitle());
+        assertEquals(paper.getAbstractSection(), result.get(0).getAbstractSection());
+    }
 }

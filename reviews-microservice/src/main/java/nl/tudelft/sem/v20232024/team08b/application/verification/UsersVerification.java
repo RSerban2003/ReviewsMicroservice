@@ -31,6 +31,22 @@ public class UsersVerification {
     }
 
     /**
+     * Checks whether a user exists.
+     *
+     * @param userID the ID of the user
+     * @return true, iff the given user exists
+     */
+    public boolean verifyIfUserExists(Long userID){
+        try {
+            // getRolesOfUser method will throw an error when this user does not exist
+            externalRepository.getRolesOfUser(userID);
+            return true;
+        } catch (NotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
      * Checks whether a user with a given ID exists and is in the same conference and track as a paper with a give ID.
      *
      * @param userID the ID of the user.

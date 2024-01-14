@@ -6,14 +6,12 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerificat
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
-import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +25,7 @@ public class AssignmentsService {
     private final PapersVerification papersVerification;
     private final TracksVerification tracksVerification;
     private final UsersVerification usersVerification;
+    private final ExternalRepository externalRepository;
 
     /**
      * Default constructor for the service.
@@ -40,11 +39,13 @@ public class AssignmentsService {
     public AssignmentsService(ReviewRepository reviewRepository,
                               PapersVerification papersVerification,
                               TracksVerification tracksVerification,
-                              UsersVerification usersVerification) {
+                              UsersVerification usersVerification,
+                              ExternalRepository externalRepository) {
         this.reviewRepository = reviewRepository;
         this.papersVerification = papersVerification;
         this.tracksVerification = tracksVerification;
         this.usersVerification = usersVerification;
+        this.externalRepository = externalRepository;
     }
 
     /**
@@ -160,11 +161,20 @@ public class AssignmentsService {
         throw new NotFoundException("There is no such a assignment");
     }
 
-    public List<PaperSummaryWithID> getAssignedPaper(Long requesterID) {
+    public List<PaperSummaryWithID> getAssignedPaper(Long requesterID) throws NotFoundException {
+        if(!usersVerification.verifyIfUserExists(requesterID)) {
+            throw new NotFoundException("User does not exist!");
+        }
         List<ReviewID> reviewIDS = reviewRepository.findByPaperIDReviewerID(requesterID);
         List<PaperSummaryWithID> list = new ArrayList<>();
         for (ReviewID reviewID : reviewIDS) {
             Long paperID = reviewID.getPaperID();
+            PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
+            Paper paper = new Paper(externalRepository.getSubmission(paperID));
+            summaryWithID.setPaperID(paperID);
+            summaryWithID.setTitle(paper.getTitle());
+            summaryWithID.setAbstractSection(paper.getAbstractSection());
+            list.add(summaryWithID);
         }
         return list;
     }
