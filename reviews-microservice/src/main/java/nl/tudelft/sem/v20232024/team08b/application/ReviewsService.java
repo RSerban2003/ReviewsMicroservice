@@ -1,30 +1,33 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.domain.Comment;
+import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
-import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.domain.*;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
+import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class ReviewsService {
     private final ReviewRepository reviewRepository;
+    private final PaperPhaseCalculator paperPhaseCalculator;
     private final PapersVerification papersVerification;
     private final TracksVerification tracksVerification;
     private final UsersVerification usersVerification;
+
+    private final PaperRepository paperRepository;
     /**
      * Default constructor for the service.
      *
@@ -34,13 +37,17 @@ public class ReviewsService {
      * */
     @Autowired
     public ReviewsService(ReviewRepository reviewRepository,
+                          PaperPhaseCalculator paperPhaseCalculator,
                           PapersVerification papersVerification,
                           TracksVerification tracksVerification,
-                          UsersVerification usersVerification) {
+                          UsersVerification usersVerification,
+                          PaperRepository paperRepository) {
         this.reviewRepository = reviewRepository;
+        this.paperPhaseCalculator = paperPhaseCalculator;
         this.papersVerification = papersVerification;
         this.tracksVerification = tracksVerification;
         this.usersVerification = usersVerification;
+        this.paperRepository = paperRepository;
     }
 
     /**
@@ -203,6 +210,89 @@ public class ReviewsService {
 
         // Map the review from local domain object to a DTO and return it
         return new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(review);
+    }
+
+    /**
+     * Finalizes the discussion phase for a paper.
+     *
+      * @param requesterID ID of requesting user
+     * @param paperID ID of the paper
+     * @throws IllegalAccessException if requester is not allowed to access the paper
+     * @throws IllegalStateException if paper is not in discussion phase or reviews are not all positive nor negative
+     * @throws NotFoundException if such requester does not exist or if the paper is not found
+     */
+    public void finalizeDiscussionPhase(Long requesterID, Long paperID) throws IllegalAccessException,
+                                                                                IllegalStateException,
+                                                                                NotFoundException {
+        //Check if requester is a valid chair of this track which contains this paper.
+        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
+            throw new IllegalAccessException("User is not a chair for this track!");
+        }
+        PaperPhase phase = paperPhaseCalculator.getPaperPhase(paperID);
+        //Check if paper is in discussion phase.
+        if (!Objects.equals(phase, PaperPhase.IN_DISCUSSION)) {
+            throw new IllegalStateException("Paper is not in discussion phase!");
+        }
+        //Check if all reviews are either in positive or negative.
+        //Reviews should not be empty because paper is already in discussion phase
+        //which means that there are 3 reviews for the paper.
+        List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
+        boolean isAgreed = isAgreed(reviews);
+        if (!isAgreed) {
+            throw new IllegalStateException("Reviews are not all positive nor all negative.");
+        }
+        RecommendationScore recommendationScore = reviews.get(0).getRecommendationScore();
+        Paper paper = getDomainPaper(paperID);
+        if (recommendationScore == RecommendationScore.STRONG_REJECT ||
+                recommendationScore == RecommendationScore.WEAK_REJECT) {
+            paper.setStatus(PaperStatus.REJECTED);
+        } else {
+            paper.setStatus(PaperStatus.ACCEPTED);
+        }
+        paper.setReviewsHaveBeenFinalized(true);
+        paperRepository.save(paper);
+    }
+
+    /**
+     * Gets the paper object from paperRepository.
+     *
+     * @param paperID the ID of the paper
+     * @return the paper object
+     * @throws NotFoundException if such paper does not exist
+     */
+    public Paper getDomainPaper(Long paperID) throws NotFoundException {
+        Optional<Paper> paper = paperRepository.findById(paperID);
+        if (paper.isEmpty()) {
+            throw new NotFoundException("Paper was not found");
+        }
+        return paper.get();
+    }
+
+    /**
+     * Checks if all reviews have made a uniform decision or not.
+     *
+     * @param reviews the list of reviews to check
+     * @return true if all reviews are either agreed or disagreed. False otherwise.
+     */
+    public static boolean isAgreed(List<Review> reviews) {
+        if (reviews == null || reviews.isEmpty()) {
+            throw new IllegalStateException("No reviews found.");
+        }
+
+        boolean isAccept = reviews.get(0).getRecommendationScore() == RecommendationScore.STRONG_ACCEPT
+                | reviews.get(0).getRecommendationScore() == RecommendationScore.WEAK_ACCEPT;
+
+        for (int i = 1; i < reviews.size(); i++) { // Start from the second review
+            RecommendationScore score = reviews.get(i).getRecommendationScore();
+            boolean currentIsAccept = score == RecommendationScore.STRONG_ACCEPT
+                    | score == RecommendationScore.WEAK_ACCEPT;
+
+            if (currentIsAccept != isAccept) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

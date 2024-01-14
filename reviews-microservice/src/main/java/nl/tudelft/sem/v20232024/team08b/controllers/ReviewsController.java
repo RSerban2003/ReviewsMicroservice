@@ -154,9 +154,24 @@ public class ReviewsController implements ReviewsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<Void> finalization(Long requesterID,
-                                             Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<Void> finalization(Long requesterID, Long paperID) {
+        try {
+            reviewsService.finalizeDiscussionPhase(requesterID, paperID);
+        } catch (NotFoundException e) {
+            // If paper is invalid, respond with 404 error.
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .build();
+
     }
 
     /**

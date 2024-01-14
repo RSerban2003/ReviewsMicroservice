@@ -9,7 +9,6 @@ import nl.tudelft.sem.v20232024.team08b.domain.ConfidenceScore;
 import nl.tudelft.sem.v20232024.team08b.domain.RecommendationScore;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Review;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -32,9 +31,8 @@ public class ReviewsControllerTests {
     MockMvc mockMvc;
     private final ReviewsService reviewsService = Mockito.mock(ReviewsService.class);
     private final PapersService papersService = Mockito.mock(PapersService.class);
-
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private Review fakeReviewDTO;
+    private nl.tudelft.sem.v20232024.team08b.dtos.review.Review fakeReviewDTO;
 
     private Long requesterID;
     private Long reviewerID;
@@ -54,6 +52,69 @@ public class ReviewsControllerTests {
         requesterID = 1L;
         reviewerID = 2L;
         paperID = 3L;
+    }
+
+    /**
+     * Simulates an exception inside finalizeDiscussion function and checks if
+     * correct status code was returned.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    public void finalizeDiscussionWithException(Exception exception, int expected) throws Exception {
+        Long requesterID = 1L;
+        Long paperID = 2L;
+
+        doThrow(exception).when(reviewsService).finalizeDiscussionPhase(requesterID, paperID);
+
+        // Send the request to respective endpoint
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/papers/{paperID}/reviews/finalization", paperID.toString())
+                        .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        // Make sure the required call to the service was made
+        verify(reviewsService, times(1)).finalizeDiscussionPhase(requesterID, paperID);
+    }
+
+    @Test
+    public void finalizeDiscussion_PaperNotFound() throws Exception {
+        finalizeDiscussionWithException(new NotFoundException("No such paper found"), 404);
+    }
+
+    @Test
+    public void finalizeDiscussion_UnknownException() throws Exception {
+        finalizeDiscussionWithException(new RuntimeException(), 500);
+    }
+
+    @Test
+    public void finalizeDiscussion_InvalidRequester() throws Exception {
+        finalizeDiscussionWithException(new IllegalAccessException(), 403);
+    }
+
+    @Test
+    public void finalizeDiscussion_InvalidPaperPhase() throws Exception {
+        finalizeDiscussionWithException(new IllegalStateException(), 409);
+    }
+
+    @Test
+    public void finalizeDiscussion_InvalidReviews() throws Exception {
+        finalizeDiscussionWithException(new IllegalStateException(), 409);
+    }
+
+    @Test
+    public void finalizeDiscussionSuccessful() throws Exception {
+        Long requesterID = 1L;
+        Long paperID = 2L;
+        doNothing().when(reviewsService).finalizeDiscussionPhase(requesterID, paperID);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/papers/{paperID}/reviews/finalization", paperID.toString())
+                        .param("requesterID", requesterID.toString())
+                ).andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));;
+        verify(reviewsService, times(1)).finalizeDiscussionPhase(requesterID, paperID);
     }
 
     @Test

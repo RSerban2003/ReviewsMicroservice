@@ -2,43 +2,58 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
+import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.*;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class ReviewsServiceTests {
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
+    @MockBean
+    private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
+    @MockBean
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
+    @MockBean
     private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
+    @MockBean
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
+    @MockBean
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    @MockBean
+    private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
     private ReviewsService reviewsService = new ReviewsService(
-            reviewRepository,
+                reviewRepository,
+                paperPhaseCalculator,
             papersVerification,
             tracksVerification,
-            usersVerification
-    );
+            usersVerification,
+            paperRepository
+        );
 
     private nl.tudelft.sem.v20232024.team08b.dtos.review.Review reviewDTO;
     private Submission fakeSubmission;
@@ -71,6 +86,212 @@ public class ReviewsServiceTests {
         when(papersVerification.verifyPaper(paperID)).thenReturn(false);
         Assert.assertThrows(NotFoundException.class, () ->
                 reviewsService.submitReview(reviewDTO, requesterID, paperID));
+    }
+
+    @Test
+    void testAllReviewsAgreePositively() {
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.WEAK_ACCEPT, null, null)
+        );
+        assertTrue(ReviewsService.isAgreed(reviews));
+    }
+
+    @Test
+    void testIsAgreedWithFirstReviewWeakAccept() {
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.WEAK_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.WEAK_ACCEPT, null, null)
+        );
+        assertTrue(ReviewsService.isAgreed(reviews));
+    }
+
+    @Test
+    void testIsAgreedWithFirstReviewWeakAcceptAndDisagreement() {
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.WEAK_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_REJECT, null, null)
+        );
+        assertFalse(ReviewsService.isAgreed(reviews));
+    }
+
+    @Test
+    void testAllReviewsAgreeNegatively() {
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.STRONG_REJECT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_REJECT, null, null),
+                new Review(null, null, null, RecommendationScore.WEAK_REJECT, null, null)
+        );
+        assertTrue(ReviewsService.isAgreed(reviews));
+    }
+
+    @Test
+    void testMixedReviews() {
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.STRONG_REJECT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.WEAK_REJECT, null, null)
+        );
+        assertFalse(ReviewsService.isAgreed(reviews));
+    }
+
+    @Test
+    void testEmptyListOfReviews() {
+        List<Review> reviews = Collections.emptyList();
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            ReviewsService.isAgreed(reviews);
+        });
+        Assertions.assertEquals("No reviews found.", exception.getMessage());
+    }
+
+    @Test
+    public void finalizeDiscussion_PaperNotFound() throws Exception {
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenThrow(new NotFoundException("No such paper found"));
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        assertThrows(NotFoundException.class, () -> reviewsService.finalizeDiscussionPhase(requesterID, paperID));
+    }
+
+    @Test
+    public void finalizeDiscussion_InvalidRequester() throws Exception {
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+        assertThrows(IllegalAccessException.class, () -> reviewsService.finalizeDiscussionPhase(requesterID, paperID));
+    }
+
+    @Test
+    public void finalizeDiscussion_InvalidPaperPhase() throws Exception {
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.IN_REVIEW);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        assertThrows(IllegalStateException.class, () -> reviewsService.finalizeDiscussionPhase(requesterID, paperID));
+        verify(reviewRepository, never()).findByReviewIDPaperID(paperID);
+    }
+
+    @Test
+    public void finalizeDiscussion_MixedReviews() throws Exception {
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_REJECT, null, null),
+                new Review(null, null, null, RecommendationScore.WEAK_ACCEPT, null, null)
+        );
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.IN_DISCUSSION);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
+        Exception e = assertThrows(IllegalStateException.class, () ->
+                reviewsService.finalizeDiscussionPhase(requesterID, paperID));
+        assertEquals("Reviews are not all positive nor all negative.", e.getMessage());
+    }
+
+    @Test
+    public void finalizeDiscussion_NullReviews() throws Exception {
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.IN_DISCUSSION);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(null);
+        assertThrows(RuntimeException.class, () -> reviewsService.finalizeDiscussionPhase(requesterID, paperID));
+    }
+
+    @Test
+    public void finalizeDiscussionSuccessful_AllAccept() throws Exception {
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.WEAK_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null)
+        );
+        Paper paper = new Paper(paperID, null, PaperStatus.NOT_DECIDED, false);
+        Optional<Paper> optional = Optional.of(paper);
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.IN_DISCUSSION);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
+        when(paperRepository.findById(paperID)).thenReturn(optional);
+        reviewsService.finalizeDiscussionPhase(requesterID, paperID);
+        assertTrue(paper.getReviewsHaveBeenFinalized());
+        verify(paperRepository, times(1)).save(paper);
+    }
+
+    @Test
+    void testGetDomainPaperSuccess() throws NotFoundException, IllegalAccessException {
+        Paper expectedPaper = new Paper();
+        when(paperRepository.findById(paperID)).thenReturn(Optional.of(expectedPaper));
+
+        Paper paper = reviewsService.getDomainPaper(paperID);
+
+        Assertions.assertNotNull(paper);
+        Assertions.assertEquals(expectedPaper, paper);
+    }
+
+    @Test
+    void testGetDomainPaperNotFoundException() throws NotFoundException, IllegalAccessException {
+        when(paperRepository.findById(paperID)).thenReturn(Optional.empty());
+
+        Exception e = assertThrows(NotFoundException.class, () -> {
+            reviewsService.getDomainPaper(paperID);
+        });
+        assertEquals("Paper was not found", e.getMessage());
+    }
+
+    @Test
+    void testFinalizeDiscussionPhaseRejectedStrongRejects()
+            throws IllegalAccessException, NotFoundException, IllegalStateException {
+        Paper paper = new Paper();
+        paper.setId(paperID);
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.STRONG_REJECT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_REJECT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_REJECT, null, null)
+        );
+
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.IN_DISCUSSION);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
+        when(paperRepository.findById(paperID)).thenReturn(Optional.of(paper));
+
+        reviewsService.finalizeDiscussionPhase(requesterID, paperID);
+        Assertions.assertEquals(PaperStatus.REJECTED, paper.getStatus());
+        assertTrue(paper.getReviewsHaveBeenFinalized());
+        verify(paperRepository, times(1)).save(paper);
+    }
+
+    @Test
+    void testFinalizeDiscussionPhaseRejectedWeakReject() throws Exception {
+        Paper paper = new Paper();
+        paper.setId(paperID);
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.WEAK_REJECT, null, null),
+                new Review(null, null, null, RecommendationScore.WEAK_REJECT, null, null),
+                new Review(null, null, null, RecommendationScore.WEAK_REJECT, null, null)
+        );
+
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.IN_DISCUSSION);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
+        when(paperRepository.findById(paperID)).thenReturn(Optional.of(paper));
+
+        reviewsService.finalizeDiscussionPhase(requesterID, paperID);
+        Assertions.assertEquals(PaperStatus.REJECTED, paper.getStatus());
+        assertTrue(paper.getReviewsHaveBeenFinalized());
+        verify(paperRepository, times(1)).save(paper);
+    }
+
+    @Test
+    void testFinalizeDiscussionPhaseAccepted() throws IllegalAccessException, NotFoundException, IllegalStateException {
+        Paper paper = new Paper();
+        paper.setId(paperID);
+
+        List<Review> reviews = List.of(
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.STRONG_ACCEPT, null, null),
+                new Review(null, null, null, RecommendationScore.WEAK_ACCEPT, null, null)
+        );
+
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.IN_DISCUSSION);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
+        when(paperRepository.findById(paperID)).thenReturn(Optional.of(paper));
+
+        reviewsService.finalizeDiscussionPhase(requesterID, paperID);
+
+        assertEquals(PaperStatus.ACCEPTED, paper.getStatus());
     }
 
     @Test
