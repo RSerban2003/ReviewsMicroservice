@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.TracksAPI;
+import nl.tudelft.sem.v20232024.team08b.application.TrackAnalyticsService;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
@@ -20,15 +21,19 @@ import java.util.List;
 @RestController
 public class TracksController implements TracksAPI {
     private final TracksService tracksService;
+    private final TrackAnalyticsService trackAnalyticsService;
 
     /**
      * Default constructor for the controller.
      *
-     * @param tracksService the respective service to inject
+     * @param tracksService service that manages tracks
+     * @param trackAnalyticsService service that manages the analytics of tracks
      */
     @Autowired
-    public TracksController(TracksService tracksService) {
+    public TracksController(TracksService tracksService,
+                            TrackAnalyticsService trackAnalyticsService) {
         this.tracksService = tracksService;
+        this.trackAnalyticsService = trackAnalyticsService;
     }
 
     /**
@@ -60,7 +65,7 @@ public class TracksController implements TracksAPI {
     ) {
         try {
             return ResponseEntity.ok(
-                    tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)
+                    trackAnalyticsService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)
             );
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
