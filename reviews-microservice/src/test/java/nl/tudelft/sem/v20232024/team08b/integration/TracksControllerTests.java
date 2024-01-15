@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.controllers.TracksController;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -240,5 +243,54 @@ public class TracksControllerTests {
 
         // Make sure the required call to the service was made
         verify(tracksService).setBiddingDeadline(requesterID, conferenceID, trackID, date);
+    }
+
+    @Test
+    void getAnalyticsSuccess() throws Exception {
+        Long requesterID = 1L;
+        Long conferenceID = 2L;
+        Long trackID = 3L;
+
+        var trackAnalytics = new TrackAnalytics(3, 2, 1);
+        when(tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)).thenReturn(trackAnalytics);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/analytics",
+                                        conferenceID.toString(), trackID.toString())
+                                .param("requesterID", requesterID.toString())
+                ).andExpect(MockMvcResultMatchers.status().is(200))
+                .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(trackAnalytics)));
+    }
+
+    @Test
+    void getAnalyticsTrackNotFound() throws Exception {
+        Long requesterID = 1L;
+        Long conferenceID = 2L;
+        Long trackID = 3L;
+
+        when(tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
+                .thenThrow(new NotFoundException(""));
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/analytics",
+                                conferenceID.toString(), trackID.toString())
+                        .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(404));
+    }
+
+    @Test
+    void getAnalyticsForbiddenAccess() throws Exception {
+        Long requesterID = 1L;
+        Long conferenceID = 2L;
+        Long trackID = 3L;
+
+        when(tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
+                .thenThrow(new ForbiddenAccessException());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/analytics",
+                                conferenceID.toString(), trackID.toString())
+                        .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(403));
     }
 }
