@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.TrackAnalyticsService;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.controllers.TracksController;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
@@ -29,12 +30,13 @@ import static org.mockito.Mockito.*;
 public class TracksControllerTests {
     MockMvc mockMvc;
     final TracksService tracksService = Mockito.mock(TracksService.class);
+    final TrackAnalyticsService trackAnalyticsService = Mockito.mock(TrackAnalyticsService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(
-                new TracksController(tracksService)
+                new TracksController(tracksService, trackAnalyticsService)
         ).build();
     }
 
@@ -252,7 +254,7 @@ public class TracksControllerTests {
         Long trackID = 3L;
 
         var trackAnalytics = new TrackAnalytics(3, 2, 1);
-        when(tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)).thenReturn(trackAnalytics);
+        when(trackAnalyticsService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)).thenReturn(trackAnalytics);
 
         mockMvc.perform(
                         MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/analytics",
@@ -268,7 +270,7 @@ public class TracksControllerTests {
         Long conferenceID = 2L;
         Long trackID = 3L;
 
-        when(tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
+        when(trackAnalyticsService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
                 .thenThrow(new NotFoundException(""));
 
         mockMvc.perform(
@@ -284,7 +286,7 @@ public class TracksControllerTests {
         Long conferenceID = 2L;
         Long trackID = 3L;
 
-        when(tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
+        when(trackAnalyticsService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
                 .thenThrow(new ForbiddenAccessException());
 
         mockMvc.perform(
