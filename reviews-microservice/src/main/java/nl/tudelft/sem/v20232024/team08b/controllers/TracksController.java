@@ -3,14 +3,17 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.TracksAPI;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.Date;
 import java.util.List;
 
@@ -52,10 +55,18 @@ public class TracksController implements TracksAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<TrackAnalytics> getAnalytics(Long requesterID,
-                                                       Long conferenceID,
-                                                       Long trackID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<TrackAnalytics> getAnalytics(
+            Long requesterID, Long conferenceID, Long trackID
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)
+            );
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ForbiddenAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     /**

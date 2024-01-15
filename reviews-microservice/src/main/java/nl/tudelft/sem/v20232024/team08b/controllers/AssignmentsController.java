@@ -3,13 +3,17 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.AssignmentsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 @RestController
@@ -85,10 +89,17 @@ public class AssignmentsController implements AssignmentsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<Void> finalization(Long requesterID,
-                                             Long conferenceID,
-                                             Long trackID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<Void> finalization(Long requesterID, Long conferenceID, Long trackID) {
+        try {
+            assignmentsService.finalization(requesterID, new TrackID(conferenceID, trackID));
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
+        } catch (ConflictException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ForbiddenAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     /**
