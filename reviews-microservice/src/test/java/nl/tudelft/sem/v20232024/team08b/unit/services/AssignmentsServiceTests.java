@@ -11,7 +11,9 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,9 +31,11 @@ import static org.mockito.Mockito.*;
 
 public class AssignmentsServiceTests {
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
-    private final VerificationService verificationService = Mockito.mock(VerificationService.class);
     private final BidRepository bidRepository = Mockito.mock(BidRepository.class);
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
+    private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
+    private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
+    private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
 
     private AssignmentsService assignmentsService;
 
@@ -44,9 +48,9 @@ public class AssignmentsServiceTests {
     void setUp() {
         assignmentsService = Mockito.spy(
             new AssignmentsService(
+                bidRepository,
                 reviewRepository,
-                verificationService,
-                trackRepository)
+                trackRepository,
                 papersVerification,
                 tracksVerification,
                 usersVerification
@@ -175,7 +179,7 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignmentsPaperNotFound() {
-        when(verificationService.verifyPaper(paperID)).thenReturn(false);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(false);
         assertThrows(NotFoundException.class, () -> {
             assignmentsService.assignments(requesterID, paperID);
         });
@@ -183,8 +187,8 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignmentsSuccessful() throws IllegalAccessException, NotFoundException {
-        when(verificationService.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
-        when(verificationService.verifyPaper(paperID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
         List<Review> reviews = new ArrayList<>();
         when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
         assertThat(assignmentsService.assignments(requesterID, paperID).size()).isEqualTo(0);

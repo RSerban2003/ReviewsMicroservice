@@ -72,18 +72,18 @@ public class AssignmentsController implements AssignmentsAPI {
     public ResponseEntity<Void> assignAuto(Long requesterID,
                                            Long conferenceID,
                                            Long trackID) {
-        try{
-            assignmentsService.assignAuto(requesterID,conferenceID, trackID);
+        try {
+            assignmentsService.assignAuto(requesterID, conferenceID, trackID);
             return new ResponseEntity<>(HttpStatus.OK);
 
-        }catch (IllegalCallerException | NotFoundException e){
+        } catch (IllegalCallerException | NotFoundException e) {
             // The requested track or user was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             // The requester must be a reviewer assigned to the given paper or a chair,
             // and the review phase must have started
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }catch (Exception e) {
+        } catch (Exception e) {
             // Internal server error
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -125,7 +125,7 @@ public class AssignmentsController implements AssignmentsAPI {
         } catch (IllegalArgumentException e) {
             // The requester must be a pc chair
             return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }catch (Exception e) {
+        } catch (Exception e) {
             // Internal server error
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
