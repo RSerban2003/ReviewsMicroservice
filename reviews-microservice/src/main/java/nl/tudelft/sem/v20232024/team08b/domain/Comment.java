@@ -3,19 +3,16 @@ package nl.tudelft.sem.v20232024.team08b.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.IdClass;
+
+import javax.persistence.Embeddable;
 import java.io.Serializable;
 
-@Entity
+@Embeddable
 @Data
-@IdClass(CommentID.class)
 @AllArgsConstructor
 @NoArgsConstructor
 public class Comment implements Serializable {
-    @EmbeddedId
-    private CommentID author;
+    private Long authorID;
 
     private String text;
 }

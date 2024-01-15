@@ -1,9 +1,11 @@
 package nl.tudelft.sem.v20232024.team08b.unit.verification;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -19,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -27,11 +31,13 @@ public class PapersVerificationTests {
     final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
     final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
+    final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
 
     final PapersVerification papersVerification = Mockito.spy(new PapersVerification(
             externalRepository,
             usersVerification,
-            tracksVerification
+            tracksVerification,
+            paperPhaseCalculator
     ));
 
 
@@ -208,5 +214,32 @@ public class PapersVerificationTests {
 
         assertDoesNotThrow(() -> papersVerification.verifyPermissionToGetPaper(reviewerID, paperID));
 
+    }
+
+    @Test
+    void testVerifyPhasePaperIsIn_True() throws NotFoundException {
+        PaperPhase phase = PaperPhase.REVIEWED;
+
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.REVIEWED);
+
+        assertTrue(papersVerification.verifyPhasePaperIsIn(paperID, phase));
+    }
+
+    @Test
+    void testVerifyPhasePaperIsIn_False() throws NotFoundException {
+        PaperPhase phase = PaperPhase.BEFORE_REVIEW;
+
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.REVIEWED);
+
+        assertFalse(papersVerification.verifyPhasePaperIsIn(paperID, phase));
+    }
+
+    @Test
+    void testVerifyPhasePaperIsIn_NotFoundException() throws NotFoundException {
+        PaperPhase phase = PaperPhase.BEFORE_REVIEW;
+
+        when(paperPhaseCalculator.getPaperPhase(paperID)).thenThrow(new NotFoundException("No such paper exists"));
+
+        assertThrows(NotFoundException.class, () -> papersVerification.verifyPhasePaperIsIn(paperID, phase));
     }
 }
