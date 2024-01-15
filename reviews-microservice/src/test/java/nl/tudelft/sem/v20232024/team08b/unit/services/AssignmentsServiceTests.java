@@ -10,6 +10,8 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerificati
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -26,12 +28,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
@@ -221,6 +223,53 @@ public class AssignmentsServiceTests {
     }
 
     @Test
+    void testGetAssignedPaperUserDoesNotExist() {
+        Long requesterID = 1L;
+        when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(false);
+
+        Exception e = assertThrows(NotFoundException.class, () -> {
+            assignmentsService.getAssignedPaper(requesterID);
+        });
+        assertEquals("User does not exist!", e.getMessage());
+    }
+
+    @Test
+    void testGetAssignedPaperNoAssignedPapers() throws NotFoundException {
+        when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(true);
+        when(reviewRepository.findByReviewIDReviewerID(requesterID)).thenReturn(Collections.emptyList());
+
+        List<PaperSummaryWithID> result = assignmentsService.getAssignedPaper(requesterID);
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetAssignedPaperWithAssignedPapers() throws NotFoundException {
+        ReviewID reviewID = new ReviewID();
+        reviewID.setPaperID(paperID);
+        Paper paper = new Paper();
+        paper.setTitle("Sample Title");
+        paper.setAbstractSection("Sample Abstract");
+
+        Submission submission = new Submission();
+        submission.setTitle("Sample Title");
+        submission.setAbstract("Sample Abstract");
+        submission.setPaper(new byte[0]);
+        submission.setKeywords(new ArrayList<>());
+
+        when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(true);
+        List<ReviewID> reviewIDs = Collections.singletonList(reviewID);
+        when(reviewRepository.findByReviewIDReviewerID(requesterID)).thenReturn(reviewIDs);
+        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+
+        List<PaperSummaryWithID> result = assignmentsService.getAssignedPaper(requesterID);
+
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        assertEquals(paperID, result.get(0).getPaperID());
+        assertEquals(paper.getTitle(), result.get(0).getTitle());
+        assertEquals(paper.getAbstractSection(), result.get(0).getAbstractSection());
+    }
+
     void finalizationSuccess() throws NotFoundException {
         final Long requesterID = 1L;
         final TrackID trackID = new TrackID(2L, 3L);
