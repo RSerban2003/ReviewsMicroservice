@@ -5,6 +5,8 @@ import java.util.Optional;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.application.strategies.AssignmentWithThreeSmallest;
+import nl.tudelft.sem.v20232024.team08b.application.TracksService;
+import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
@@ -15,13 +17,20 @@ import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
+import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
+import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -44,6 +53,10 @@ public class AssignmentsServiceTests {
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
     private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
+    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
+    private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
+    private final TracksService tracksService = Mockito.mock(TracksService.class);
 
     private AssignmentsService assignmentsService;
 
@@ -63,7 +76,11 @@ public class AssignmentsServiceTests {
                 trackRepository,
                 papersVerification,
                 tracksVerification,
-                usersVerification
+                    usersVerification,
+                    externalRepository,
+                    trackPhaseCalculator,
+                    trackRepository,
+                    tracksService
             )
         );
         assignmentsService.setAutomaticAssignmentStrategy(new AssignmentWithThreeSmallest(
@@ -338,6 +355,43 @@ public class AssignmentsServiceTests {
 
 
     }
+    @Test
+    void finalizationSuccess() throws NotFoundException {
+        final Long requesterID = 1L;
+        final TrackID trackID = new TrackID(2L, 3L);
+        List<Submission> submissions = new ArrayList<>();
+        var s = new Submission();
+        s.setSubmissionId(5L);
+        submissions.add(s);
+        s = new Submission();
+        s.setSubmissionId(6L);
+        submissions.add(s);
+
+        when(externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(usersVerification
+                .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
+                .thenReturn(true);
+        when(trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenReturn(TrackPhase.ASSIGNING);
+        when(externalRepository.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
+        when(reviewRepository.findByReviewIDPaperID(5L)).thenReturn(List.of(new Review(), new Review(), new Review()));
+        when(reviewRepository.findByReviewIDPaperID(6L)).thenReturn(List.of(new Review(),
+                new Review(), new Review(), new Review()));
+        var t = new nl.tudelft.sem.v20232024.team08b.domain.Track();
+        when(tracksService.getTrackWithInsertionToOurRepo(trackID.getConferenceID(),
+                trackID.getTrackID())).thenReturn(t);
+
+        Assertions.assertDoesNotThrow(() -> assignmentsService.finalization(requesterID, trackID));
+        Assertions.assertTrue(t.getReviewersHaveBeenFinalized());
+    }
+
+    @Test
+    void finalizationWhenTrackDoesNotExistThrowsNotFoundException() throws NotFoundException {
+        Long requesterID = 1L;
+        TrackID trackID = new TrackID(2L, 3L);
+
+        when(externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenThrow(NotFoundException.class);
 
 
 

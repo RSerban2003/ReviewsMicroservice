@@ -13,7 +13,10 @@ import java.util.List;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.controllers.AssignmentsController;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,6 +25,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 public class AssignmentsControllerTests {
@@ -235,4 +247,52 @@ public class AssignmentsControllerTests {
         verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
     }
 
+    @Test
+    public void testFinalizationSuccess() throws Exception {
+        doNothing().when(assignmentsService).finalization(anyLong(), any(TrackID.class));
+
+        mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
+                        .param("requesterID", "3"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+        verify(assignmentsService, times(1)).finalization(eq(3L),
+                eq(new TrackID(1L, 2L)));
+    }
+
+    @Test
+    public void testFinalizationConflictException() throws Exception {
+        doThrow(new ConflictException()).when(assignmentsService).finalization(anyLong(), any(TrackID.class));
+
+        mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
+                        .param("requesterID", "3"))
+                .andExpect(status().isConflict());
+
+        verify(assignmentsService, times(1)).finalization(eq(3L),
+                eq(new TrackID(1L, 2L)));
+    }
+
+    @Test
+    public void testFinalizationNotFoundException() throws Exception {
+        doThrow(new NotFoundException("")).when(assignmentsService).finalization(anyLong(), any(TrackID.class));
+
+        mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
+                        .param("requesterID", "3"))
+                .andExpect(status().isNotFound());
+
+        verify(assignmentsService, times(1)).finalization(eq(3L),
+                eq(new TrackID(1L, 2L)));
+    }
+
+    @Test
+    public void testFinalizationForbiddenAccessException() throws Exception {
+        doThrow(new ForbiddenAccessException()).when(assignmentsService).finalization(anyLong(), any(TrackID.class));
+
+        mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
+                        .param("requesterID", "3"))
+                .andExpect(status().isForbidden());
+
+        verify(assignmentsService, times(1)).finalization(eq(3L),
+                eq(new TrackID(1L, 2L)));
+    }
 }
