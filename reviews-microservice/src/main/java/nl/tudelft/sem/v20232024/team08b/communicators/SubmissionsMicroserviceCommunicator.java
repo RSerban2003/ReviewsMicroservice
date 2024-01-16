@@ -17,17 +17,37 @@ public class SubmissionsMicroserviceCommunicator implements CommunicationWithSub
     private final ObjectMapper objectMapper;
     private final HttpRequestSender httpRequestSender;
 
+
+    /**
+     * Constructor used for testing purposes.
+     *
+     * @param httpRequestSender class used for sending HTTP requests
+     * @param objectMapper class used to map objects to json
+     */
     public SubmissionsMicroserviceCommunicator(ObjectMapper objectMapper, HttpRequestSender httpRequestSender) {
         this.objectMapper = objectMapper;
         this.httpRequestSender = httpRequestSender;
     }
 
+
+    /**
+     * Default constructor.
+     *
+     * @param httpRequestSender class used for sending HTTP requests
+     */
     @Autowired
     public SubmissionsMicroserviceCommunicator(HttpRequestSender httpRequestSender) {
         this.objectMapper = new ObjectMapper();
         this.httpRequestSender = httpRequestSender;
     }
 
+
+    /**
+     * Gets a paper (called submission) from the Submissions microservice.
+     *
+     * @param paperID the ID of the paper to get
+     * @return the gotten Submission object
+     */
     @Override
     public Submission getSubmission(Long paperID) throws NotFoundException {
         try {
@@ -43,11 +63,26 @@ public class SubmissionsMicroserviceCommunicator implements CommunicationWithSub
         }
     }
 
+
+    /**
+     * Gets all submissions in a track using the default requester ID (ourID).
+     *
+     * @param trackID the ID of the track
+     * @return a list of submissions in the track
+     */
     @Override
     public List<Submission> getSubmissionsInTrack(TrackID trackID) throws NotFoundException {
         return getSubmissionsInTrack(trackID, ourID);
     }
 
+
+    /**
+     * Gets all submissions in a track.
+     *
+     * @param trackID     the ID of the track
+     * @param requesterID the ID of the requester
+     * @return a list of submissions in the track
+     */
     @Override
     public List<Submission> getSubmissionsInTrack(TrackID trackID, Long requesterID) throws NotFoundException {
         try {

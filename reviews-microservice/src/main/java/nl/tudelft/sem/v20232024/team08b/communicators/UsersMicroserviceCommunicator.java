@@ -15,17 +15,36 @@ public class UsersMicroserviceCommunicator implements CommunicationWithUsersMicr
     private final ObjectMapper objectMapper;
     private final HttpRequestSender httpRequestSender;
 
+
+    /**
+     * Default constructor.
+     *
+     * @param httpRequestSender class used for sending HTTP requests
+     */
     @Autowired
     public UsersMicroserviceCommunicator(HttpRequestSender httpRequestSender) {
         this.httpRequestSender = httpRequestSender;
         this.objectMapper = new ObjectMapper();
     }
 
+    /**
+     * Constructor used for testing purposes.
+     *
+     * @param httpRequestSender class used for sending HTTP requests
+     * @param objectMapper class used to map objects to json
+     */
     public UsersMicroserviceCommunicator(ObjectMapper objectMapper, HttpRequestSender httpRequestSender) {
         this.objectMapper = objectMapper;
         this.httpRequestSender = httpRequestSender;
     }
 
+    /**
+     * Gets a track from the Users microservice.
+     *
+     * @param conferenceID the ID of the conference the track is in
+     * @param trackID the ID of the conference the track is in
+     * @return the track object, from the Users microservice
+     */
     @Override
     public Track getTrack(Long conferenceID, Long trackID) throws NotFoundException {
         try {
@@ -41,6 +60,13 @@ public class UsersMicroserviceCommunicator implements CommunicationWithUsersMicr
         }
     }
 
+
+    /**
+     * Gets from the Users microservice all the roles of a user.
+     *
+     * @param userID the ID of the user
+     * @return a list of roles of that user
+     */
     @Override
     public RolesOfUser getRolesOfUser(Long userID) throws NotFoundException {
         try {
