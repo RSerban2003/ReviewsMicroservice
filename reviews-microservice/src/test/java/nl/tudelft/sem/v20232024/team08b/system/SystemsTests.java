@@ -9,11 +9,13 @@ import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.opentest4j.TestAbortedException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
@@ -27,28 +29,19 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//@SpringBootTest
-//@AutoConfigureMockMvc
+@ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
-//@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.MOCK, classes={ Application.class })
-//@ExtendWith(SpringExtension.class)
-//@ContextConfiguration(classes = Application.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-//@RunWith((SpringRunner.class)
-public class SystemsTests {
-    //@Autowired
-    //private WebApplicationContext webApplicationContext;
+class SystemsTests {
+    private final TestRestTemplate testRestTemplate = new TestRestTemplate();
 
-    //@Autowired
-    //private MockMvc mockMvc;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     private final Long ourID = -1L;
     private final String submissionsURL = "http://localhost:8081";
     private final String usersURL = "http://localhost:8082";
     private final String reviewsURL = "http://localhost:8080";
-
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private HttpClient httpClient = HttpClient.newHttpClient();
 
     private Long submitter1ID, submitter2ID, submitter3ID;
     private Long reviewer1ID;
@@ -61,18 +54,6 @@ public class SystemsTests {
 
     @BeforeEach
     void setup() {
-        //externalRepository = Mockito.mock(ExternalRepository.class);
-        //mockMvc = MockMvcBuilders.standaloneSetup().build();
-
-        /*when(externalRepository.getRolesOfUser(anyLong())).thenThrow(new RuntimeException(
-                "Cowabunga it's a mock!"));*/
-        /*when(externalRepository.getSubmission(anyLong())).thenCallRealMethod();
-        when(externalRepository.getSubmissionsInTrack(any(), any())).thenCallRealMethod();
-        when(externalRepository.getSubmissionsInTrack(any())).thenCallRealMethod();
-        when(externalRepository.getTrack(any(), any())).thenCallRealMethod();*/
-
-        //mockMvc = webAppContextSetup(webApplicationContext).build();
-
         // Verify that the other microservices are running
         try {
             sendRequest(RequestType.GET, null, Object.class, usersURL, "event");
@@ -139,11 +120,6 @@ public class SystemsTests {
         event1.generalChairs(List.of());
         event1.description("This is a test event.");
         event1.setId(rng.nextLong());
-        /*var role = new Role();
-        role.setEventId(event1.getId());
-        role.setUserId(chair1.getId());
-        role.setRoleName("PCchair");
-        chair1.addRolesItem(role);*/
         event1 = sendRequest(RequestType.POST, event1, Event.class, usersURL, "event");
         System.out.println(event1);
 
@@ -157,7 +133,6 @@ public class SystemsTests {
                 event1.getId().toString());
         System.out.println(track1);
 
-        // Make chair1 PCchair of track1
         sendRequest(RequestType.PUT, null, null, usersURL, "event", event1.getId().toString(),
                 track1.getId().toString(), "role",
                 chair1.getId().toString() + "?Assignee=" + chair1.getId().toString()
@@ -253,7 +228,6 @@ public class SystemsTests {
         event1ID = event1.getId();
         chair1ID = chair1.getId();
 
-        // Give reviewer 1 PCmember role in track 1
         sendRequest(RequestType.PUT, null, null, usersURL, "event", event1.getId().toString(),
                 track1.getId().toString(), "role",
                 reviewer1ID + "?Assignee=" + chair1.getId().toString()
@@ -261,9 +235,8 @@ public class SystemsTests {
     }
 
     @Test
-    void ReviewersCanSeeTheTitlesAndAbstractsOfSubmittedPapers() throws Exception {
+    void ReviewersCanSeeTheTitlesAndAbstractsOfSubmittedPapers() {
         var conferenceID = event1ID;
-        var trackID = track1ID;
         var paper1 = new PaperSummaryWithID();
         paper1.setTitle("Title 1");
         paper1.setAbstractSection("Abstract 1");
@@ -275,42 +248,11 @@ public class SystemsTests {
         var papersSummaryWithIDS = new ArrayList<PaperSummaryWithID>();
         papersSummaryWithIDS.add(paper1);
         papersSummaryWithIDS.add(paper2);
-        TestRestTemplate testRestTemplate = new TestRestTemplate();
-        var response =
-                testRestTemplate.getForEntity(reviewsURL + "/conferences/" + conferenceID +
-                        "/tracks" +
-                        "/" + track1ID
-                        + "/papers?requesterID=" + chair1ID, Object.class);
-        System.out.println(response.getBody());
+
+        var response = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID +
+                "/tracks/" + track1ID + "/papers?requesterID=" + chair1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(papersSummaryWithIDS, response.getBody());
-
-        /*var roles = new RolesOfUser();
-        var role = new RolesOfUserTracksInner();
-        role.setEventId(event1ID);
-        // TODO make sure the names of the roles correspond to the ones the Users team is using
-        //  it seems they are a bit inconsistent about it
-        role.setRoleName("PC Chair");
-        role.setTrackId(track1ID);
-        roles.setTracks(List.of(role));
-        when(externalRepository.getRolesOfUser(chair1ID)).thenReturn(roles);
-
-        roles = new RolesOfUser();
-        role = new RolesOfUserTracksInner();
-        role.setEventId(event1ID);
-        role.setTrackId(track1ID);
-        role.setRoleName("PC Member");
-        roles.setTracks(List.of(role));
-        when(externalRepository.getRolesOfUser(reviewer1ID)).thenReturn(roles);*/
-
-        /*mockMvc.perform(MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID" +
-                                        "}/papers",
-                        conferenceID,
-                        trackID)
-                .param("requesterID", chair1ID.toString()))
-                        .andExpect(MockMvcResultMatchers.status().is(200))
-                        .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(papersSummaryWithIDS)));
-        */
     }
 
     <T, U> U sendRequest(RequestType requestType, T body, Class<T> expectedResponseClass,

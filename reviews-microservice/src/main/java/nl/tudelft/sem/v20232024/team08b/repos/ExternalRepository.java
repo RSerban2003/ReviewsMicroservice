@@ -15,11 +15,10 @@ import java.util.List;
 @Repository
 public class ExternalRepository {
     private final Long ourID = -1L;
-    private final String submissionsURL = "http://localhost:8081";
-    private final String usersURL = "http://localhost:8082";
+    private final String submissionsURL = "https://localhost:8081";
+    private final String usersURL = "https://localhost:8082";
     private final ObjectMapper objectMapper;
     private final HttpRequestSender httpRequestSender;
-
 
     /**
      * Default constructor.
@@ -28,7 +27,7 @@ public class ExternalRepository {
      */
     @Autowired
     public ExternalRepository(HttpRequestSender httpRequestSender) {
-        this.httpRequestSender = new HttpRequestSender();
+        this.httpRequestSender = httpRequestSender;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -93,12 +92,10 @@ public class ExternalRepository {
     public Track getTrack(Long conferenceID,
                           Long trackID) throws NotFoundException {
         try {
-            var http = new HttpRequestSender();
-            var om = new ObjectMapper();
             String url = usersURL + "/track/" + conferenceID + "/" + trackID;
-            String response = http.sendGetRequest(url);
+            String response = httpRequestSender.sendGetRequest(url);
             Track track;
-            track = om.readValue(response, Track.class);
+            track = objectMapper.readValue(response, Track.class);
             return track;
         } catch (NotFoundException e) {
             throw e;
@@ -126,13 +123,11 @@ public class ExternalRepository {
      */
     public List<Submission> getSubmissionsInTrack(TrackID trackID, Long requesterID) throws NotFoundException {
         try {
-            var http = new HttpRequestSender();
-            var om = new ObjectMapper();
             String url = submissionsURL + "/submission/event/" + trackID.getConferenceID()
                     + "/track/" + trackID.getTrackID() + "/" + requesterID;
-            String response = http.sendGetRequest(url);
+            String response = httpRequestSender.sendGetRequest(url);
             List<Submission> submissions;
-            submissions = om.readValue(response, List.class);
+            submissions = objectMapper.readValue(response, List.class);
             return submissions;
         } catch (NotFoundException e) {
             throw e;
