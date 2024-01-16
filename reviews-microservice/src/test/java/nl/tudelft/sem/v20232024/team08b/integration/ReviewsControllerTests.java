@@ -113,7 +113,7 @@ public class ReviewsControllerTests {
                 MockMvcRequestBuilders.post("/papers/{paperID}/reviews/finalization", paperID.toString())
                         .param("requesterID", requesterID.toString())
                 ).andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));;
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
         verify(reviewsService, times(1)).finalizeDiscussionPhase(requesterID, paperID);
     }
 
