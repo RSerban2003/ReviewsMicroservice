@@ -290,7 +290,7 @@ public class TracksService {
         }
         var submissions = externalRepository.getSubmissionsInTrack(trackID1, requesterID);
 
-        List<PaperSummaryWithID> papers = new ArrayList<>();
+        final List<PaperSummaryWithID> papers = new ArrayList<>();
         for (Submission submission : submissions) {
             PaperSummaryWithID paperSummaryWithID = new PaperSummaryWithID();
             paperSummaryWithID.setPaperID(submission.getSubmissionId());
