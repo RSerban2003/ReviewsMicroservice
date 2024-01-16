@@ -4,8 +4,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,6 +34,8 @@ public class AssignmentsControllerTests {
     private Long requesterID = 1L;
     private Long reviewerID = 2L;
     private Long paperID = 3L;
+    private Long conferenceID = 4L;
+    private Long trackID = 5L;
 
     @BeforeEach
     void setup() {
@@ -163,6 +164,75 @@ public class AssignmentsControllerTests {
             .andExpect(status().isInternalServerError());
 
         verify(assignmentsService).assignments(requesterID, paperID);
+    }
+
+
+    @Test
+    void assignAutoReturnsOk() throws Exception {
+
+        doNothing().when(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
+
+        mockMvc.perform(put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+        verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
+    }
+
+    @Test
+    void assignAutoReturnsNotFound() throws Exception {
+        doThrow(new NotFoundException("Not found")).when(assignmentsService).assignAuto(requesterID,
+            conferenceID, trackID);
+
+        mockMvc.perform(put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+
+        verify(assignmentsService).assignAuto(requesterID,conferenceID, trackID);
+    }
+
+    @Test
+    void assignAutoReturnsForbidden() throws Exception {
+
+        doThrow(new IllegalAccessException("Forbidden")).when(assignmentsService).assignAuto(requesterID,
+            conferenceID, trackID);
+
+        mockMvc.perform(put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+
+        verify(assignmentsService).assignAuto(requesterID,conferenceID, trackID);
+    }
+
+    @Test
+    void assignAutoReturnsConflict() throws Exception {
+
+        doThrow(new IllegalArgumentException("CONFLICT")).when(assignmentsService).assignAuto(requesterID,
+            conferenceID, trackID);
+
+        mockMvc.perform(put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isConflict());
+
+        verify(assignmentsService).assignAuto(requesterID,conferenceID, trackID);
+    }
+
+    @Test
+    void assignAutoReturnsInternalServerError() throws Exception {
+
+        doThrow(new RuntimeException("Internal server error")).when(assignmentsService).assignAuto(requesterID,
+            conferenceID, trackID);
+
+
+        mockMvc.perform(put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
+            .param("requesterID", String.valueOf(requesterID))
+            .contentType(MediaType.APPLICATION_JSON));
+
+        verify(assignmentsService).assignAuto(requesterID,conferenceID, trackID);
     }
 
 }

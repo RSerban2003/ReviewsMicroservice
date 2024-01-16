@@ -83,6 +83,10 @@ public class AssignmentsController implements AssignmentsAPI {
             // The requester must be a reviewer assigned to the given paper or a chair,
             // and the review phase must have started
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (IllegalArgumentException e) {
+            // The requester must be a reviewer assigned to the given paper or a chair,
+            // and the review phase must have started
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (Exception e) {
             // Internal server error
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

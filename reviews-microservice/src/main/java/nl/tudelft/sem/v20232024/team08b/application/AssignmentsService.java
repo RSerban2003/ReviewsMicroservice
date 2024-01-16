@@ -167,33 +167,22 @@ public class AssignmentsService {
             }
             List<Integer> numberOfPapers = new ArrayList<>();
             for (Long user : users) {
-                numberOfPapers.add(byReviewer(user).size());
+                 numberOfPapers.add(byReviewer(user).size());
             }
-            int[] threeSmallest = gettingSmallest(numberOfPapers);
-            int min0 = threeSmallest[0];
-            int min1 = threeSmallest[1];
-            int min2 = threeSmallest[2];
-            ReviewID reviewID1 = new ReviewID(paper.getId(), users.get(min0));
-            ReviewID reviewID2 = new ReviewID(paper.getId(), users.get(min1));
-            ReviewID reviewID3 = new ReviewID(paper.getId(), users.get(min2));
-            Review toSave1 = new Review();
-            Review toSave2 = new Review();
-            Review toSave3 = new Review();
-            toSave1.setReviewID(reviewID1);
-            toSave2.setReviewID(reviewID2);
-            toSave3.setReviewID(reviewID3);
-            reviewRepository.save(toSave1);
-            reviewRepository.save(toSave2);
-            reviewRepository.save(toSave3);
+            List<Integer> threeSmallest = gettingSmallest(numberOfPapers);
+            for (Integer index : threeSmallest) {
+                ReviewID reviewID = new ReviewID(paper.getId(), users.get(index));
+                Review toSave = new Review();
+                toSave.setReviewID(reviewID);
+                reviewRepository.save(toSave);
 
-
-
+            }
         }
 
 
     }
 
-    private List<Paper> byReviewer(Long UserID) {
+    public List<Paper> byReviewer(Long UserID) {
         return new ArrayList<>();
     }
 
@@ -221,9 +210,13 @@ public class AssignmentsService {
      * @param numberOfPapers A list corresponding to the number of papers of every reviewer
      * @return an array with the 3 smallest elements
      */
-    private int[] gettingSmallest(List<Integer> numberOfPapers) {
-        int[] smallest = new int[3];
-        for (int j = 0; j < 3; j++) {
+    private List<Integer> gettingSmallest(List<Integer> numberOfPapers) {
+        List<Integer> smallest = new ArrayList<>();
+        int numberOfRepeats = 3;
+        if (numberOfPapers.size() < numberOfRepeats) {
+            numberOfRepeats = numberOfPapers.size();
+        }
+        for (int j = 0; j < numberOfRepeats; j++) {
             int minIndex = 0;
             // Find the index of the minimum element
             for (int k = 1; k < numberOfPapers.size(); k++) {
@@ -232,17 +225,7 @@ public class AssignmentsService {
                 }
             }
             // Store the indices of the smallest elements and set the chosen minimum to a large value
-            switch (j) {
-                case 0:
-                    smallest[0] = minIndex;
-                    break;
-                case 1:
-                    smallest[1] = minIndex;
-                    break;
-                default:
-                    smallest[2] = minIndex;
-                    break;
-            }
+            smallest.add(minIndex);
             numberOfPapers.set(minIndex, Integer.MAX_VALUE);
         }
         return smallest;
