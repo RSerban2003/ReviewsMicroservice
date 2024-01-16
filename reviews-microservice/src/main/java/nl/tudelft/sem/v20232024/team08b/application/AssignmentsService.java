@@ -44,7 +44,8 @@ public class AssignmentsService {
      * @param papersVerification object responsible for verifying paper information
      * @param tracksVerification object responsible for verifying track information
      * @param usersVerification object responsible for verifying user information
-     * @param externalRepository class, that talks to outside microservices
+     * @param submissionCommunicator class, that talks to submissions microservice
+     * @param usersCommunicator class, that talks to submissions microservice
      * @param trackPhaseCalculator object responsible for getting the current phase
      * @param trackRepository repository storing the tracks
      * @param tracksService service responsible for tracks

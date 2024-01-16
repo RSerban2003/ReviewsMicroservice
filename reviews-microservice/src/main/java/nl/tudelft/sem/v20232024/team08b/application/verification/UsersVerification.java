@@ -23,7 +23,8 @@ public class UsersVerification {
     /**
      * Default constructor for the user verification.
      *
-     * @param externalRepository object storing external objects
+     * @param submissionsCommunicator class, that talks to submissions microservice
+     * @param usersCommunicator class, that talks to submissions microservice
      * @param reviewRepository repository storing all reviews
      */
     public UsersVerification(UsersMicroserviceCommunicator usersCommunicator,

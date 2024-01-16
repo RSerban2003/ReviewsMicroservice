@@ -27,7 +27,8 @@ public class TracksVerification {
      * Default constructor for the track verification.
      *
      * @param trackRepository repository storing all tracks
-     * @param externalRepository object storing external objects
+     * @param submissionsCommunicator class, that talks to submissions microservice
+     * @param usersCommunicator class, that talks to submissions microservice
      * @param trackPhaseCalculator object responsible for calculating track phases
      * @param usersVerification object that handles user verification
      */

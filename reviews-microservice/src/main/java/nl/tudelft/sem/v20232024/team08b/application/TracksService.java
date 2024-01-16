@@ -36,13 +36,13 @@ public class TracksService {
     /**
      * Default constructor for the service.
      *
-     * @param externalRepository   class, that talks to outside microservices
+     * @param submissionsCommunicator  class, that talks to submissions microservices
      * @param trackPhaseCalculator object responsible for getting the current phase
      *                             of a track
      * @param trackRepository      repository storing the tracks
      * @param tracksVerification   object responsible for verifying track information
      * @param usersVerification    object responsible for verifying user information
-     * @param usersCommunicator
+     * @param usersCommunicator    class that talks with users microservice
      * @param papersService        service responsible for papers
      */
     @Autowired
@@ -50,7 +50,8 @@ public class TracksService {
                          TrackRepository trackRepository,
                          SubmissionsMicroserviceCommunicator submissionsCommunicator,
                          TracksVerification tracksVerification,
-                         UsersVerification usersVerification, UsersMicroserviceCommunicator usersCommunicator, PapersService papersService) {
+                         UsersVerification usersVerification,
+                         UsersMicroserviceCommunicator usersCommunicator, PapersService papersService) {
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.trackRepository = trackRepository;
         this.submissionsCommunicator = submissionsCommunicator;

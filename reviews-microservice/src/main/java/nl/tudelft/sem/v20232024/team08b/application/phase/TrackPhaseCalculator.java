@@ -25,8 +25,7 @@ public class TrackPhaseCalculator {
      * Default constructor for the phase calculator.
      *
      * @param trackRepository repository storing the tracks
-     * @param externalRepository repository storing everything outside of
-     *                           this microservice
+     * @param usersCommunicator class that talks with users microservice
      * @param paperPhaseCalculator object that calculates phase of the paper
      */
     @Autowired

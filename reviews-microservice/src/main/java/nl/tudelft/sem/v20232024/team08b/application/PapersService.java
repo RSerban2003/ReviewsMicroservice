@@ -25,8 +25,7 @@ public class PapersService {
     /**
      * Default constructor for the service.
      *
-     * @param externalRepository repository storing everything outside of
-     *                           this microservice
+     * @param submissionsCommunicator Class that talks with submission microservice
      * @param paperRepository repository storing papers
      * @param paperPhaseCalculator class that calculates the phase of a paper
      * @param papersVerification object responsible for verifying paper information

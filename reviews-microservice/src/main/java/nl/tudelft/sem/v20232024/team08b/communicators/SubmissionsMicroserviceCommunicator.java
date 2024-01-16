@@ -6,8 +6,11 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class SubmissionsMicroserviceCommunicator implements CommunicationWithSubmissionMicroservice{
+@Component
+public class SubmissionsMicroserviceCommunicator implements CommunicationWithSubmissionMicroservice {
 
     private final Long ourID = -1L;
     private final String submissionsURL = "http://localhost:8081";
@@ -19,6 +22,7 @@ public class SubmissionsMicroserviceCommunicator implements CommunicationWithSub
         this.httpRequestSender = httpRequestSender;
     }
 
+    @Autowired
     public SubmissionsMicroserviceCommunicator(HttpRequestSender httpRequestSender) {
         this.objectMapper = new ObjectMapper();
         this.httpRequestSender = httpRequestSender;

@@ -22,7 +22,8 @@ public class BidsVerification {
      *
      * @param usersVerification object responsible for verifying users
      * @param trackPhaseCalculator object responsible for calculating current track phase
-     * @param externalRepository stores access to the objects stored in other microservices
+     * @param submissionsCommunicator class, that talks to submissions microservice
+     *
      */
     @Autowired
     public BidsVerification(UsersVerification usersVerification,

@@ -5,18 +5,22 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class UsersMicroserviceCommunicator implements CommunicationWithUsersMicroservice{
+@Component
+public class UsersMicroserviceCommunicator implements CommunicationWithUsersMicroservice {
     private final Long ourID = -1L;
     private final String usersURL = "http://localhost:8082";
     private final ObjectMapper objectMapper;
     private final HttpRequestSender httpRequestSender;
 
-
+    @Autowired
     public UsersMicroserviceCommunicator(HttpRequestSender httpRequestSender) {
         this.httpRequestSender = httpRequestSender;
         this.objectMapper = new ObjectMapper();
     }
+
     public UsersMicroserviceCommunicator(ObjectMapper objectMapper, HttpRequestSender httpRequestSender) {
         this.objectMapper = objectMapper;
         this.httpRequestSender = httpRequestSender;

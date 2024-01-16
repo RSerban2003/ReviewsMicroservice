@@ -26,7 +26,7 @@ public class PapersVerification {
     /**
      * Default constructor for this verification service.
      *
-     * @param externalRepository class storing access to the objects stored in other microservices
+     * @param submissionsCommunicator class that talks with submissions microservice
      * @param usersVerification object used for verifying user information
      * @param tracksVerification object used for verifying track information
      */

@@ -27,7 +27,7 @@ public class PaperPhaseCalculator {
      *
      * @param paperRepository repository storing papers
      * @param trackRepository repository storing tracks
-     * @param externalRepository repository storing external objects
+     * @param submissionsCommunicator class that talks with submissions microservice
      * @param reviewRepository repository storing reviews
      */
     @Autowired
