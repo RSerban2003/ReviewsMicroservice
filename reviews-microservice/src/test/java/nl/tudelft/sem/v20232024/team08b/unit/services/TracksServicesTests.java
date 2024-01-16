@@ -6,6 +6,8 @@ import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
@@ -14,7 +16,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,17 +37,19 @@ public class TracksServicesTests {
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator =
+        Mockito.mock(SubmissionsMicroserviceCommunicator.class);
     private final PapersService papersService = Mockito.mock(PapersService.class);
+    private final UsersMicroserviceCommunicator usersCommunicator = Mockito.mock(UsersMicroserviceCommunicator.class);
 
     private final TracksService tracksService = Mockito.spy(
             new TracksService(
                     trackPhaseCalculator,
                     trackRepository,
-                    externalRepository,
+                    submissionsCommunicator,
                     tracksVerification,
                     usersVerification,
-                    papersService
+                usersCommunicator, papersService
             )
     );
 
@@ -84,7 +87,7 @@ public class TracksServicesTests {
                 .parse("1970-01-01 22:01:23");
         Long submissionDeadlineLong = submissionDeadline.toInstant().toEpochMilli();
         trackDTO.setDeadline(Integer.valueOf(submissionDeadlineLong.toString()));
-        when(externalRepository.getTrack(conferenceID, trackID)).thenReturn(trackDTO);
+        when(usersCommunicator.getTrack(conferenceID, trackID)).thenReturn(trackDTO);
 
         // Make sure that our fake track is returned from DB
         doReturn(track).when(tracksService).getTrackWithInsertionToOurRepo(conferenceID, trackID);
@@ -302,7 +305,7 @@ public class TracksServicesTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
 
-        when(externalRepository.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
 
         when(papersService.getState(requesterID, 1L)).thenReturn(PaperStatus.ACCEPTED);
         when(papersService.getState(requesterID, 2L)).thenReturn(PaperStatus.REJECTED);
@@ -328,7 +331,7 @@ public class TracksServicesTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
 
-        when(externalRepository.getSubmissionsInTrack(trackID, requesterID)).thenThrow(NotFoundException.class);
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID, requesterID)).thenThrow(NotFoundException.class);
 
         Assertions.assertThrows(NotFoundException.class, () -> {
             tracksService.getAnalytics(trackID, requesterID);
@@ -366,7 +369,7 @@ public class TracksServicesTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
 
-        when(externalRepository.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
 
         when(papersService.getState(1L, requesterID)).thenThrow(new IllegalAccessException());
 

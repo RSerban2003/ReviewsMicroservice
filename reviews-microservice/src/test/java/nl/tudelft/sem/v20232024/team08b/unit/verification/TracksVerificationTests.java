@@ -4,12 +4,13 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,13 +28,16 @@ import static org.mockito.Mockito.*;
 
 public class TracksVerificationTests {
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator =
+        Mockito.mock(SubmissionsMicroserviceCommunicator.class);
+    private final UsersMicroserviceCommunicator usersCommunicator = Mockito.mock(UsersMicroserviceCommunicator.class);
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
 
     private final TracksVerification tracksVerification = Mockito.spy(new TracksVerification(
             trackRepository,
-            externalRepository,
+            submissionsCommunicator,
+            usersCommunicator,
             trackPhaseCalculator,
             usersVerification
     ));
@@ -70,12 +74,12 @@ public class TracksVerificationTests {
         submission.setTrackId(456L);
         submission.setEventId(789L);
 
-        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(paperID)).thenReturn(submission);
         when(trackRepository.findById(any())).thenReturn(Optional.of(new Track()));
 
         tracksVerification.verifyIfTrackExists(paperID);
 
-        verify(externalRepository, times(1)).getSubmission(paperID);
+        verify(submissionsCommunicator, times(1)).getSubmission(paperID);
         verify(trackRepository, times(1)).findById(any());
         verify(tracksVerification, never()).insertTrack(anyLong(), anyLong());
     }
@@ -87,7 +91,7 @@ public class TracksVerificationTests {
         submission.setTrackId(456L);
         submission.setEventId(789L);
 
-        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(paperID)).thenReturn(submission);
         when(trackRepository.findById(any())).thenReturn(Optional.empty());
 
         tracksVerification.verifyIfTrackExists(paperID);
@@ -158,7 +162,7 @@ public class TracksVerificationTests {
 
         // When we want to figure out paper parent ID, we ask external repository
         when(
-                externalRepository.getSubmission(paperID)
+                submissionsCommunicator.getSubmission(paperID)
         ).thenReturn(fakeSubmission);
 
         // Assume verifyTrackPhase throws
@@ -181,7 +185,7 @@ public class TracksVerificationTests {
 
         // When we want to figure out paper parent ID, we ask external repository
         when(
-                externalRepository.getSubmission(paperID)
+                submissionsCommunicator.getSubmission(paperID)
         ).thenReturn(fakeSubmission);
 
         // Assume verifyTrackPhase throws
@@ -198,13 +202,13 @@ public class TracksVerificationTests {
 
     @Test
     void verifyTrack_Yes() throws NotFoundException {
-        when(externalRepository.getTrack(1L, 2L)).thenReturn(null);
+        when(usersCommunicator.getTrack(1L, 2L)).thenReturn(null);
         assertThat(tracksVerification.verifyTrack(1L, 2L)).isTrue();
     }
 
     @Test
     void verifyTrack_No() throws NotFoundException {
-        when(externalRepository.getTrack(1L, 2L)).thenThrow(
+        when(usersCommunicator.getTrack(1L, 2L)).thenThrow(
                 new NotFoundException("")
         );
         assertThat(tracksVerification.verifyTrack(1L, 2L)).isFalse();

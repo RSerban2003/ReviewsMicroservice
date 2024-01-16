@@ -1,11 +1,12 @@
 package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.User;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,8 @@ import java.util.Objects;
 
 @Service
 public class UsersVerification {
-    private ExternalRepository externalRepository;
+    private UsersMicroserviceCommunicator usersCommunicator;
+    private SubmissionsMicroserviceCommunicator submissionsCommunicator;
     private ReviewRepository reviewRepository;
 
     /**
@@ -24,10 +26,12 @@ public class UsersVerification {
      * @param externalRepository object storing external objects
      * @param reviewRepository repository storing all reviews
      */
-    public UsersVerification(ExternalRepository externalRepository,
+    public UsersVerification(UsersMicroserviceCommunicator usersCommunicator,
+                             SubmissionsMicroserviceCommunicator submissionsCommunicator,
                              ReviewRepository reviewRepository) {
-        this.externalRepository = externalRepository;
+        this.usersCommunicator = usersCommunicator;
         this.reviewRepository = reviewRepository;
+        this.submissionsCommunicator = submissionsCommunicator;
     }
 
     /**
@@ -39,7 +43,7 @@ public class UsersVerification {
     public boolean verifyIfUserExists(Long userID) {
         try {
             // getRolesOfUser method will throw an error when this user does not exist
-            externalRepository.getRolesOfUser(userID);
+            usersCommunicator.getRolesOfUser(userID);
             return true;
         } catch (NotFoundException e) {
             return false;
@@ -58,7 +62,7 @@ public class UsersVerification {
     public boolean verifyRoleFromTrack(Long userID, Long conferenceID, Long trackID, UserRole role) {
         try {
             // Get all roles of each track from other microservice
-            RolesOfUser roles = externalRepository.getRolesOfUser(userID);
+            RolesOfUser roles = usersCommunicator.getRolesOfUser(userID);
             boolean ret = false;
 
             // Iterate over each role/track
@@ -96,8 +100,8 @@ public class UsersVerification {
      */
     public boolean verifyRoleFromPaper(Long userID, Long paperID, UserRole role) {
         try {
-            Long trackID = externalRepository.getSubmission(paperID).getTrackId();
-            Long conferenceID = externalRepository.getSubmission(paperID).getEventId();
+            Long trackID = submissionsCommunicator.getSubmission(paperID).getTrackId();
+            Long conferenceID = submissionsCommunicator.getSubmission(paperID).getEventId();
             return verifyRoleFromTrack(userID, conferenceID, trackID, role);
         } catch (NotFoundException e) {
             return false;
@@ -125,7 +129,7 @@ public class UsersVerification {
      */
     public boolean isAuthorToPaper(Long userID, Long paperID) {
         try {
-            var submission = externalRepository.getSubmission(paperID);
+            var submission = submissionsCommunicator.getSubmission(paperID);
             List<@Valid User> authors = submission.getAuthors();
             for (@Valid User author : authors) {
                 if (Objects.equals(author.getUserId(), userID)) {

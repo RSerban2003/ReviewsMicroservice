@@ -1,12 +1,12 @@
 package nl.tudelft.sem.v20232024.team08b.application.phase;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @Component
 public class TrackPhaseCalculator {
     private final TrackRepository trackRepository;
-    private final ExternalRepository externalRepository;
+    private final UsersMicroserviceCommunicator usersCommunicator;
     private final PaperPhaseCalculator paperPhaseCalculator;
     private Clock clock;
     /**
@@ -31,10 +31,10 @@ public class TrackPhaseCalculator {
      */
     @Autowired
     public TrackPhaseCalculator(TrackRepository trackRepository,
-                                ExternalRepository externalRepository,
+                                UsersMicroserviceCommunicator usersCommunicator,
                                 PaperPhaseCalculator paperPhaseCalculator) {
         this.trackRepository = trackRepository;
-        this.externalRepository = externalRepository;
+        this.usersCommunicator = usersCommunicator;
         this.paperPhaseCalculator = paperPhaseCalculator;
         clock = Clock.systemUTC();
     }
@@ -80,7 +80,7 @@ public class TrackPhaseCalculator {
     public boolean checkIfAllPapersFinalized(Long conferenceID,
                                              Long trackID) throws NotFoundException {
         // Check if such track exists
-        externalRepository.getTrack(conferenceID, trackID);
+        usersCommunicator.getTrack(conferenceID, trackID);
 
         // Get the track
         Optional<Track> trackOptional = trackRepository.findById(
@@ -127,7 +127,7 @@ public class TrackPhaseCalculator {
         // Get the track from external repository. Such track should always
         // exist, since we verified, so the following line will not throw.
         nl.tudelft.sem.v20232024.team08b.dtos.users.Track track =
-                externalRepository.getTrack(conferenceID, trackID);
+                usersCommunicator.getTrack(conferenceID, trackID);
 
         // Get the current timestamp
         long currentTime = clock.instant().toEpochMilli();

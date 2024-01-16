@@ -2,13 +2,13 @@ package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.User;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class PapersVerification {
 
-    private final ExternalRepository externalRepository;
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
     private final UsersVerification usersVerification;
     private final TracksVerification tracksVerification;
     private final PaperPhaseCalculator paperPhaseCalculator;
@@ -31,11 +31,11 @@ public class PapersVerification {
      * @param tracksVerification object used for verifying track information
      */
     @Autowired
-    public PapersVerification(ExternalRepository externalRepository,
+    public PapersVerification(SubmissionsMicroserviceCommunicator submissionsCommunicator,
                               UsersVerification usersVerification,
                               TracksVerification tracksVerification,
                               PaperPhaseCalculator paperPhaseCalculator) {
-        this.externalRepository = externalRepository;
+        this.submissionsCommunicator = submissionsCommunicator;
         this.usersVerification = usersVerification;
         this.tracksVerification = tracksVerification;
         this.paperPhaseCalculator = paperPhaseCalculator;
@@ -49,7 +49,7 @@ public class PapersVerification {
      */
     public boolean verifyPaper(Long paperID) {
         try {
-            externalRepository.getSubmission(paperID);
+            submissionsCommunicator.getSubmission(paperID);
             return true;
         } catch (NotFoundException e) {
             return false;
@@ -65,7 +65,7 @@ public class PapersVerification {
      * @throws ConflictOfInterestException if the reviewer cannot be assigned
      */
     public void verifyCOI(Long paperID, Long reviewerID) throws NotFoundException, ConflictOfInterestException {
-        Submission submission = externalRepository.getSubmission(paperID);
+        Submission submission = submissionsCommunicator.getSubmission(paperID);
         List<@Valid User> conflictsOfInterest = submission.getConflictsOfInterest();
         if (conflictsOfInterest == null) {
             return;

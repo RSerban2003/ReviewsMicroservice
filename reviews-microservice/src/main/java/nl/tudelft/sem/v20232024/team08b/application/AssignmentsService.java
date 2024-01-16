@@ -5,6 +5,8 @@ import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
@@ -15,7 +17,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,8 @@ public class AssignmentsService {
     private final PapersVerification papersVerification;
     private final TracksVerification tracksVerification;
     private final UsersVerification usersVerification;
-    private final ExternalRepository externalRepository;
+    private final SubmissionsMicroserviceCommunicator submissionCommunicator;
+    private final UsersMicroserviceCommunicator usersCommunicator;
     private final TrackPhaseCalculator trackPhaseCalculator;
     private final TrackRepository trackRepository;
     private final TracksService tracksService;
@@ -53,7 +55,8 @@ public class AssignmentsService {
             PapersVerification papersVerification,
             TracksVerification tracksVerification,
             UsersVerification usersVerification,
-            ExternalRepository externalRepository,
+            SubmissionsMicroserviceCommunicator submissionCommunicator,
+            UsersMicroserviceCommunicator usersCommunicator,
             TrackPhaseCalculator trackPhaseCalculator,
             TrackRepository trackRepository,
             TracksService tracksService
@@ -62,7 +65,8 @@ public class AssignmentsService {
         this.papersVerification = papersVerification;
         this.tracksVerification = tracksVerification;
         this.usersVerification = usersVerification;
-        this.externalRepository = externalRepository;
+        this.submissionCommunicator = submissionCommunicator;
+        this.usersCommunicator = usersCommunicator;
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.trackRepository = trackRepository;
         this.tracksService = tracksService;
@@ -197,7 +201,7 @@ public class AssignmentsService {
             ReviewID reviewID = review.getReviewID();
             Long paperID = reviewID.getPaperID();
             PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
-            Paper paper = new Paper(externalRepository.getSubmission(paperID));
+            Paper paper = new Paper(submissionCommunicator.getSubmission(paperID));
             summaryWithID.setPaperID(paperID);
             summaryWithID.setTitle(paper.getTitle());
             summaryWithID.setAbstractSection(paper.getAbstractSection());
@@ -220,7 +224,7 @@ public class AssignmentsService {
     public void finalization(Long requesterID, TrackID trackID)
             throws ForbiddenAccessException, NotFoundException, ConflictException {
         // Ensure the track exists
-        externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID());
+        usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID());
 
         // Ensure the requester is a PC chair
         if (!usersVerification.verifyRoleFromTrack(
@@ -236,7 +240,7 @@ public class AssignmentsService {
         }
 
         // Ensure there is at least 3 reviewers assigned to each paper
-        var submissions = externalRepository.getSubmissionsInTrack(trackID, requesterID);
+        var submissions = submissionCommunicator.getSubmissionsInTrack(trackID, requesterID);
         if (submissions.stream().anyMatch(submission ->
                 reviewRepository.findByReviewIDPaperID(submission.getSubmissionId()).size() < 3
         )) {

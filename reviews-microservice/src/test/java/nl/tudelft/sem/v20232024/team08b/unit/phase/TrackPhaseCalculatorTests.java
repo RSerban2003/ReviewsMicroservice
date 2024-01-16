@@ -3,13 +3,13 @@ package nl.tudelft.sem.v20232024.team08b.unit.phase;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,14 +28,14 @@ import static org.mockito.Mockito.when;
 
 public class TrackPhaseCalculatorTests {
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final UsersMicroserviceCommunicator usersCommunicator = Mockito.mock(UsersMicroserviceCommunicator.class);
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
     private final Clock clock = Mockito.mock(Clock.class);
 
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.spy(
             new TrackPhaseCalculator(
                     trackRepository,
-                    externalRepository,
+                    usersCommunicator,
                     paperPhaseCalculator
             )
     );
@@ -87,7 +87,7 @@ public class TrackPhaseCalculatorTests {
         trackDTO = new nl.tudelft.sem.v20232024.team08b.dtos.users.Track();
 
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )
@@ -272,7 +272,7 @@ public class TrackPhaseCalculatorTests {
     void checkIfAllPapersFinalized_NoTrackPresent() throws NotFoundException {
         // Assume that such track exists
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )
@@ -299,7 +299,7 @@ public class TrackPhaseCalculatorTests {
 
         // Assume that such track exists
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )
@@ -327,7 +327,7 @@ public class TrackPhaseCalculatorTests {
         papers.get(0).setReviewsHaveBeenFinalized(true);
         // Assume that such track exists
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )
@@ -354,7 +354,7 @@ public class TrackPhaseCalculatorTests {
 
         // Assume that such track exists
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )
