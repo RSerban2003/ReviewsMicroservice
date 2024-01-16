@@ -43,14 +43,20 @@ class SystemsTests {
     private final String usersURL = "http://localhost:8082";
     private final String reviewsURL = "http://localhost:8080";
 
-    private Long submitter1ID, submitter2ID, submitter3ID;
+    private Long submitter1ID;
+    private Long submitter2ID;
+    private Long submitter3ID;
+
     private Long reviewer1ID;
 
-    private Long track1ID, track2ID;
+    private Long track1ID;
+    private Long track2ID;
     private Long event1ID;
     private Long chair1ID;
 
-    private Long submission1ID, submission2ID, submission3ID;
+    private Long submission1ID;
+    private Long submission2ID;
+    private Long submission3ID;
 
     @BeforeEach
     void setup() {
@@ -75,10 +81,6 @@ class SystemsTests {
         System.out.println("[Systems Testing Log] Submissions microservice is running.");
 
         // Make some test data
-        User chair1;
-        Event event1;
-        Track track1, track2;
-
         Random rng = new Random();
         var user = new User();
         user.name("1");
@@ -113,9 +115,9 @@ class SystemsTests {
         user.surname("Doe");
         user.email(rng.nextInt() + "@tudelt.nl");
         submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
-        chair1 = submitter;
+        final var chair1 = submitter;
 
-        event1 = new Event();
+        var event1 = new Event();
         event1.name("Test Event 1");
         event1.generalChairs(List.of());
         event1.description("This is a test event.");
@@ -123,7 +125,7 @@ class SystemsTests {
         event1 = sendRequest(RequestType.POST, event1, Event.class, usersURL, "event");
         System.out.println(event1);
 
-        track1 = new Track();
+        var track1 = new Track();
         track1.setId((long) rng.nextInt());
         track1.name("Test Track 1");
         track1.maxLength(10000);
@@ -138,7 +140,7 @@ class SystemsTests {
                 chair1.getId().toString() + "?Assignee=" + chair1.getId().toString()
                         + "&roleType=PCchair");
 
-        track2 = new Track();
+        var track2 = new Track();
         track2.setId((long) rng.nextInt());
         track2.name("Test Track 2");
         track2.maxLength(10000);
@@ -187,10 +189,10 @@ class SystemsTests {
         fakeSubmission.setTrackId(track1.getId());
         fakeSubmission.setLinkToReplicationPackage("https://github.com");
         var submitter2 = new nl.tudelft.sem.v20232024.team08b.dtos.submissions.User();
-        submitter1.setUserId(submitter1ID);
-        submitter1.setEmail("email@tudelft.nl");
-        submitter1.setName("1");
-        submitter1.setSurname("Doe");
+        submitter2.setUserId(submitter1ID);
+        submitter2.setEmail("email@tudelft.nl");
+        submitter2.setName("1");
+        submitter2.setSurname("Doe");
         fakeSubmission.setAuthors(List.of(submitter1));
         fakeSubmission.setConflictsOfInterest(List.of());
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
@@ -212,10 +214,10 @@ class SystemsTests {
         fakeSubmission.setTrackId(track2.getId());
         fakeSubmission.setLinkToReplicationPackage("https://github.com");
         var submitter3 = new nl.tudelft.sem.v20232024.team08b.dtos.submissions.User();
-        submitter1.setUserId(submitter3ID);
-        submitter1.setEmail("email@tudelft.nl");
-        submitter1.setName("1");
-        submitter1.setSurname("Doe");
+        submitter3.setUserId(submitter3ID);
+        submitter3.setEmail("email@tudelft.nl");
+        submitter3.setName("1");
+        submitter3.setSurname("Doe");
         fakeSubmission.setAuthors(List.of(submitter3));
         fakeSubmission.setConflictsOfInterest(List.of());
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
@@ -234,8 +236,13 @@ class SystemsTests {
                         + "&roleType=PCmember");
     }
 
+
+    /**
+     * Tests Must-have Requirement #3: Reviewers can see all of the papers in their tracks.
+     * Using endpoint: GET /conferences/{conferenceID}/tracks/{trackID}/papers
+     */
     @Test
-    void ReviewersCanSeeTheTitlesAndAbstractsOfSubmittedPapers() {
+    void reviewersCanSeeSubmittedPapersInATrack() {
         var conferenceID = event1ID;
         var paper1 = new PaperSummaryWithID();
         paper1.setTitle("Title 1");
@@ -255,9 +262,247 @@ class SystemsTests {
         assertEquals(papersSummaryWithIDS, response.getBody());
     }
 
+    /**
+     * Tests Must-have Requirement #2: Reviewers can read the titles and abstracts of the submitted papers.
+     * Using endpoint: GET /papers/{paperID}/title-and-abstract
+     */
+    @Test
+    void reviewersCanSeeTitlesAndAbstractsOfPapers() {
+    }
+
+    /**
+     * Tests Could-have Requirement #2: Chairs can read the titles and abstracts of the submitted
+     * papers, but not the authors of the papers.
+     * Using endpoint: GET /papers/{paperID}/title-and-abstract
+     */
+    @Test
+    void chairsCanReadTitlesAndAbstractsOfPapersInTheirTrackInBiddingPhase() {
+    }
+
+    /**
+     * Tests Should-have Requirement #5: Reviewers can read the papers that they are assigned to.
+     * Must-have Requirement #4: Reviewers should not see the author of a paper.
+     * Using endpoint: GET /papers/{paperID}
+     */
+    @Test
+    void reviewersCanReadPapersTheyAreAssignedTo() {
+    }
+
+    /**
+     * Test Could-have Requirement #5: Chairs can read the papers that are a part of their track(s).
+     * Using endpoint: GET /papers/{paperID}
+     */
+    @Test
+    void chairsCanReadPapersInTheirTrackInAssignmentPhase() {
+    }
+
+    /**
+     * Tests Must-have Requirement #5: Reviewers can decide to review/not review/stay neutral towards a paper.
+     * Must-have Requirement #1: The bidding phase automatically starts when the submission deadline passes.
+     * Must-have Requirement #6: The bidding phase must end after a certain deadline (default is a few days).
+     * Using endpoints: PUT /papers/{paperID}/bid
+     * GET /papers/{paperID}/bids/by-reviewer/{reviewerID}
+     */
+    @Test
+    void reviewersCanBidOnPapers() {
+    }
+
+    /**
+     * Tests Must-have Requirement #7: Chairs can initiate an automated process that assigns papers
+     * based on the bidding information for papers in their track(s).
+     * Must-have Requirement #8: Chairs can view the current assignments of the reviews of papers in their track(s).
+     * Must-have Requirement #9: Each submitted paper must be reviewed by three reviewers.
+     * Could-have Requirement #3: Reviewers should be assigned to similar amounts of papers
+     * by the automatic assignment.
+     * Using endpoints: PUT /conferences/{conferenceID}/tracks/{trackID}/automatic
+     * GET /papers/{paperID}/assignees
+     */
+    @Test
+    void chairsCanAssignPapersAutomatically() {
+    }
+
+    /**
+     * Tests Must-have Requirement #10: Chairs can finalize the assignments, so they are no longer editable.
+     * Must-have Requirement #9: Each submitted paper must be reviewed by three reviewers.
+     * Using endpoints: POST /conferences/{conferenceID}/tracks/{trackID}/finalization
+     * GET /conferences/{conferenceID}/tracks/{trackID}/phase
+     */
+    @Test
+    void chairsCanFinalizeAssignments() {
+    }
+
+    /**
+     * Tests Must-have Requirement #11: Reviewers can submit their review for each submission they are assigned to.
+     * Must-have Requirement #12: Reviewers can resubmit their reviews
+     * as long as the Review phase of the track is still ongoing.
+     * Using endpoints: PUT /papers/{paperID}/reviews
+     * GET /papers/{paperID}/reviews/by-reviewer/{reviewerID}
+     */
+    @Test
+    void reviewersCanSubmitAndResubmitReviews() {
+    }
+
+    /**
+     * Tests Must-have Requirement #14: Once all reviews for a paper are submitted, the Review phase
+     * for this paper automatically ends, and the Discussion phase for the paper begins.
+     * Using endpoint: PUT /papers/{paperID}/reviews
+     * GET /papers/{paperID}/reviews/phase
+     */
+    @Test
+    void discussionPhaseBeginsSuccessfully() {
+    }
+
+    /**
+     * Tests Must-have Requirement #15: Reviewers can read the reviews of other reviewers
+     * if they are assigned to the same paper.
+     * Using endpoint: GET /papers/{paperID}/reviews/by-reviewer/{reviewerID}
+     */
+    @Test
+    void reviewersCanReadOtherReviewsDuringDiscussionPhase() {
+        discussionPhaseBeginsSuccessfully();
+    }
+
+    /**
+     * Tests Must-have Requirement #16: Chairs can read the reviews of the papers in their track(s).
+     * Using endpoint: GET /papers/{paperID}/reviews
+     */
+    @Test
+    void chairsCanReadReviewsDuringDiscussionPhase() {
+        discussionPhaseBeginsSuccessfully();
+    }
+
+    /**
+     * Tests Must-have Requirement #17: Reviewers can edit their own reviews, by submitting them again.
+     * Using endpoint: PUT /papers/{paperID}/reviews
+     */
+    @Test
+    void reviewersCanEditTheirOwnReviewsDuringDiscussionPhase() {
+        discussionPhaseBeginsSuccessfully();
+    }
+
+    /**
+     * Tests Must-have Requirement #18: Once a Chair has approved the reviews for a paper,
+     * the Discussion phase for this paper ends and the Final phase begins.
+     * Must-have Requirement #19: Chairs can approve (finalize) the reviews for a paper
+     * in their track(s) and only if the reviews for the paper are all positive or all negative.
+     * Using endpoints: POST /papers/{paperID}/reviews/finalization
+     * GET /papers/{paperID}/reviews/phase
+     */
+    @Test
+    void chairsCanFinalizeReviewsDuringDiscussionPhase() {
+        discussionPhaseBeginsSuccessfully();
+    }
+
+    /**
+     * Tests Must-have Requirement #21: Chairs and Reviewers can see the finalized reviews
+     * for the appropriate papers.
+     * Could-have Requirement #8: Chairs view the finalized reviews of all papers in their track(s).
+     * Using endpoint: GET /papers/{paperID}/reviews
+     */
+    @Test
+    void chairsAndReviewersCanSeeFinalizedReviews() {
+        chairsCanFinalizeReviewsDuringDiscussionPhase();
+    }
+
+    /**
+     * Tests Must-have Requirement #22: Authors can check if their paper was accepted.
+     * Must-have Requirement #20: If all scores for a paper are positive, the paper is accepted.
+     * Using endpoint: GET /papers/{paperID}/status
+     */
+    @Test
+    void authorsCanCheckTheStatusOfTheirPaper() {
+        chairsCanFinalizeReviewsDuringDiscussionPhase();
+    }
+
+    /**
+     * Tests Should-have Requirement #1: Reviewers cannot be assigned papers, for review,
+     * if conflicts of interest (COIs) have been indicated.
+     * Using endpoint: PUT /papers/{paperID}/bid
+     */
+    @Test
+    void reviewersCannotBeAssignedToPapersIfCOI() {
+    }
+
+    /**
+     * Tests Should-have Requirement #2: Chairs can manually assign papers in their track(s)
+     * to each reviewer based on the bidding information.
+     * Should-have Requirement #3: Chairs can edit any of the assignments before the finalization.
+     * Should-have Requirement #4: Chairs can delete any of the assignments before the finalization.
+     * Using endpoints: POST /papers/{paperID}/assignees/{reviewerID}
+     * DELETE /papers/{paperID}/assignees/{reviewerID}
+     * GET /papers/{paperID}/assignees
+     */
+    @Test
+    void chairsCanManuallyAssignPapers() {
+    }
+
+    /**
+     * Tests Should-have Requirement #6: Reviewers can write discussion comments on each other's reviews
+     * Could-have Requirement #6: Chairs can also make discussion comments on the reviews.
+     * Using endpoints: GET /papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments
+     * POST /papers/{paperID}/reviews/by-reviewer/{reviewerID}/discussion-comments
+     */
+    @Test
+    void reviewersAndChairsCanWriteDiscussionCommentsDuringDiscussionPhase() {
+        discussionPhaseBeginsSuccessfully();
+    }
+
+    /**
+     * Tests Should-have Requirement #7: Authors can read the reviews for their papers
+     * Must-have Requirement #13: Authors should never be shown the confidential comments,
+     * review changes, and discussion comments under any circumstance.
+     * Using endpoints: GET /papers/{paperID}/reviewers
+     * GET /papers/{paperID}/reviews/by-reviewer/{reviewerID}
+     */
+    @Test
+    void authorsCanReadReviews() {
+        chairsCanFinalizeReviewsDuringDiscussionPhase();
+    }
+
+    /**
+     * Tests Could-have Requirement #1: Before the bidding has started, Chairs can decide on the deadline
+     * for the bidding phase for their track(s), i.e., the deadline for bidding for reviews
+     * after the submission of papers.
+     * Using endpoints: PUT /conferences/{conferenceID}/tracks/{trackID}/bidding-deadline
+     * GET /conferences/{conferenceID}/tracks/{trackID}/bidding-deadline
+     */
+    @Test
+    void chairsCanSetBiddingDeadline() {
+    }
+
+    /**
+     * Tests Could-have Requirement #4: Chairs can view analytics for their track(s):
+     * the number of papers that will be accepted, rejected, and papers with no final verdict.
+     * Using endpoint: GET /conferences/{conferenceID}/tracks/{trackID}/analytics
+     */
+    @Test
+    void chairsCanViewAnalytics() {
+    }
+
+    /**
+     * Tests Could-have Requirement #7: Reviewers can check the final decision
+     * of the papers they were assigned to.
+     * Using endpoint: GET /papers/{paperID}/status
+     */
+    @Test
+    void reviewersCanCheckStatusOfPaper() {
+    }
+
+    /**
+     * Sends an http request.
+     *
+     * @param requestType           GET, POST, PUT, or DELETE
+     * @param body                  The body of the request
+     * @param expectedResponseClass The class of the expected response
+     * @param url                   The url of the request
+     * @param <T>                   The type of the request body
+     * @param <U>                   The type of the response body
+     * @return The response body converted to the expected class
+     */
     <T, U> U sendRequest(RequestType requestType, T body, Class<T> expectedResponseClass,
                          String... url) {
         HttpRequest request;
+        HttpResponse response;
         try {
             request = HttpRequest.newBuilder()
                     .uri(URI.create(String.join("/", url)))
@@ -266,13 +511,6 @@ class SystemsTests {
                             HttpRequest.BodyPublishers.noBody() :
                             HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body))
                     ).build();
-        } catch (JsonProcessingException e) {
-            System.out.println("[Systems Test Error] Failed to write request body to JSON.");
-            throw new RuntimeException(e);
-        }
-
-        HttpResponse response;
-        try {
             response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             System.out.println("[Systems Test Error] Failed to send request.");
@@ -282,18 +520,13 @@ class SystemsTests {
         switch (HttpStatus.valueOf(response.statusCode())) {
             case OK, CREATED -> {
                 try {
-                    if (expectedResponseClass == null) {
-                        return null;
-                    }
-                    return (U) objectMapper.readValue((String) response.body(), expectedResponseClass);
+                    return expectedResponseClass == null ? null :
+                            (U) objectMapper.readValue((String) response.body(), expectedResponseClass);
                 } catch (JsonProcessingException e) {
                     System.out.println("[Systems Test Error] Failed to parse response body.");
                     throw new RuntimeException(e);
                 }
             }
-            /*case NOT_FOUND -> throw new NotFoundException("404 NOT FOUND");
-            case FORBIDDEN, UNAUTHORIZED -> throw new ForbiddenAccessException();
-            case BAD_REQUEST -> throw new BadHttpRequest();*/
             default -> {
                 System.out.println("[Systems Testing Error] Request was: " + request.toString());
                 throw new RuntimeException("Unexpected response status: " + response.statusCode());
@@ -301,6 +534,9 @@ class SystemsTests {
         }
     }
 
+    /**
+     * Enum for the type of request.
+     */
     enum RequestType {
         GET, POST, PUT, DELETE
     }
