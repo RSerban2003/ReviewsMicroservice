@@ -1,5 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
+import java.util.ArrayList;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
@@ -7,9 +8,11 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerificati
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
@@ -259,5 +262,45 @@ public class TracksService {
             }
         }
         return new TrackAnalytics(accepted, rejected, undecided);
+    }
+
+    /**
+     * Gets the submissions of a track and transforms them into an instance of PaperSummaryWithID.
+     *
+     * @param requesterID the ID of the requester
+     * @param conferenceID the ID of the conference
+     * @param trackID the ID of the track
+     * @return A list of PaperSummaryWithID
+     * @throws ForbiddenAccessException if the track does not exist
+     * @throws NotFoundException if the user is not a pc chair
+     */
+    public List<PaperSummaryWithID> getPapers(Long requesterID,
+                                              Long conferenceID,
+                                              Long trackID) throws ForbiddenAccessException,
+        NotFoundException {
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        if (!usersVerification.verifyRoleFromTrack(requesterID, trackID1.getConferenceID(),
+            trackID1.getTrackID(), UserRole.CHAIR)) {
+            throw new ForbiddenAccessException();
+        }
+        if (!tracksVerification.verifyTrack(conferenceID, trackID)) {
+            throw new NotFoundException(
+                "Not Found. The requested track or conference was not found."
+            );
+        }
+        var submissions = externalRepository.getSubmissionsInTrack(trackID1, requesterID);
+
+        List<PaperSummaryWithID> papers = new ArrayList<>();
+        for (Submission submission : submissions) {
+            PaperSummaryWithID paperSummaryWithID = new PaperSummaryWithID();
+            paperSummaryWithID.setPaperID(submission.getSubmissionId());
+            paperSummaryWithID.setTitle(submission.getTitle());
+            paperSummaryWithID.setAbstractSection(submission.getAbstract());
+            papers.add(paperSummaryWithID);
+        }
+        return papers;
+        //return submissions.stream()
+        //.map(x -> new PaperSummaryWithID(x.getTitle(), x.getAbstract(), x.getSubmissionId()))
+        //.collect(Collectors.toList());
     }
 }
