@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.strategies.AutomaticAssignmentStrategy;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
@@ -23,9 +24,6 @@ import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 public class AssignmentsService {
     private final ReviewRepository reviewRepository;
@@ -34,6 +32,7 @@ public class AssignmentsService {
     private final PapersVerification papersVerification;
     private final TracksVerification tracksVerification;
     private final UsersVerification usersVerification;
+    private AutomaticAssignmentStrategy automaticAssignmentStrategy;
 
     /**
      * Default constructor for the service.
@@ -159,32 +158,12 @@ public class AssignmentsService {
         Optional<Track> opTrack = trackRepository.findById(trackID1);
         Track track = opTrack.get();
         List<Paper> papers = track.getPapers();
-        for (Paper paper : papers) {
-            List<Bid> bids = bidRepository.getBidsOfPapers(requesterID, paper.getId());
-            List<Long> users = bids.stream().map(Bid::getBidderID).collect(Collectors.toList());
-            if (users.isEmpty()) {
-                throw new IllegalArgumentException("At least One reviewer needed");
-            }
-            List<Integer> numberOfPapers = new ArrayList<>();
-            for (Long user : users) {
-                 numberOfPapers.add(byReviewer(user).size());
-            }
-            List<Integer> threeSmallest = gettingSmallest(numberOfPapers);
-            for (Integer index : threeSmallest) {
-                ReviewID reviewID = new ReviewID(paper.getId(), users.get(index));
-                Review toSave = new Review();
-                toSave.setReviewID(reviewID);
-                reviewRepository.save(toSave);
-
-            }
-        }
+        automaticAssignmentStrategy.automaticAssignment(papers, requesterID);
 
 
     }
 
-    public List<Paper> byReviewer(Long UserID) {
-        return new ArrayList<>();
-    }
+
 
     private void verificationOfTrack(Long conferenceID, long trackID, long requesterID)
         throws IllegalAccessException, NotFoundException {
@@ -204,31 +183,9 @@ public class AssignmentsService {
 
     }
 
-    /**
-     * Method that gets the three smallest elements of an array.
-     *
-     * @param numberOfPapers A list corresponding to the number of papers of every reviewer
-     * @return an array with the 3 smallest elements
-     */
-    private List<Integer> gettingSmallest(List<Integer> numberOfPapers) {
-        List<Integer> smallest = new ArrayList<>();
-        int numberOfRepeats = 3;
-        if (numberOfPapers.size() < numberOfRepeats) {
-            numberOfRepeats = numberOfPapers.size();
-        }
-        for (int j = 0; j < numberOfRepeats; j++) {
-            int minIndex = 0;
-            // Find the index of the minimum element
-            for (int k = 1; k < numberOfPapers.size(); k++) {
-                if (numberOfPapers.get(k) < numberOfPapers.get(minIndex)) {
-                    minIndex = k;
-                }
-            }
-            // Store the indices of the smallest elements and set the chosen minimum to a large value
-            smallest.add(minIndex);
-            numberOfPapers.set(minIndex, Integer.MAX_VALUE);
-        }
-        return smallest;
-
+    @Autowired
+    public void setAutomaticAssignmentStrategy(
+        AutomaticAssignmentStrategy automaticAssignmentStrategy) {
+        this.automaticAssignmentStrategy = automaticAssignmentStrategy;
     }
 }

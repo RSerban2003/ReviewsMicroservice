@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Optional;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
+import nl.tudelft.sem.v20232024.team08b.application.strategies.AssignmentWithThreeSmallest;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
@@ -65,7 +66,8 @@ public class AssignmentsServiceTests {
                 usersVerification
             )
         );
-
+        assignmentsService.setAutomaticAssignmentStrategy(new AssignmentWithThreeSmallest(
+                                                            bidRepository,reviewRepository));
         fakeSubmission = new Submission();
         fakeSubmission.setEventId(4L);
         fakeSubmission.setTrackId(5L);
@@ -328,8 +330,6 @@ public class AssignmentsServiceTests {
 
         when(bidRepository.getBidsOfPapers(requesterID, paper.getId())).thenReturn(bids);
         assignmentsService.assignAuto(requesterID, conferenceID, trackID);
-        when(assignmentsService.byReviewer(1L)).thenReturn(user1Papers);
-        when(assignmentsService.byReviewer(2L)).thenReturn(user2Papers);
         verify(reviewRepository).save(argThat(review -> review.getReviewID().getPaperID().equals(123L)
             && review.getReviewID().getReviewerID().equals(1L)));
         verify(reviewRepository).save(argThat(review -> review.getReviewID().getPaperID().equals(123L)
