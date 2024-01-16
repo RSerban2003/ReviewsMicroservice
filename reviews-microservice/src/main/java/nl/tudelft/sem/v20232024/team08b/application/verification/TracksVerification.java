@@ -2,12 +2,13 @@ package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,8 @@ import java.util.List;
 @Service
 public class TracksVerification {
     private final TrackRepository trackRepository;
-    private final ExternalRepository externalRepository;
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private final UsersMicroserviceCommunicator usersCommunicator;
     private final TrackPhaseCalculator trackPhaseCalculator;
     private final UsersVerification usersVerification;
 
@@ -25,17 +27,20 @@ public class TracksVerification {
      * Default constructor for the track verification.
      *
      * @param trackRepository repository storing all tracks
-     * @param externalRepository object storing external objects
+     * @param submissionsCommunicator class, that talks to submissions microservice
+     * @param usersCommunicator class, that talks to submissions microservice
      * @param trackPhaseCalculator object responsible for calculating track phases
      * @param usersVerification object that handles user verification
      */
     @Autowired
     public TracksVerification(TrackRepository trackRepository,
-                              ExternalRepository externalRepository,
+                              SubmissionsMicroserviceCommunicator submissionsCommunicator,
+                              UsersMicroserviceCommunicator usersCommunicator,
                               TrackPhaseCalculator trackPhaseCalculator,
                               UsersVerification usersVerification) {
         this.trackRepository = trackRepository;
-        this.externalRepository = externalRepository;
+        this.submissionsCommunicator = submissionsCommunicator;
+        this.usersCommunicator = usersCommunicator;
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.usersVerification = usersVerification;
     }
@@ -47,7 +52,7 @@ public class TracksVerification {
      * @throws NotFoundException if paper is not found in database
      */
     public void verifyIfTrackExists(Long paperID) throws NotFoundException {
-        Submission submission = externalRepository.getSubmission(paperID);
+        Submission submission = submissionsCommunicator.getSubmission(paperID);
         Long trackID = submission.getTrackId();
         Long conferenceID = submission.getEventId();
         if (trackRepository.findById(new TrackID(conferenceID, trackID)).isPresent()) {
@@ -83,7 +88,7 @@ public class TracksVerification {
     public void verifyTrackPhaseThePaperIsIn(Long paperID,
                                              List<TrackPhase> acceptablePhases) throws IllegalAccessException,
                                                                                        NotFoundException {
-        Submission submission = externalRepository.getSubmission(paperID);
+        Submission submission = submissionsCommunicator.getSubmission(paperID);
         Long conferenceID = submission.getEventId();
         Long trackID = submission.getTrackId();
         verifyTrackPhase(conferenceID, trackID, acceptablePhases);
@@ -122,7 +127,7 @@ public class TracksVerification {
     public boolean verifyTrack(Long conferenceID,
                                Long trackID) {
         try {
-            externalRepository.getTrack(conferenceID, trackID);
+            usersCommunicator.getTrack(conferenceID, trackID);
             return true;
         } catch (NotFoundException e) {
             return false;

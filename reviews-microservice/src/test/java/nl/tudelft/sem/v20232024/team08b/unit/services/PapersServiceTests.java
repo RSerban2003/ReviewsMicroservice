@@ -4,12 +4,12 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class PapersServiceTests {
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator =
+        Mockito.mock(SubmissionsMicroserviceCommunicator.class);
     private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
@@ -40,7 +41,7 @@ public class PapersServiceTests {
     void setUp() {
         papersService = Mockito.spy(
                 new PapersService(
-                        externalRepository,
+                        submissionsCommunicator,
                         paperRepository,
                         paperPhaseCalculator,
                         papersVerification
@@ -62,7 +63,7 @@ public class PapersServiceTests {
     @Test
     void getTitleAndAbstract_Successful() throws NotFoundException, IllegalAccessException {
         doNothing().when(papersVerification).verifyPermissionToAccessPaper(reviewerID, paperID);
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         fakeSubmission.setTitle("Title");
         fakeSubmission.setKeywords(List.of("Keywords"));
@@ -136,7 +137,7 @@ public class PapersServiceTests {
         expectedPaper.setAbstractSection("Abstract");
         expectedPaper.setMainText(new String(fakeSubmission.getPaper()));
 
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         assertThat(papersService.getPaper(reviewerID, paperID)).isEqualTo(expectedPaper);
     }

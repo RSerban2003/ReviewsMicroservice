@@ -6,6 +6,7 @@ import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
@@ -13,7 +14,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.Assert;
@@ -43,7 +43,8 @@ public class ReviewsServiceTests {
     @MockBean
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
     @MockBean
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator =
+        Mockito.mock(SubmissionsMicroserviceCommunicator.class);
     @MockBean
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
     private ReviewsService reviewsService = new ReviewsService(
@@ -300,7 +301,7 @@ public class ReviewsServiceTests {
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
         // Essentially, fake the track, that the submission belongs to
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF does not work
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
@@ -316,7 +317,7 @@ public class ReviewsServiceTests {
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
         // Essentially, fake the track, that the submission belongs to
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF works
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
@@ -335,7 +336,7 @@ public class ReviewsServiceTests {
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
         // Essentially, fake the track, that the submission belongs to
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF works
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))
@@ -359,7 +360,7 @@ public class ReviewsServiceTests {
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
 
         // Essentially, fake the track, that the submission belongs to
-        when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(paperID)).thenReturn(fakeSubmission);
 
         // Assume the second IF works
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER))

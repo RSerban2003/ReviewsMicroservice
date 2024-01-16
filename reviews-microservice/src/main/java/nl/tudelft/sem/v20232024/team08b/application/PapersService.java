@@ -3,12 +3,12 @@ package nl.tudelft.sem.v20232024.team08b.application;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Service
 public class PapersService {
-    private final ExternalRepository externalRepository;
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
     private final PaperRepository paperRepository;
     private final PapersVerification papersVerification;
     private final PaperPhaseCalculator paperPhaseCalculator;
@@ -25,18 +25,17 @@ public class PapersService {
     /**
      * Default constructor for the service.
      *
-     * @param externalRepository repository storing everything outside of
-     *                           this microservice
+     * @param submissionsCommunicator Class that talks with submission microservice
      * @param paperRepository repository storing papers
      * @param paperPhaseCalculator class that calculates the phase of a paper
      * @param papersVerification object responsible for verifying paper information
      */
     @Autowired
-    public PapersService(ExternalRepository externalRepository,
+    public PapersService(SubmissionsMicroserviceCommunicator submissionsCommunicator,
                          PaperRepository paperRepository,
                          PaperPhaseCalculator paperPhaseCalculator,
                          PapersVerification papersVerification) {
-        this.externalRepository = externalRepository;
+        this.submissionsCommunicator = submissionsCommunicator;
         this.paperRepository = paperRepository;
         this.paperPhaseCalculator = paperPhaseCalculator;
         this.papersVerification = papersVerification;
@@ -56,7 +55,7 @@ public class PapersService {
         // Verify that user has permission to view the paper, while also checking phase (true)
         papersVerification.verifyPermissionToGetPaper(reviewerID, paperID);
 
-        Submission submission = externalRepository.getSubmission(paperID);
+        Submission submission = submissionsCommunicator.getSubmission(paperID);
 
         return new nl.tudelft.sem.v20232024.team08b.dtos.review.Paper(submission);
     }
@@ -76,7 +75,7 @@ public class PapersService {
         // Track phase verification for reading an abstract of a paper is not necessary,
         // since title and abstract can be read during all phases
 
-        return new PaperSummary(externalRepository.getSubmission(paperID));
+        return new PaperSummary(submissionsCommunicator.getSubmission(paperID));
     }
 
     /**
