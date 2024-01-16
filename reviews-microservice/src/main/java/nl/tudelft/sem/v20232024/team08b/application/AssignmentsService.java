@@ -21,7 +21,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
@@ -50,7 +49,6 @@ public class AssignmentsService {
      * @param usersVerification object responsible for verifying user information
      * @param externalRepository class, that talks to outside microservices
      * @param trackPhaseCalculator object responsible for getting the current phase
-     * @param trackRepository repository storing the tracks
      * @param tracksService service responsible for tracks
      */
     @Autowired
@@ -251,7 +249,8 @@ public class AssignmentsService {
             ReviewID reviewID = review.getReviewID();
             Long paperID = reviewID.getPaperID();
             PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
-            nl.tudelft.sem.v20232024.team08b.dtos.review.Paper paper = new nl.tudelft.sem.v20232024.team08b.dtos.review.Paper(externalRepository.getSubmission(paperID));
+            nl.tudelft.sem.v20232024.team08b.dtos.review.Paper paper =
+                new nl.tudelft.sem.v20232024.team08b.dtos.review.Paper(externalRepository.getSubmission(paperID));
             summaryWithID.setPaperID(paperID);
             summaryWithID.setTitle(paper.getTitle());
             summaryWithID.setAbstractSection(paper.getAbstractSection());

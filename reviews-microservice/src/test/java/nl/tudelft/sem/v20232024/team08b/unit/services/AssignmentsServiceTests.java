@@ -311,8 +311,6 @@ public class AssignmentsServiceTests {
     @Test
     void oneUserException() throws NotFoundException, IllegalAccessException {
         List<Paper> papers = new ArrayList<>();
-        TrackID trackID1 = new TrackID(conferenceID, trackID);
-        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
@@ -326,7 +324,7 @@ public class AssignmentsServiceTests {
         bids.add(bid2);
 
         Review review1 = new Review();
-        review1.setReviewID(new ReviewID(10L,1L));
+        review1.setReviewID(new ReviewID(10L, 1L));
 
         List<Review> reviews1 = new ArrayList<>();
         reviews1.add(review1);
@@ -338,6 +336,8 @@ public class AssignmentsServiceTests {
 
         when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
         when(externalRepository.getSubmission(10L)).thenThrow((new NotFoundException("Track not found")));
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
             trackOptional
         );
@@ -351,9 +351,7 @@ public class AssignmentsServiceTests {
 
     @Test
     void twoUsersAutomatic() throws NotFoundException, IllegalAccessException {
-        TrackID trackID1 = new TrackID(conferenceID, trackID);
         List<Paper> papers = new ArrayList<>();
-        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
@@ -367,11 +365,11 @@ public class AssignmentsServiceTests {
         bids.add(bid2);
 
         Review review1 = new Review();
-        review1.setReviewID(new ReviewID(10L,1L));
+        review1.setReviewID(new ReviewID(10L, 1L));
         Review review2 = new Review();
-        review2.setReviewID(new ReviewID(10L,2L));
+        review2.setReviewID(new ReviewID(10L, 2L));
         Review review3 = new Review();
-        review3.setReviewID(new ReviewID(20L,2L));
+        review3.setReviewID(new ReviewID(20L, 2L));
         List<Review> reviews1 = new ArrayList<>();
         reviews1.add(review1);
         List<Review> reviews2 = new ArrayList<>();
@@ -385,6 +383,8 @@ public class AssignmentsServiceTests {
         when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
         when(externalRepository.getSubmission(10L)).thenReturn(submission);
         when(externalRepository.getSubmission(20L)).thenReturn(submission);
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
             trackOptional
         );
@@ -404,9 +404,7 @@ public class AssignmentsServiceTests {
 
     @Test
     void fourUsersAutomatic() throws NotFoundException, IllegalAccessException {
-        TrackID trackID1 = new TrackID(conferenceID, trackID);
         List<Paper> papers = new ArrayList<>();
-        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
@@ -424,15 +422,15 @@ public class AssignmentsServiceTests {
         bids.add(bid4);
 
         Review review1 = new Review();
-        review1.setReviewID(new ReviewID(10L,1L));
+        review1.setReviewID(new ReviewID(10L, 1L));
         Review review2 = new Review();
-        review2.setReviewID(new ReviewID(10L,2L));
+        review2.setReviewID(new ReviewID(10L, 2L));
         Review review3 = new Review();
-        review3.setReviewID(new ReviewID(20L,2L));
+        review3.setReviewID(new ReviewID(20L, 2L));
         Review review4 = new Review();
-        review4.setReviewID(new ReviewID(10L,3L));
+        review4.setReviewID(new ReviewID(10L, 3L));
         Review review5 = new Review();
-        review5.setReviewID(new ReviewID(20L,4L));
+        review5.setReviewID(new ReviewID(20L, 4L));
         List<Review> reviews1 = new ArrayList<>();
         reviews1.add(review1);
         List<Review> reviews2 = new ArrayList<>();
@@ -452,6 +450,8 @@ public class AssignmentsServiceTests {
         when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
         when(externalRepository.getSubmission(10L)).thenReturn(submission);
         when(externalRepository.getSubmission(20L)).thenReturn(submission);
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
             trackOptional
         );
@@ -473,9 +473,7 @@ public class AssignmentsServiceTests {
 
     @Test
     void fourUsersNotInTrack() throws NotFoundException, IllegalAccessException {
-        TrackID trackID1 = new TrackID(conferenceID, trackID);
         List<Paper> papers = new ArrayList<>();
-        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
@@ -496,15 +494,15 @@ public class AssignmentsServiceTests {
         bids.add(bid4);
 
         Review review1 = new Review();
-        review1.setReviewID(new ReviewID(10L,1L));
+        review1.setReviewID(new ReviewID(10L, 1L));
         Review review2 = new Review();
-        review2.setReviewID(new ReviewID(40L,2L));
+        review2.setReviewID(new ReviewID(40L, 2L));
         Review review3 = new Review();
-        review3.setReviewID(new ReviewID(50L,2L));
+        review3.setReviewID(new ReviewID(50L, 2L));
         Review review4 = new Review();
-        review4.setReviewID(new ReviewID(10L,3L));
+        review4.setReviewID(new ReviewID(10L, 3L));
         Review review5 = new Review();
-        review5.setReviewID(new ReviewID(20L,4L));
+        review5.setReviewID(new ReviewID(20L, 4L));
         List<Review> reviews1 = new ArrayList<>();
         reviews1.add(review1);
         List<Review> reviews2 = new ArrayList<>();
@@ -527,6 +525,8 @@ public class AssignmentsServiceTests {
         when(externalRepository.getSubmission(20L)).thenReturn(submission);
         when(externalRepository.getSubmission(40L)).thenReturn(submission2);
         when(externalRepository.getSubmission(50L)).thenReturn(submission2);
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
             trackOptional
         );
@@ -548,9 +548,7 @@ public class AssignmentsServiceTests {
 
     @Test
     void fourUsersNotInConference() throws NotFoundException, IllegalAccessException {
-        TrackID trackID1 = new TrackID(conferenceID, trackID);
         List<Paper> papers = new ArrayList<>();
-        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
@@ -571,15 +569,15 @@ public class AssignmentsServiceTests {
         bids.add(bid4);
 
         Review review1 = new Review();
-        review1.setReviewID(new ReviewID(10L,1L));
+        review1.setReviewID(new ReviewID(10L, 1L));
         Review review2 = new Review();
-        review2.setReviewID(new ReviewID(40L,2L));
+        review2.setReviewID(new ReviewID(40L, 2L));
         Review review3 = new Review();
-        review3.setReviewID(new ReviewID(50L,2L));
+        review3.setReviewID(new ReviewID(50L, 2L));
         Review review4 = new Review();
-        review4.setReviewID(new ReviewID(10L,3L));
+        review4.setReviewID(new ReviewID(10L, 3L));
         Review review5 = new Review();
-        review5.setReviewID(new ReviewID(20L,4L));
+        review5.setReviewID(new ReviewID(20L, 4L));
         List<Review> reviews1 = new ArrayList<>();
         reviews1.add(review1);
         List<Review> reviews2 = new ArrayList<>();
@@ -602,6 +600,8 @@ public class AssignmentsServiceTests {
         when(externalRepository.getSubmission(20L)).thenReturn(submission);
         when(externalRepository.getSubmission(40L)).thenReturn(submission2);
         when(externalRepository.getSubmission(50L)).thenReturn(submission2);
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
             trackOptional
         );
@@ -672,6 +672,7 @@ public class AssignmentsServiceTests {
         assertEquals(paper.getAbstractSection(), result.get(0).getAbstractSection());
     }
 
+    @Test
     void finalizationSuccess() throws NotFoundException {
         final Long requesterID = 1L;
         final TrackID trackID = new TrackID(2L, 3L);
@@ -683,7 +684,8 @@ public class AssignmentsServiceTests {
         s.setSubmissionId(6L);
         submissions.add(s);
 
-        when(externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new  nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
+        when(externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(
+            new  nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification
                 .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
                 .thenReturn(true);
