@@ -113,7 +113,7 @@ public class ExternalRepositoryTests {
         when(
                 objectMapper.readValue("json", List.class)
         ).thenReturn(expected);
-        assertThat(externalRepository.getSubmissionsInTrack(new TrackID(1L, 2L),
+        assertThat(externalRepository.getSubmissionsInTrack(1L, 2L,
                 3L)).isEqualTo(expected);
     }
 
@@ -122,7 +122,7 @@ public class ExternalRepositoryTests {
         when(httpRequestSender.sendGetRequest(ArgumentMatchers.any()))
                 .thenThrow(new NotFoundException(""));
         assertThrows(NotFoundException.class, () ->
-                externalRepository.getSubmissionsInTrack(new TrackID(1L, 2L), 3L));
+                externalRepository.getSubmissionsInTrack(1L, 2L, 3L));
     }
 
     @Test
@@ -143,6 +143,6 @@ public class ExternalRepositoryTests {
                 objectMapper.readValue("json", List.class)
         ).thenThrow(new RuntimeException(""));
         assertThrows(RuntimeException.class, () ->
-                externalRepository.getSubmissionsInTrack(new TrackID(1L, 2L), 3L));
+                externalRepository.getSubmissionsInTrack(1L, 2L, 3L));
     }
 }

@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class DiscussionVerificationTests {
-
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);

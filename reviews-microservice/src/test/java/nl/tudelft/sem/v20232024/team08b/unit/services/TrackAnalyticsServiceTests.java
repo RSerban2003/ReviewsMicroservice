@@ -68,7 +68,8 @@ public class TrackAnalyticsServiceTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
 
-        when(externalRepository.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
+        when(externalRepository.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
+                .thenReturn(submissions);
 
         when(papersService.getState(requesterID, 1L)).thenReturn(PaperStatus.ACCEPTED);
         when(papersService.getState(requesterID, 2L)).thenReturn(PaperStatus.REJECTED);
@@ -94,7 +95,8 @@ public class TrackAnalyticsServiceTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
 
-        when(externalRepository.getSubmissionsInTrack(trackID, requesterID)).thenThrow(NotFoundException.class);
+        when(externalRepository.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
+                .thenThrow(NotFoundException.class);
 
         Assertions.assertThrows(NotFoundException.class, () -> {
             trackAnalyticsService.getAnalytics(trackID, requesterID);
@@ -132,7 +134,8 @@ public class TrackAnalyticsServiceTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
 
-        when(externalRepository.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
+        when(externalRepository.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
+                .thenReturn(submissions);
 
         when(papersService.getState(1L, requesterID)).thenThrow(new IllegalAccessException());
 

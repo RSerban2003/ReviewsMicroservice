@@ -30,10 +30,14 @@ import static org.mockito.Mockito.*;
 @AutoConfigureMockMvc
 public class ReviewsControllerTests {
     MockMvc mockMvc;
+
     private final ReviewsService reviewsService = Mockito.mock(ReviewsService.class);
     private final PapersService papersService = Mockito.mock(PapersService.class);
+
     private final DiscussionService discussionService = Mockito.mock(DiscussionService.class);
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
     private nl.tudelft.sem.v20232024.team08b.dtos.review.Review fakeReviewDTO;
 
     private Long requesterID;
