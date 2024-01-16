@@ -15,8 +15,8 @@ import java.util.List;
 @Repository
 public class ExternalRepository {
     private final Long ourID = -1L;
-    private final String submissionsURL = "https://localhost:8081";
-    private final String usersURL = "https://localhost:8082";
+    private final String submissionsURL = "http://localhost:8081";
+    private final String usersURL = "http://localhost:8082";
     private final ObjectMapper objectMapper;
     private final HttpRequestSender httpRequestSender;
 

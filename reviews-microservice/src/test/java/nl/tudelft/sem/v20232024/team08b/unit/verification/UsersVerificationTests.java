@@ -39,8 +39,8 @@ public class UsersVerificationTests {
 
         RolesOfUserTracksInner innerReviewer = new RolesOfUserTracksInner();
         innerReviewer.setRoleName("PC Member");
-        innerReviewer.setTrackId(2);
-        innerReviewer.setEventId(4);
+        innerReviewer.setTrackId(2L);
+        innerReviewer.setEventId(4L);
 
         List<RolesOfUserTracksInner> listOfTracks = new ArrayList<>();
         listOfTracks.add(innerReviewer);
@@ -77,8 +77,8 @@ public class UsersVerificationTests {
         // Construct a user in the same track, but he is a chair
         RolesOfUserTracksInner innerChair = new RolesOfUserTracksInner();
         innerChair.setRoleName("PC Chair");
-        innerChair.setTrackId(2);
-        innerChair.setEventId(4);
+        innerChair.setTrackId(2L);
+        innerChair.setEventId(4L);
 
         // Add the user to the DTO
         List<RolesOfUserTracksInner> listOfTracks = new ArrayList<>();
@@ -102,8 +102,8 @@ public class UsersVerificationTests {
         // Construct a user in the same track, but he is a chair
         RolesOfUserTracksInner innerChair = new RolesOfUserTracksInner();
         innerChair.setRoleName("PC Chair");
-        innerChair.setTrackId(2);
-        innerChair.setEventId(4);
+        innerChair.setTrackId(2L);
+        innerChair.setEventId(4L);
 
         // Add the user to the DTO
         fakeRolesOfUser.getTracks().add(innerChair);
@@ -117,8 +117,8 @@ public class UsersVerificationTests {
         // Construct a user in the same track, but he is a chair
         RolesOfUserTracksInner innerChair = new RolesOfUserTracksInner();
         innerChair.setRoleName("PC Chair");
-        innerChair.setTrackId(2);
-        innerChair.setEventId(4);
+        innerChair.setTrackId(2L);
+        innerChair.setEventId(4L);
 
         // Add the user to the DTO
         fakeRolesOfUser.getTracks().clear();
