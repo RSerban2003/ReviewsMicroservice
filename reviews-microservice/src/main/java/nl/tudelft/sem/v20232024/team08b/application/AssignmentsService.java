@@ -13,7 +13,7 @@ import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
@@ -70,7 +70,6 @@ public class AssignmentsService {
         this.usersVerification = usersVerification;
         this.externalRepository = externalRepository;
         this.trackPhaseCalculator = trackPhaseCalculator;
-        this.trackRepository = trackRepository;
         this.tracksService = tracksService;
     }
 
@@ -164,7 +163,7 @@ public class AssignmentsService {
      * @param trackID ID of a trackID
      * @throws IllegalAccessException If the requester does not have a permission to assign
      * @throws NotFoundException If the reviewer is not in the track of paper
-     * @throws ConflictOfInterestException If reviewer can not be assigned due to conflict of interest
+     * @throws IllegalArgumentException If reviewer can not be assigned due to conflict of interest
      */
     public void assignAuto(Long requesterID, Long conferenceID, Long trackID)
         throws NotFoundException, IllegalAccessException {
@@ -174,7 +173,7 @@ public class AssignmentsService {
         Optional<Track> opTrack = trackRepository.findById(trackID1);
         Track track = opTrack.get();
         List<Paper> papers = track.getPapers();
-        automaticAssignmentStrategy.automaticAssignment(papers, requesterID);
+        automaticAssignmentStrategy.automaticAssignment(trackID1, papers);
 
 
     }
@@ -252,7 +251,7 @@ public class AssignmentsService {
             ReviewID reviewID = review.getReviewID();
             Long paperID = reviewID.getPaperID();
             PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
-            Paper paper = new Paper(externalRepository.getSubmission(paperID));
+            nl.tudelft.sem.v20232024.team08b.dtos.review.Paper paper = new nl.tudelft.sem.v20232024.team08b.dtos.review.Paper(externalRepository.getSubmission(paperID));
             summaryWithID.setPaperID(paperID);
             summaryWithID.setTitle(paper.getTitle());
             summaryWithID.setAbstractSection(paper.getAbstractSection());
