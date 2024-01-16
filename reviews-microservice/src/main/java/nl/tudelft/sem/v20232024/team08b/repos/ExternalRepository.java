@@ -20,6 +20,7 @@ public class ExternalRepository {
     private final ObjectMapper objectMapper;
     private final HttpRequestSender httpRequestSender;
 
+
     /**
      * Default constructor.
      *
@@ -27,7 +28,7 @@ public class ExternalRepository {
      */
     @Autowired
     public ExternalRepository(HttpRequestSender httpRequestSender) {
-        this.httpRequestSender = httpRequestSender;
+        this.httpRequestSender = new HttpRequestSender();
         this.objectMapper = new ObjectMapper();
     }
 
@@ -92,10 +93,12 @@ public class ExternalRepository {
     public Track getTrack(Long conferenceID,
                           Long trackID) throws NotFoundException {
         try {
+            var http = new HttpRequestSender();
+            var om = new ObjectMapper();
             String url = usersURL + "/track/" + conferenceID + "/" + trackID;
-            String response = httpRequestSender.sendGetRequest(url);
+            String response = http.sendGetRequest(url);
             Track track;
-            track = objectMapper.readValue(response, Track.class);
+            track = om.readValue(response, Track.class);
             return track;
         } catch (NotFoundException e) {
             throw e;
@@ -123,11 +126,13 @@ public class ExternalRepository {
      */
     public List<Submission> getSubmissionsInTrack(TrackID trackID, Long requesterID) throws NotFoundException {
         try {
+            var http = new HttpRequestSender();
+            var om = new ObjectMapper();
             String url = submissionsURL + "/submission/event/" + trackID.getConferenceID()
                     + "/track/" + trackID.getTrackID() + "/" + requesterID;
-            String response = httpRequestSender.sendGetRequest(url);
+            String response = http.sendGetRequest(url);
             List<Submission> submissions;
-            submissions = objectMapper.readValue(response, List.class);
+            submissions = om.readValue(response, List.class);
             return submissions;
         } catch (NotFoundException e) {
             throw e;

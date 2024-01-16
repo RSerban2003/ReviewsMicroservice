@@ -2,37 +2,53 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
-import nl.tudelft.sem.v20232024.team08b.dtos.users.Role;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.opentest4j.TestAbortedException;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@AutoConfigureMockMvc
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+//@SpringBootTest
+//@AutoConfigureMockMvc
+@RunWith(SpringRunner.class)
+//@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.MOCK, classes={ Application.class })
+//@ExtendWith(SpringExtension.class)
+//@ContextConfiguration(classes = Application.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+//@RunWith((SpringRunner.class)
 public class SystemsTests {
+    //@Autowired
+    //private WebApplicationContext webApplicationContext;
+
+    //@Autowired
+    //private MockMvc mockMvc;
+
     private final Long ourID = -1L;
     private final String submissionsURL = "http://localhost:8081";
     private final String usersURL = "http://localhost:8082";
-    private MockMvc mockMvc;
+    private final String reviewsURL = "http://localhost:8080";
+
     private ObjectMapper objectMapper = new ObjectMapper();
     private HttpClient httpClient = HttpClient.newHttpClient();
-    private TrackPhaseCalculator trackPhaseCalculator;
 
     private Long submitter1ID, submitter2ID, submitter3ID;
     private Long reviewer1ID;
@@ -41,10 +57,21 @@ public class SystemsTests {
     private Long event1ID;
     private Long chair1ID;
 
+    private Long submission1ID, submission2ID, submission3ID;
 
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup().build();
+        //externalRepository = Mockito.mock(ExternalRepository.class);
+        //mockMvc = MockMvcBuilders.standaloneSetup().build();
+
+        /*when(externalRepository.getRolesOfUser(anyLong())).thenThrow(new RuntimeException(
+                "Cowabunga it's a mock!"));*/
+        /*when(externalRepository.getSubmission(anyLong())).thenCallRealMethod();
+        when(externalRepository.getSubmissionsInTrack(any(), any())).thenCallRealMethod();
+        when(externalRepository.getSubmissionsInTrack(any())).thenCallRealMethod();
+        when(externalRepository.getTrack(any(), any())).thenCallRealMethod();*/
+
+        //mockMvc = webAppContextSetup(webApplicationContext).build();
 
         // Verify that the other microservices are running
         try {
@@ -109,14 +136,14 @@ public class SystemsTests {
 
         event1 = new Event();
         event1.name("Test Event 1");
-        event1.generalChairs(List.of(chair1));
+        event1.generalChairs(List.of());
         event1.description("This is a test event.");
         event1.setId(rng.nextLong());
-        var role = new Role();
+        /*var role = new Role();
         role.setEventId(event1.getId());
         role.setUserId(chair1.getId());
         role.setRoleName("PCchair");
-        chair1.addRolesItem(role);
+        chair1.addRolesItem(role);*/
         event1 = sendRequest(RequestType.POST, event1, Event.class, usersURL, "event");
         System.out.println(event1);
 
@@ -128,13 +155,13 @@ public class SystemsTests {
         track1.setDeadline(System.currentTimeMillis() + 1000);
         track1 = sendRequest(RequestType.POST, track1, Track.class, usersURL, "track",
                 event1.getId().toString());
-        /*role = new Role();
-        role.setEventId(event1.getId());
-        role.setTrackId(track1.getId());
-        role.setRoleName("PCchair");
-        role.setUserId(chair1.getId());
-        track1.addRolesItem(role);*/
         System.out.println(track1);
+
+        // Make chair1 PCchair of track1
+        sendRequest(RequestType.PUT, null, null, usersURL, "event", event1.getId().toString(),
+                track1.getId().toString(), "role",
+                chair1.getId().toString() + "?Assignee=" + chair1.getId().toString()
+                        + "&roleType=PCchair");
 
         track2 = new Track();
         track2.setId((long) rng.nextInt());
@@ -168,6 +195,7 @@ public class SystemsTests {
         fakeSubmission.setConflictsOfInterest(List.of());
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
                 submissionsURL, "submission", submitter1ID.toString());
+        submission1ID = fakeSubmission.getSubmissionId();
         System.out.println(fakeSubmission);
 
         sendRequest(RequestType.PUT, null, null, usersURL, "event", event1.getId().toString(),
@@ -192,6 +220,7 @@ public class SystemsTests {
         fakeSubmission.setConflictsOfInterest(List.of());
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
                 submissionsURL, "submission", submitter1ID.toString());
+        submission2ID = fakeSubmission.getSubmissionId();
         System.out.println(fakeSubmission);
 
         sendRequest(RequestType.PUT, null, null, usersURL, "event", event1.getId().toString(),
@@ -216,6 +245,7 @@ public class SystemsTests {
         fakeSubmission.setConflictsOfInterest(List.of());
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
                 submissionsURL, "submission", submitter3ID.toString());
+        submission3ID = fakeSubmission.getSubmissionId();
         System.out.println(fakeSubmission);
 
         track1ID = track1.getId();
@@ -228,29 +258,63 @@ public class SystemsTests {
                 track1.getId().toString(), "role",
                 reviewer1ID + "?Assignee=" + chair1.getId().toString()
                         + "&roleType=PCmember");
-
     }
 
     @Test
-    void ReviewersCanSeeTheTitlesAndAbstractsOfSubmittedPapers() {
+    void ReviewersCanSeeTheTitlesAndAbstractsOfSubmittedPapers() throws Exception {
         var conferenceID = event1ID;
         var trackID = track1ID;
-        var requesterID = chair1ID;
-        /*mockMvc.perform(get("/conferences/{conferenceID}/tracks/{trackID}/papers")
-                .param("requesterID", requesterID.toString())*/
+        var paper1 = new PaperSummaryWithID();
+        paper1.setTitle("Title 1");
+        paper1.setAbstractSection("Abstract 1");
+        paper1.setPaperID(submission1ID);
+        var paper2 = new PaperSummaryWithID();
+        paper2.setTitle("Title 2");
+        paper2.setAbstractSection("Abstract 2");
+        paper2.setPaperID(submission2ID);
+        var papersSummaryWithIDS = new ArrayList<PaperSummaryWithID>();
+        papersSummaryWithIDS.add(paper1);
+        papersSummaryWithIDS.add(paper2);
+        TestRestTemplate testRestTemplate = new TestRestTemplate();
+        var response =
+                testRestTemplate.getForEntity(reviewsURL + "/conferences/" + conferenceID +
+                        "/tracks" +
+                        "/" + track1ID
+                        + "/papers?requesterID=" + chair1ID, Object.class);
+        System.out.println(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(papersSummaryWithIDS, response.getBody());
+
+        /*var roles = new RolesOfUser();
+        var role = new RolesOfUserTracksInner();
+        role.setEventId(event1ID);
+        // TODO make sure the names of the roles correspond to the ones the Users team is using
+        //  it seems they are a bit inconsistent about it
+        role.setRoleName("PC Chair");
+        role.setTrackId(track1ID);
+        roles.setTracks(List.of(role));
+        when(externalRepository.getRolesOfUser(chair1ID)).thenReturn(roles);
+
+        roles = new RolesOfUser();
+        role = new RolesOfUserTracksInner();
+        role.setEventId(event1ID);
+        role.setTrackId(track1ID);
+        role.setRoleName("PC Member");
+        roles.setTracks(List.of(role));
+        when(externalRepository.getRolesOfUser(reviewer1ID)).thenReturn(roles);*/
+
+        /*mockMvc.perform(MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID" +
+                                        "}/papers",
+                        conferenceID,
+                        trackID)
+                .param("requesterID", chair1ID.toString()))
+                        .andExpect(MockMvcResultMatchers.status().is(200))
+                        .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(papersSummaryWithIDS)));
+        */
     }
 
-    /*<T> Object sendCorrectRequest(RequestType requestType, T body, String... url) {
-        try {
-            return sendRequest(requestType, body, url);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }*/
-
     <T, U> U sendRequest(RequestType requestType, T body, Class<T> expectedResponseClass,
-                         String... url)
-        /*throws NotFoundException, ForbiddenAccessException, BadHttpRequest*/ {
+                         String... url) {
         HttpRequest request;
         try {
             request = HttpRequest.newBuilder()
