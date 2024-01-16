@@ -1,17 +1,11 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
-import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
-import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
-import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.application.verification.AssignmentsVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
-import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
@@ -23,81 +17,35 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AssignmentsService {
     private final ReviewRepository reviewRepository;
-    private final PapersVerification papersVerification;
-    private final TracksVerification tracksVerification;
-    private final UsersVerification usersVerification;
     private final ExternalRepository externalRepository;
-    private final TrackPhaseCalculator trackPhaseCalculator;
     private final TrackRepository trackRepository;
-    private final TracksService tracksService;
+    private final AssignmentsVerification assignmentsVerification;
 
     /**
      * Default constructor for the service.
      *
      * @param reviewRepository repository storing the reviews
-     * @param papersVerification object responsible for verifying paper information
-     * @param tracksVerification object responsible for verifying track information
-     * @param usersVerification object responsible for verifying user information
      * @param externalRepository class, that talks to outside microservices
-     * @param trackPhaseCalculator object responsible for getting the current phase
      * @param trackRepository repository storing the tracks
-     * @param tracksService service responsible for tracks
+     * @param assignmentsVerification object responsible for verifying assignments
+     *
      */
     @Autowired
     public AssignmentsService(
             ReviewRepository reviewRepository,
-            PapersVerification papersVerification,
-            TracksVerification tracksVerification,
-            UsersVerification usersVerification,
             ExternalRepository externalRepository,
-            TrackPhaseCalculator trackPhaseCalculator,
             TrackRepository trackRepository,
-            TracksService tracksService
+            AssignmentsVerification assignmentsVerification
     ) {
         this.reviewRepository = reviewRepository;
-        this.papersVerification = papersVerification;
-        this.tracksVerification = tracksVerification;
-        this.usersVerification = usersVerification;
         this.externalRepository = externalRepository;
-        this.trackPhaseCalculator = trackPhaseCalculator;
         this.trackRepository = trackRepository;
-        this.tracksService = tracksService;
-    }
-
-    /**
-     * This method verifies the permission to do certain tasks.
-     *
-     * @param userID ID of a user
-     * @param paperID ID of a paper
-     * @param role Role of the user
-     * @return returns true if user has permission
-     * @throws IllegalAccessException when the user does not have a permission
-     * @throws NotFoundException when there is no reviewer with this ID in this track
-     * @throws ConflictOfInterestException when there is conflict of interest
-     */
-    public boolean verifyIfUserCanAssign(Long userID, Long paperID, UserRole role)
-        throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
-        switch (role) {
-            case CHAIR:
-                if (!usersVerification.verifyRoleFromPaper(userID, paperID, UserRole.CHAIR)) {
-                    throw new IllegalAccessException("You are not PC chair for this track");
-                }
-                break;
-            case REVIEWER:
-                if (!usersVerification.verifyRoleFromPaper(userID, paperID, UserRole.REVIEWER)) {
-                    throw new NotFoundException("There is no such a user in this track");
-                }
-                papersVerification.verifyCOI(paperID, userID);
-                break;
-            default:
-                throw new IllegalAccessException("You are not pc chair for this track");
-        }
-
-        return true;
+        this.assignmentsVerification = assignmentsVerification;
     }
 
     /**
@@ -112,17 +60,11 @@ public class AssignmentsService {
      */
     public void assignManually(Long requesterID, Long reviewerID, Long paperID)
         throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
-        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
 
-        verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR);
-        verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
-        tracksVerification.verifyIfTrackExists(paperID);
+        assignmentsVerification.verifyIfManualAssignmentIsPossible(requesterID, paperID, reviewerID);
 
-        ReviewID reviewID = new ReviewID(paperID, reviewerID);
-        Review toSave = new Review();
-        toSave.setReviewID(reviewID);
+        Review toSave = new Review(paperID, reviewerID);
         reviewRepository.save(toSave);
-
     }
 
     /**
@@ -134,14 +76,7 @@ public class AssignmentsService {
      * @throws IllegalAccessException If the requester does not have permissions to see the assignments
      */
     public List<Long> assignments(Long requesterID, Long paperID) throws IllegalAccessException, NotFoundException {
-        if (!papersVerification.verifyPaper(paperID)) {
-            throw new NotFoundException("this paper does not exist");
-        }
-        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
-            throw new IllegalAccessException("Only pc chairs are allowed to do that");
-        }
-        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING,
-            TrackPhase.FINAL, TrackPhase.REVIEWING));
+        assignmentsVerification.verifyPermissionToGetAssignments(requesterID, paperID);
         List<Long> userIds = new ArrayList<>();
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
         for (Review review : reviews) {
@@ -160,13 +95,7 @@ public class AssignmentsService {
      * @throws IllegalAccessException when the requester is not a pc chair
      */
     public void remove(Long requesterID, Long paperID, Long reviewerID) throws NotFoundException, IllegalAccessException {
-        if (!papersVerification.verifyPaper(paperID)) {
-            throw new NotFoundException("this paper does not exist");
-        }
-        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
-            throw new IllegalAccessException("Only pc chairs are allowed to do that");
-        }
-        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+        assignmentsVerification.verifyPermissionToRemoveAssignment(requesterID, paperID);
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
         if (reviews.size() == 0) {
             throw new NotFoundException("there are no reviewers assigned to this paper");
@@ -188,19 +117,15 @@ public class AssignmentsService {
      * @throws NotFoundException if user is not found
      */
     public List<PaperSummaryWithID> getAssignedPapers(Long requesterID) throws NotFoundException {
-        if (!usersVerification.verifyIfUserExists(requesterID)) {
-            throw new NotFoundException("User does not exist!");
-        }
-        List<Review> reviewIDS = reviewRepository.findByReviewIDReviewerID(requesterID);
+        assignmentsVerification.verifyIfUserCanGetAssignedPapers(requesterID);
+        List<Long> paperIDs = reviewRepository.findPapersByReviewer(requesterID);
         List<PaperSummaryWithID> list = new ArrayList<>();
-        for (Review review : reviewIDS) {
-            ReviewID reviewID = review.getReviewID();
-            Long paperID = reviewID.getPaperID();
+        for (Long paperID : paperIDs) {
             PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
-            Paper paper = new Paper(externalRepository.getSubmission(paperID));
+            Submission paper = externalRepository.getSubmission(paperID);
             summaryWithID.setPaperID(paperID);
             summaryWithID.setTitle(paper.getTitle());
-            summaryWithID.setAbstractSection(paper.getAbstractSection());
+            summaryWithID.setAbstractSection(paper.getAbstract());
             list.add(summaryWithID);
         }
         return list;
@@ -217,26 +142,12 @@ public class AssignmentsService {
      * @throws ConflictException        If there is less than 3 reviewers assigned to a paper
      *                                  or the track is not in ASSIGNING phase
      */
-    public void finalization(Long requesterID, TrackID trackID)
+    public void finalization(Long requesterID, Long conferenceID, Long trackID)
             throws ForbiddenAccessException, NotFoundException, ConflictException {
-        // Ensure the track exists
-        externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID());
-
-        // Ensure the requester is a PC chair
-        if (!usersVerification.verifyRoleFromTrack(
-                requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR
-        )) {
-            throw new ForbiddenAccessException();
-        }
-
-        // Ensure the track is in the ASSIGNING phase
-        if (trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID())
-                != TrackPhase.ASSIGNING) {
-            throw new ConflictException();
-        }
+        assignmentsVerification.verifyPermissionToFinalize(requesterID, conferenceID, trackID);
 
         // Ensure there is at least 3 reviewers assigned to each paper
-        var submissions = externalRepository.getSubmissionsInTrack(trackID, requesterID);
+        var submissions = externalRepository.getSubmissionsInTrack(conferenceID, trackID, requesterID);
         if (submissions.stream().anyMatch(submission ->
                 reviewRepository.findByReviewIDPaperID(submission.getSubmissionId()).size() < 3
         )) {
@@ -244,8 +155,13 @@ public class AssignmentsService {
         }
 
         // Ensure the track is in our repository
-        var track = tracksService.getTrackWithInsertionToOurRepo(trackID.getConferenceID(), trackID.getTrackID());
+        Optional<Track> optional =  trackRepository.findById(conferenceID, trackID);
+        if (optional.isEmpty()) {
+            throw new NotFoundException("");
+        }
 
+        // Get the track from our database
+        Track track = optional.get();
         track.setReviewersHaveBeenFinalized(true);
         trackRepository.save(track);
     }

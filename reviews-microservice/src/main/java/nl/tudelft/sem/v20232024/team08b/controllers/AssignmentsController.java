@@ -3,7 +3,6 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.AssignmentsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
@@ -91,7 +90,7 @@ public class AssignmentsController implements AssignmentsAPI {
     @Override
     public ResponseEntity<Void> finalization(Long requesterID, Long conferenceID, Long trackID) {
         try {
-            assignmentsService.finalization(requesterID, new TrackID(conferenceID, trackID));
+            assignmentsService.finalization(requesterID, conferenceID, trackID);
             return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
         } catch (ConflictException e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
