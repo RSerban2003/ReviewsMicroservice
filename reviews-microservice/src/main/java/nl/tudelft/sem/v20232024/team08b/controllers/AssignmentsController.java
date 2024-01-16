@@ -166,7 +166,7 @@ public class AssignmentsController implements AssignmentsAPI {
             return ResponseEntity
                     .ok()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(assignmentsService.getAssignedPaper(requesterID));
+                    .body(assignmentsService.getAssignedPapers(requesterID));
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {

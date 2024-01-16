@@ -228,8 +228,9 @@ public class AssignmentsServiceTests {
     void testGetAssignedPaperUserDoesNotExist() {
         Long requesterID = 1L;
         when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(false);
+
         Exception e = assertThrows(NotFoundException.class, () -> {
-            assignmentsService.getAssignedPaper(requesterID);
+            assignmentsService.getAssignedPapers(requesterID);
         });
         assertEquals("User does not exist!", e.getMessage());
     }
@@ -336,7 +337,7 @@ public class AssignmentsServiceTests {
         when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(true);
         when(reviewRepository.findByReviewIDReviewerID(requesterID)).thenReturn(Collections.emptyList());
 
-        List<PaperSummaryWithID> result = assignmentsService.getAssignedPaper(requesterID);
+        List<PaperSummaryWithID> result = assignmentsService.getAssignedPapers(requesterID);
         Assertions.assertTrue(result.isEmpty());
     }
 
@@ -356,10 +357,11 @@ public class AssignmentsServiceTests {
 
         when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(true);
         List<ReviewID> reviewIDs = Collections.singletonList(reviewID);
-        when(reviewRepository.findByReviewIDReviewerID(requesterID)).thenReturn(reviewIDs);
+        List<Review> reviews = List.of(new Review(reviewID, null, null, null, null, null));
+        when(reviewRepository.findByReviewIDReviewerID(requesterID)).thenReturn(reviews);
         when(externalRepository.getSubmission(paperID)).thenReturn(submission);
 
-        List<PaperSummaryWithID> result = assignmentsService.getAssignedPaper(requesterID);
+        List<PaperSummaryWithID> result = assignmentsService.getAssignedPapers(requesterID);
 
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());

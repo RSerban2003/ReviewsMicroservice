@@ -182,15 +182,14 @@ public class AssignmentsControllerTests {
 
         List<PaperSummaryWithID> list = List.of(summaryWithID);
         String paperSummaryJSON = objectMapper.writeValueAsString(list);
-        doReturn(list).when(assignmentsService).getAssignedPaper(requesterID);
+        doReturn(list).when(assignmentsService).getAssignedPapers(requesterID);
 
         mockMvc.perform(
                         MockMvcRequestBuilders.get("/papers/by-reviewer")
                                 .param("requesterID", Long.toString(requesterID))
                 ).andExpect(MockMvcResultMatchers.status().is(200))
                 .andExpect(MockMvcResultMatchers.content().json(paperSummaryJSON));
-
-        verify(assignmentsService).getAssignedPaper(requesterID);
+        verify(assignmentsService).getAssignedPapers(requesterID);
     }
 
     /**
@@ -204,14 +203,14 @@ public class AssignmentsControllerTests {
     public void getAssignedPapers_Exceptions(Exception exception, int expected) throws Exception {
         long requesterID = 1L;
 
-        doThrow(exception).when(assignmentsService).getAssignedPaper(requesterID);
+        doThrow(exception).when(assignmentsService).getAssignedPapers(requesterID);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/papers/by-reviewer")
                         .param("requesterID", Long.toString(requesterID))
         ).andExpect(MockMvcResultMatchers.status().is(expected));
 
-        verify(assignmentsService).getAssignedPaper(requesterID);
+        verify(assignmentsService).getAssignedPapers(requesterID);
     }
 
     @Test
@@ -224,6 +223,7 @@ public class AssignmentsControllerTests {
         getAssignedPapers_Exceptions(new RuntimeException(), 500);
     }
 
+    @Test
     public void testFinalizationSuccess() throws Exception {
         doNothing().when(assignmentsService).finalization(anyLong(), any(TrackID.class));
 

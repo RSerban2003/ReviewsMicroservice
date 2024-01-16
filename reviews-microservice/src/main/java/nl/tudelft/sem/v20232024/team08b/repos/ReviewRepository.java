@@ -35,6 +35,5 @@ public interface ReviewRepository extends JpaRepository<Review, ReviewID> {
      * @param reviewerID the ID of the reviewer
      * @return a list of reviewIDs assigned to the reviewer
      */
-    List<ReviewID> findByReviewIDReviewerID(Long reviewerID);
-
+    List<Review> findByReviewIDReviewerID(Long reviewerID);
 }

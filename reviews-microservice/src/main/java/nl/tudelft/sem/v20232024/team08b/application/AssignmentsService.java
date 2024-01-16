@@ -181,19 +181,20 @@ public class AssignmentsService {
     }
 
     /**
-     * Gets the assigned paper for a reviewer.
+     * Gets assigned papers for a reviewer.
      *
      * @param requesterID ID of a user making a request
      * @return the PaperSummaryWithID objects related to the requester
      * @throws NotFoundException if user is not found
      */
-    public List<PaperSummaryWithID> getAssignedPaper(Long requesterID) throws NotFoundException {
+    public List<PaperSummaryWithID> getAssignedPapers(Long requesterID) throws NotFoundException {
         if (!usersVerification.verifyIfUserExists(requesterID)) {
             throw new NotFoundException("User does not exist!");
         }
-        List<ReviewID> reviewIDS = reviewRepository.findByReviewIDReviewerID(requesterID);
+        List<Review> reviewIDS = reviewRepository.findByReviewIDReviewerID(requesterID);
         List<PaperSummaryWithID> list = new ArrayList<>();
-        for (ReviewID reviewID : reviewIDS) {
+        for (Review review : reviewIDS) {
+            ReviewID reviewID = review.getReviewID();
             Long paperID = reviewID.getPaperID();
             PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
             Paper paper = new Paper(externalRepository.getSubmission(paperID));
@@ -204,6 +205,7 @@ public class AssignmentsService {
         }
         return list;
     }
+
     /**
      * This method finalizes the assignment of reviewers, so they can no longer be changed
      * manually or automatically. It moves the track into the REVIEWING phase.
