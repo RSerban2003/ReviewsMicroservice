@@ -46,7 +46,6 @@ public class TrackAnalyticsService {
                 trackID.getTrackID(), UserRole.CHAIR)) {
             throw new ForbiddenAccessException();
         }
-
     }
 
     /**
@@ -61,10 +60,12 @@ public class TrackAnalyticsService {
      */
     public TrackAnalytics getAnalytics(TrackID trackID, Long requesterID)
             throws NotFoundException, ForbiddenAccessException {
-        // Verify if the user
+        // Verify if the user is a chair
         verifyIfChair(trackID, requesterID);
 
-        var submissions = externalRepository.getSubmissionsInTrack(trackID, requesterID);
+        var submissions = externalRepository.getSubmissionsInTrack(
+                trackID.getConferenceID(), trackID.getTrackID(), requesterID
+        );
         var accepted = 0;
         var rejected = 0;
         var undecided = 0;
