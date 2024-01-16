@@ -299,8 +299,5 @@ public class TracksService {
             papers.add(paperSummaryWithID);
         }
         return papers;
-        //return submissions.stream()
-        //.map(x -> new PaperSummaryWithID(x.getTitle(), x.getAbstract(), x.getSubmissionId()))
-        //.collect(Collectors.toList());
     }
 }

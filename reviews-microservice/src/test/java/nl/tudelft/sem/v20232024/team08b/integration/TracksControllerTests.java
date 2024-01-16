@@ -350,4 +350,19 @@ public class TracksControllerTests {
                 .param("requesterID", requesterID.toString())
         ).andExpect(MockMvcResultMatchers.status().is(403));
     }
+
+    @Test
+    void getPapersInternalServerError() throws Exception {
+        Long requesterID = 3L;
+        Long conferenceID = 4L;
+        Long trackID = 5L;
+        when(tracksService.getPapers(requesterID, conferenceID, trackID))
+            .thenThrow(new RuntimeException());
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/papers",
+                    conferenceID, trackID)
+                .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(500));
+    }
 }
