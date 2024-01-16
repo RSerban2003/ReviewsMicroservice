@@ -7,6 +7,8 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerificat
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
@@ -146,6 +148,62 @@ public class AssignmentsService {
             userIds.add(review.getReviewID().getReviewerID());
         }
         return userIds;
+    }
+
+    /**
+     * Removes assignment from paper.
+     *
+     * @param requesterID ID of a user making the request
+     * @param paperID ID of a paper for which there is an assignment
+     * @param reviewerID ID of a reviewer assigned to the paper
+     * @throws NotFoundException when the paper does not exist or there is no such an assignment
+     * @throws IllegalAccessException when the requester is not a pc chair
+     */
+    public void remove(Long requesterID, Long paperID, Long reviewerID) throws NotFoundException, IllegalAccessException {
+        if (!papersVerification.verifyPaper(paperID)) {
+            throw new NotFoundException("this paper does not exist");
+        }
+        if (!usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)) {
+            throw new IllegalAccessException("Only pc chairs are allowed to do that");
+        }
+        tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+        List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
+        if (reviews.size() == 0) {
+            throw new NotFoundException("there are no reviewers assigned to this paper");
+        }
+        for (Review r : reviews) {
+            if (r.getReviewID().getReviewerID().equals(reviewerID)) {
+                reviewRepository.delete(r);
+                return;
+            }
+        }
+        throw new NotFoundException("There is no such a assignment");
+    }
+
+    /**
+     * Gets assigned papers for a reviewer.
+     *
+     * @param requesterID ID of a user making a request
+     * @return the PaperSummaryWithID objects related to the requester
+     * @throws NotFoundException if user is not found
+     */
+    public List<PaperSummaryWithID> getAssignedPapers(Long requesterID) throws NotFoundException {
+        if (!usersVerification.verifyIfUserExists(requesterID)) {
+            throw new NotFoundException("User does not exist!");
+        }
+        List<Review> reviewIDS = reviewRepository.findByReviewIDReviewerID(requesterID);
+        List<PaperSummaryWithID> list = new ArrayList<>();
+        for (Review review : reviewIDS) {
+            ReviewID reviewID = review.getReviewID();
+            Long paperID = reviewID.getPaperID();
+            PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
+            Paper paper = new Paper(externalRepository.getSubmission(paperID));
+            summaryWithID.setPaperID(paperID);
+            summaryWithID.setTitle(paper.getTitle());
+            summaryWithID.setAbstractSection(paper.getAbstractSection());
+            list.add(summaryWithID);
+        }
+        return list;
     }
 
     /**
