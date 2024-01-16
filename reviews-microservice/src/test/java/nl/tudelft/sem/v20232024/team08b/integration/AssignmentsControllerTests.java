@@ -10,19 +10,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
+import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.controllers.AssignmentsController;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
+import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -40,6 +45,9 @@ public class AssignmentsControllerTests {
 
 
     private AssignmentsService assignmentsService = Mockito.mock(AssignmentsService.class);
+    private UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
+    private ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     private MockMvc mockMvc;
@@ -245,6 +253,57 @@ public class AssignmentsControllerTests {
             .contentType(MediaType.APPLICATION_JSON));
 
         verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
+    }
+
+    @Test
+    void getAssignedPapers_Successful() throws Exception {
+        PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
+        summaryWithID.setAbstractSection("a");
+        summaryWithID.setPaperID(paperID);
+        summaryWithID.setTitle("t");
+
+        List<PaperSummaryWithID> list = List.of(summaryWithID);
+        String paperSummaryJSON = objectMapper.writeValueAsString(list);
+        doReturn(list).when(assignmentsService).getAssignedPapers(requesterID);
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/papers/by-reviewer")
+                                .param("requesterID", Long.toString(requesterID))
+                ).andExpect(MockMvcResultMatchers.status().is(200))
+                .andExpect(MockMvcResultMatchers.content().json(paperSummaryJSON));
+
+        verify(assignmentsService).getAssignedPapers(requesterID);
+    }
+
+    /**
+     * Simulates an exception inside getAssignedPapers function and checks if
+     * correct status code was returned.
+     *
+     * @param exception the exception to be thrown
+     * @param expected the expected status code
+     * @throws Exception method can throw exception
+     */
+    public void getAssignedPapers_Exceptions(Exception exception, int expected) throws Exception {
+        long requesterID = 1L;
+
+        doThrow(exception).when(assignmentsService).getAssignedPapers(requesterID);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/papers/by-reviewer")
+                        .param("requesterID", Long.toString(requesterID))
+        ).andExpect(MockMvcResultMatchers.status().is(expected));
+
+        verify(assignmentsService).getAssignedPapers(requesterID);
+    }
+
+    @Test
+    public void getAssignedPaper_NotFoundException() throws Exception {
+        getAssignedPapers_Exceptions(new NotFoundException("User does not exist!"), 404);
+    }
+
+    @Test
+    public void getAssignedPaper_OtherExceptions() throws Exception {
+        getAssignedPapers_Exceptions(new RuntimeException(), 500);
     }
 
     @Test

@@ -9,6 +9,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,8 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class UsersVerificationTests {
 
@@ -47,6 +47,24 @@ public class UsersVerificationTests {
 
         fakeRolesOfUser = new RolesOfUser();
         fakeRolesOfUser.setTracks(listOfTracks);
+    }
+
+    @Test
+    void testVerifyIfUserExists_UserExists() throws NotFoundException {
+        Long userID = 1L;
+        // Assuming getRolesOfUser doesn't throw an exception when user exists
+        when(externalRepository.getRolesOfUser(userID)).thenReturn(new RolesOfUser());
+
+        Assertions.assertTrue(usersVerification.verifyIfUserExists(userID));
+    }
+
+    @Test
+    void testVerifyIfUserExists_UserDoesNotExist() throws NotFoundException {
+        Long userID = 2L;
+        // Simulate NotFoundException for non-existing user
+        doThrow(new NotFoundException("User does not exist!")).when(externalRepository).getRolesOfUser(userID);
+
+        Assertions.assertFalse(usersVerification.verifyIfUserExists(userID));
     }
 
     @Test
