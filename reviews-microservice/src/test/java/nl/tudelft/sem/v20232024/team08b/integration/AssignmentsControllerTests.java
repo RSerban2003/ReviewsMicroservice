@@ -190,7 +190,7 @@ public class AssignmentsControllerTests {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
 
-        verify(assignmentsService).assignAuto(requesterID,conferenceID, trackID);
+        verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
     }
 
     @Test
@@ -204,7 +204,7 @@ public class AssignmentsControllerTests {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isForbidden());
 
-        verify(assignmentsService).assignAuto(requesterID,conferenceID, trackID);
+        verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
     }
 
     @Test
@@ -218,7 +218,7 @@ public class AssignmentsControllerTests {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isConflict());
 
-        verify(assignmentsService).assignAuto(requesterID,conferenceID, trackID);
+        verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
     }
 
     @Test
@@ -232,7 +232,7 @@ public class AssignmentsControllerTests {
             .param("requesterID", String.valueOf(requesterID))
             .contentType(MediaType.APPLICATION_JSON));
 
-        verify(assignmentsService).assignAuto(requesterID,conferenceID, trackID);
+        verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
     }
 
 }
