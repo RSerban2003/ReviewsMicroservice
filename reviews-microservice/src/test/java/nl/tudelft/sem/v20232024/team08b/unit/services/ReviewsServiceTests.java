@@ -504,6 +504,7 @@ public class ReviewsServiceTests {
 
         doNothing().when(reviewsService).verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
+        when(usersVerification.isAuthorToPaper(requesterID, paperID)).thenReturn(false);
         nl.tudelft.sem.v20232024.team08b.dtos.review.Review expectedDTO =
                 new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(fakeReview);
         assertThat(reviewsService.getReview(requesterID, reviewerID, paperID)).isEqualTo(expectedDTO);
@@ -516,6 +517,7 @@ public class ReviewsServiceTests {
 
         doNothing().when(reviewsService).verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.empty());
+        when(usersVerification.isAuthorToPaper(requesterID, paperID)).thenReturn(false);
         assertThrows(NotFoundException.class, () ->
                 reviewsService.getReview(requesterID, reviewerID, paperID));
     }
@@ -529,8 +531,22 @@ public class ReviewsServiceTests {
         doThrow(new NotFoundException("")).when(reviewsService)
                 .verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
+        when(usersVerification.isAuthorToPaper(requesterID, paperID)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> reviewsService.getReview(requesterID, reviewerID, paperID));
+    }
+
+    @Test
+    void getReview_SuccessfulForAuthor() throws NotFoundException, IllegalAccessException {
+        // We are going to mock the "verifyIfUserCanAccessReview" method
+        reviewsService = Mockito.spy(reviewsService);
+
+        doNothing().when(reviewsService).verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
+        when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
+        when(usersVerification.isAuthorToPaper(requesterID, paperID)).thenReturn(true);
+        nl.tudelft.sem.v20232024.team08b.dtos.review.Review review =
+                reviewsService.getReview(requesterID, reviewerID, paperID);
+        assertNull(review.getConfidentialComment());
     }
 
     @Test
