@@ -1,4 +1,4 @@
-package nl.tudelft.sem.v20232024.team08b.unit.controllers;
+package nl.tudelft.sem.v20232024.team08b.unit.communicators;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
