@@ -1,12 +1,14 @@
 package nl.tudelft.sem.v20232024.team08b.unit.services;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
-import nl.tudelft.sem.v20232024.team08b.application.strategies.AssignmentWithThreeSmallest;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.application.strategies.AssignmentWithThreeSmallest;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
@@ -17,33 +19,24 @@ import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
+import org.mockito.Mockito;
 import static org.mockito.Mockito.*;
 
 public class AssignmentsServiceTests {
@@ -55,7 +48,6 @@ public class AssignmentsServiceTests {
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
     private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
-    private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final TracksService tracksService = Mockito.mock(TracksService.class);
 
     private AssignmentsService assignmentsService;
@@ -71,7 +63,6 @@ public class AssignmentsServiceTests {
     void setUp() {
         assignmentsService = Mockito.spy(
             new AssignmentsService(
-                bidRepository,
                 reviewRepository,
                 trackRepository,
                 papersVerification,
@@ -79,7 +70,6 @@ public class AssignmentsServiceTests {
                     usersVerification,
                     externalRepository,
                     trackPhaseCalculator,
-                    trackRepository,
                     tracksService
             )
         );
@@ -367,7 +357,7 @@ public class AssignmentsServiceTests {
         s.setSubmissionId(6L);
         submissions.add(s);
 
-        when(externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new  nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification
                 .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
                 .thenReturn(true);
@@ -391,8 +381,8 @@ public class AssignmentsServiceTests {
         TrackID trackID = new TrackID(2L, 3L);
 
         when(externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
-                .thenThrow(NotFoundException.class);
+            .thenThrow(NotFoundException.class);
 
-
+    }
 
 }

@@ -3,27 +3,23 @@ package nl.tudelft.sem.v20232024.team08b.application;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.application.strategies.AutomaticAssignmentStrategy;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.application.strategies.AutomaticAssignmentStrategy;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
-import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
+import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
@@ -33,7 +29,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class AssignmentsService {
     private final ReviewRepository reviewRepository;
-    private final BidRepository bidRepository;
     private final TrackRepository trackRepository;
     private final PapersVerification papersVerification;
     private final TracksVerification tracksVerification;
@@ -41,7 +36,6 @@ public class AssignmentsService {
     private AutomaticAssignmentStrategy automaticAssignmentStrategy;
     private final ExternalRepository externalRepository;
     private final TrackPhaseCalculator trackPhaseCalculator;
-    private final TrackRepository trackRepository;
     private final TracksService tracksService;
 
     /**
@@ -58,22 +52,14 @@ public class AssignmentsService {
      * @param tracksService service responsible for tracks
      */
     @Autowired
-    public AssignmentsService(BidRepository bidRepository,
-                              ReviewRepository reviewRepository,
+    public AssignmentsService(ReviewRepository reviewRepository,
                               TrackRepository trackRepository,
                               PapersVerification papersVerification,
                               TracksVerification tracksVerification,
-                              UsersVerification usersVerification) {
-        this.bidRepository = bidRepository;
-    public AssignmentsService(
-            ReviewRepository reviewRepository,
-            PapersVerification papersVerification,
-            TracksVerification tracksVerification,
-            UsersVerification usersVerification,
-            ExternalRepository externalRepository,
-            TrackPhaseCalculator trackPhaseCalculator,
-            TrackRepository trackRepository,
-            TracksService tracksService
+                              UsersVerification usersVerification,
+                              ExternalRepository externalRepository,
+                              TrackPhaseCalculator trackPhaseCalculator,
+                              TracksService tracksService
     ) {
         this.reviewRepository = reviewRepository;
         this.trackRepository = trackRepository;
@@ -82,7 +68,6 @@ public class AssignmentsService {
         this.usersVerification = usersVerification;
         this.externalRepository = externalRepository;
         this.trackPhaseCalculator = trackPhaseCalculator;
-        this.trackRepository = trackRepository;
         this.tracksService = tracksService;
     }
 
