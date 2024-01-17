@@ -100,7 +100,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_BeforeSubmissionDeadline() throws NotFoundException {
         // Assume that the current time (10) is before the submission deadline
-        trackDTO.setDeadline(11);
+        trackDTO.setDeadline(11L);
 
         TrackPhase result = trackPhaseCalculator.getTrackPhase(
                 trackID.getConferenceID(),
@@ -113,7 +113,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_ExactlyAtSubmissionDeadline() throws NotFoundException {
         // Assume that the current time (10) is at the time of submission deadline
-        trackDTO.setDeadline(10);
+        trackDTO.setDeadline(10L);
 
         TrackPhase result = trackPhaseCalculator.getTrackPhase(
                 trackID.getConferenceID(),
@@ -126,7 +126,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_NoBiddingDeadline() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline is not set yet
         doReturn(null).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -145,7 +145,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_BeforeBiddingDeadline() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has not yet passed
         doReturn(11L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -164,7 +164,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_ExactlyAtBiddingDeadline() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has not yet passed
         doReturn(10L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -184,7 +184,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_ReviewersAreNotAssigned() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has passed
         doReturn(6L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -209,7 +209,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_NotAllPapersHaveBeenFinalized() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has passed
         doReturn(6L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -240,7 +240,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_AllPapersHaveBeenFinalized() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has passed
         doReturn(6L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(

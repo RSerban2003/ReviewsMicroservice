@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-@Entity
+@Entity(name = "TrackReviews")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Track implements Serializable {

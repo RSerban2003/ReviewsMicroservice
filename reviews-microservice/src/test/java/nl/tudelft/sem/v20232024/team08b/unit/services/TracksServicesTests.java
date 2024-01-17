@@ -87,7 +87,7 @@ public class TracksServicesTests {
         Date submissionDeadline = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH)
                 .parse("1970-01-01 22:01:23");
         Long submissionDeadlineLong = submissionDeadline.toInstant().toEpochMilli();
-        trackDTO.setDeadline(Integer.valueOf(submissionDeadlineLong.toString()));
+        trackDTO.setDeadline(Long.valueOf(submissionDeadlineLong.toString()));
         when(usersCommunicator.getTrack(conferenceID, trackID)).thenReturn(trackDTO);
 
         // Make sure that our fake track is returned from DB
