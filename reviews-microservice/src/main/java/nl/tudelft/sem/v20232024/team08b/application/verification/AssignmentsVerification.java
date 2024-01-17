@@ -5,7 +5,6 @@ import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,13 +68,13 @@ public class AssignmentsVerification {
      * @param requesterID the ID of the requesting user
      * @param conferenceID the ID of the conference of the track
      * @param trackID the ID of the track that is finalized
-     * @throws ConflictException if the track phase is not assigning
+     * @throws IllegalStateException if the track phase is not assigning
      * @throws ForbiddenAccessException if the user is not a chair of the track
      * @throws NotFoundException if such track does not exist
      */
     public void verifyPermissionToFinalize(Long requesterID,
                                            Long conferenceID,
-                                           Long trackID) throws ConflictException,
+                                           Long trackID) throws IllegalStateException,
                                                                 ForbiddenAccessException,
                                                                 NotFoundException {
         // Ensure the track exists
@@ -91,7 +90,7 @@ public class AssignmentsVerification {
         // Ensure the track is in the ASSIGNING phase
         if (trackPhaseCalculator.getTrackPhase(conferenceID, trackID)
                 != TrackPhase.ASSIGNING) {
-            throw new ConflictException();
+            throw new IllegalStateException();
         }
     }
 

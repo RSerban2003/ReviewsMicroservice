@@ -4,7 +4,6 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.AssignmentsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,7 +112,7 @@ public class AssignmentsController implements AssignmentsAPI {
         try {
             assignmentsService.finalization(requesterID, conferenceID, trackID);
             return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).build();
-        } catch (ConflictException e) {
+        } catch (IllegalStateException e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

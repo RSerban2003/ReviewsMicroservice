@@ -16,7 +16,6 @@ import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
@@ -764,7 +763,7 @@ public class AssignmentsServiceTests {
     }
 
     @Test
-    void finalizationWhenTrackIsNotInAssigningPhaseThrowsConflictException() throws NotFoundException {
+    void finalizationWhenTrackIsNotInAssigningPhaseThrowsIllegalStateException() throws NotFoundException {
         Long requesterID = 1L;
         TrackID trackID = new TrackID(2L, 3L);
 
@@ -774,12 +773,12 @@ public class AssignmentsServiceTests {
         when(trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID()))
                 .thenReturn(TrackPhase.REVIEWING);
 
-        Assertions.assertThrows(ConflictException.class,
+        Assertions.assertThrows(IllegalStateException.class,
                 () -> assignmentsService.finalization(requesterID, trackID.getConferenceID(), trackID.getTrackID()));
     }
 
     @Test
-    void finalizationWhenNotEnoughReviewersAssignedToEachPaperThrowsConflictException()
+    void finalizationWhenNotEnoughReviewersAssignedToEachPaperThrowsIllegalStateException()
             throws NotFoundException {
         final Long requesterID = 1L;
         final TrackID trackID = new TrackID(1L, 1L);
@@ -804,7 +803,7 @@ public class AssignmentsServiceTests {
         when(reviewRepository.findByReviewIDPaperID(6L)).thenReturn(List.of(new Review(),
                 new Review()));
 
-        Assertions.assertThrows(ConflictException.class,
+        Assertions.assertThrows(IllegalStateException.class,
                 () -> assignmentsService.finalization(requesterID, trackID.getConferenceID(), trackID.getTrackID()));
     }
 

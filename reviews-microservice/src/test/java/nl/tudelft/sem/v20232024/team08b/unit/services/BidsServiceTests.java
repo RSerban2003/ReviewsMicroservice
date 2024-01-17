@@ -6,7 +6,6 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.BidsVerificatio
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.BidID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import org.junit.jupiter.api.Assertions;
@@ -95,7 +94,7 @@ public class BidsServiceTests {
     }
 
     @Test
-    void testBidValidRequestSavesBid() throws ForbiddenAccessException, NotFoundException, ConflictException {
+    void testBidValidRequestSavesBid() throws ForbiddenAccessException, NotFoundException, IllegalStateException {
         Long paperID = 5L;
         Long requesterID = 1L;
         doNothing().when(bidsVerification).verifyPermissionToSubmitBid(requesterID, paperID);
@@ -107,7 +106,7 @@ public class BidsServiceTests {
     }
 
     @Test
-    void testBidForbiddedAccess() throws ForbiddenAccessException, NotFoundException, ConflictException {
+    void testBidForbiddedAccess() throws ForbiddenAccessException, NotFoundException, IllegalStateException {
         Long paperID = 5L;
         Long requesterID = 1L;
         var bid = nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW;

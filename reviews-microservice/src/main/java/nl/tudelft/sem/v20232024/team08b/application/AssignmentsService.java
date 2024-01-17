@@ -10,7 +10,6 @@ import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
@@ -105,6 +104,9 @@ public class AssignmentsService {
 
         TrackID trackID1 = new TrackID(conferenceID, trackID);
         Optional<Track> opTrack = trackRepository.findById(trackID1);
+        if (opTrack.isEmpty()) {
+            throw new NotFoundException("Track was not found");
+        }
         Track track = opTrack.get();
         List<Paper> papers = track.getPapers();
         automaticAssignmentStrategy.automaticAssignment(trackID1, papers);
@@ -128,7 +130,7 @@ public class AssignmentsService {
     public void remove(Long requesterID, Long paperID, Long reviewerID) throws NotFoundException, IllegalAccessException {
         assignmentsVerification.verifyPermissionToRemoveAssignment(requesterID, paperID);
         List<Review> reviews = reviewRepository.findByReviewIDPaperID(paperID);
-        if (reviews.size() == 0) {
+        if (reviews.isEmpty()) {
             throw new NotFoundException("there are no reviewers assigned to this paper");
         }
         for (Review r : reviews) {
@@ -165,16 +167,16 @@ public class AssignmentsService {
     /**
      * This method finalizes the assignment of reviewers, so they can no longer be changed
      * manually or automatically. It moves the track into the REVIEWING phase.
-     *
+     * 
      * @param requesterID ID of a requester
      * @param trackID     ID of a track
      * @throws ForbiddenAccessException If the requester is not a PC chair
      * @throws NotFoundException        If the track does not exist
-     * @throws ConflictException        If there is less than 3 reviewers assigned to a paper
+     * @throws IllegalStateException    If there is less than 3 reviewers assigned to a paper
      *                                  or the track is not in ASSIGNING phase
      */
     public void finalization(Long requesterID, Long conferenceID, Long trackID)
-            throws ForbiddenAccessException, NotFoundException, ConflictException {
+            throws ForbiddenAccessException, NotFoundException, IllegalStateException {
         assignmentsVerification.verifyPermissionToFinalize(requesterID, conferenceID, trackID);
 
         // Ensure there is at least 3 reviewers assigned to each paper
@@ -182,7 +184,7 @@ public class AssignmentsService {
         if (submissions.stream().anyMatch(submission ->
                 reviewRepository.findByReviewIDPaperID(submission.getSubmissionId()).size() < 3
         )) {
-            throw new ConflictException();
+            throw new IllegalStateException();
         }
 
         // Ensure the track is in our repository

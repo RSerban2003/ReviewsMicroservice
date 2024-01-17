@@ -6,7 +6,6 @@ import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.controllers.AssignmentsController;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
@@ -321,8 +320,8 @@ public class AssignmentsControllerTests {
     }
 
     @Test
-    public void testFinalizationConflictException() throws Exception {
-        doThrow(new ConflictException()).when(assignmentsService).finalization(anyLong(), anyLong(), anyLong());
+    public void testFinalizationIllegalStateException() throws Exception {
+        doThrow(new IllegalStateException()).when(assignmentsService).finalization(anyLong(), anyLong(), anyLong());
 
         mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
                         .param("requesterID", "3"))
