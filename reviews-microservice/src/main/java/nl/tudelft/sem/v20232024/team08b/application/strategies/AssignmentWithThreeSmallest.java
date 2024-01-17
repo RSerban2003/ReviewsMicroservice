@@ -41,8 +41,7 @@ public class AssignmentWithThreeSmallest implements AutomaticAssignmentStrategy 
     }
 
     @Override
-    public void automaticAssignment(TrackID trackID, List<Paper> papers)
-        throws NotFoundException {
+    public void automaticAssignment(TrackID trackID, List<Paper> papers) {
         for (Paper paper : papers) {
             List<Bid> bids = bidRepository.findByPaperID(paper.getId());
             List<Long> users = bids.stream().map(Bid::getBidderID).collect(Collectors.toList());
@@ -96,7 +95,7 @@ public class AssignmentWithThreeSmallest implements AutomaticAssignmentStrategy 
 
     private List<Integer> gettingSmallest(List<Integer> numberOfPapers) {
         List<Integer> smallest = new ArrayList<>();
-        int numberOfRepeats = min(3,numberOfPapers.size());
+        int numberOfRepeats = min(3, numberOfPapers.size());
 
 
         for (int j = 0; j < numberOfRepeats; j++) {
