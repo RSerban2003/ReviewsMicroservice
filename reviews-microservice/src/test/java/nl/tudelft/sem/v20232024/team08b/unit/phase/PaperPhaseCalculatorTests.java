@@ -2,11 +2,11 @@ package nl.tudelft.sem.v20232024.team08b.unit.phase;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
@@ -26,14 +26,15 @@ import static org.mockito.Mockito.when;
 public class PaperPhaseCalculatorTests {
     private final PaperRepository paperRepository = Mockito.mock(PaperRepository.class);
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator =
+        Mockito.mock(SubmissionsMicroserviceCommunicator.class);
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
 
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.spy(
             new PaperPhaseCalculator(
                     paperRepository,
                     trackRepository,
-                    externalRepository,
+                    submissionsCommunicator,
                     reviewRepository
             )
     );
@@ -87,7 +88,7 @@ public class PaperPhaseCalculatorTests {
         Submission submission1 = new Submission();
         submission1.setEventId(trackID.getConferenceID());
         submission1.setTrackId(trackID.getTrackID());
-        when(externalRepository.getSubmission(paper1.getId())).thenReturn(submission1);
+        when(submissionsCommunicator.getSubmission(paper1.getId())).thenReturn(submission1);
 
     }
 

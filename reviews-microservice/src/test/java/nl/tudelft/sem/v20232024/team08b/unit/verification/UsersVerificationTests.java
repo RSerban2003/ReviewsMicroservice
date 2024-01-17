@@ -2,13 +2,15 @@ package nl.tudelft.sem.v20232024.team08b.unit.verification;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.User;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUserTracksInner;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,15 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class UsersVerificationTests {
 
-    private ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private SubmissionsMicroserviceCommunicator submissionsCommunicator =
+        Mockito.mock(SubmissionsMicroserviceCommunicator.class);
+    private UsersMicroserviceCommunicator usersCommunicator = Mockito.mock(UsersMicroserviceCommunicator.class);
     private ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
     UsersVerification usersVerification = Mockito.spy(new UsersVerification(
-            externalRepository,
+            usersCommunicator,
+            submissionsCommunicator,
             reviewRepository
     ));
 
@@ -50,8 +54,26 @@ public class UsersVerificationTests {
     }
 
     @Test
+    void testVerifyIfUserExists_UserExists() throws NotFoundException {
+        Long userID = 1L;
+        // Assuming getRolesOfUser doesn't throw an exception when user exists
+        when(usersCommunicator.getRolesOfUser(userID)).thenReturn(new RolesOfUser());
+
+        Assertions.assertTrue(usersVerification.verifyIfUserExists(userID));
+    }
+
+    @Test
+    void testVerifyIfUserExists_UserDoesNotExist() throws NotFoundException {
+        Long userID = 2L;
+        // Simulate NotFoundException for non-existing user
+        doThrow(new NotFoundException("User does not exist!")).when(usersCommunicator).getRolesOfUser(userID);
+
+        Assertions.assertFalse(usersVerification.verifyIfUserExists(userID));
+    }
+
+    @Test
     void verifyRoleFromTrack_verifyUserExists() throws NotFoundException {
-        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        when(usersCommunicator.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
         assertThat(usersVerification.verifyRoleFromTrack(1L, 4L, 2L, UserRole.REVIEWER)).isEqualTo(true);
     }
 
@@ -59,14 +81,14 @@ public class UsersVerificationTests {
     @Test
     void verifyRoleFromTrack_verifyUserExistsButInDifferentConference() throws NotFoundException {
         // This user IS a reviewer in a track with the same ID, but in a different conference
-        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        when(usersCommunicator.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
         assertThat(usersVerification.verifyRoleFromTrack(1L, 3L, 2L, UserRole.REVIEWER)).isEqualTo(false);
     }
 
     @Test
     void verifyRoleFromTrack_verifyUserExistsButInDifferentEvent() throws NotFoundException {
         // This user IS a reviewer in a track with the same ID, but in a different track
-        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        when(usersCommunicator.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
         assertThat(usersVerification.verifyRoleFromTrack(1L, 4L, 1L, UserRole.REVIEWER)).isEqualTo(false);
     }
 
@@ -87,13 +109,13 @@ public class UsersVerificationTests {
         fakeRolesOfUser.setTracks(listOfTracks);
 
         // Mock the return
-        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        when(usersCommunicator.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
         assertThat(usersVerification.verifyRoleFromTrack(1L, 3L, 2L, UserRole.REVIEWER)).isEqualTo(false);
     }
 
     @Test
     void verifyRoleFromTrack_verifyUserDoesNotExist() throws NotFoundException {
-        when(externalRepository.getRolesOfUser(1L)).thenThrow(new NotFoundException(""));
+        when(usersCommunicator.getRolesOfUser(1L)).thenThrow(new NotFoundException(""));
         assertThat(usersVerification.verifyRoleFromTrack(1L, 4L, 2L, UserRole.REVIEWER)).isEqualTo(false);
     }
 
@@ -107,7 +129,7 @@ public class UsersVerificationTests {
 
         // Add the user to the DTO
         fakeRolesOfUser.getTracks().add(innerChair);
-        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        when(usersCommunicator.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
         assertThat(usersVerification.verifyRoleFromTrack(1L, 4L, 2L, UserRole.REVIEWER))
                 .isEqualTo(true);
     }
@@ -125,7 +147,7 @@ public class UsersVerificationTests {
         fakeRolesOfUser.getTracks().add(innerChair);
         fakeRolesOfUser.getTracks().add(innerChair);
 
-        when(externalRepository.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
+        when(usersCommunicator.getRolesOfUser(1L)).thenReturn(fakeRolesOfUser);
         assertThat(usersVerification.verifyRoleFromTrack(1L, 4L, 2L, UserRole.REVIEWER))
                 .isEqualTo(false);
     }
@@ -137,7 +159,7 @@ public class UsersVerificationTests {
         fakeSubmission.setEventId(1L);
         fakeSubmission.setTrackId(2L);
 
-        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(3L)).thenReturn(fakeSubmission);
         doReturn(true).when(usersVerification)
                 .verifyRoleFromTrack(0L, 1L, 2L, UserRole.CHAIR);
         boolean result = usersVerification.verifyRoleFromPaper(0L, 3L, UserRole.CHAIR);
@@ -150,7 +172,7 @@ public class UsersVerificationTests {
         fakeSubmission.setEventId(1L);
         fakeSubmission.setTrackId(2L);
 
-        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(3L)).thenReturn(fakeSubmission);
         doReturn(false).when(usersVerification)
                 .verifyRoleFromTrack(0L, 1L, 2L, UserRole.CHAIR);
         boolean result = usersVerification.verifyRoleFromPaper(0L, 3L, UserRole.CHAIR);
@@ -159,7 +181,7 @@ public class UsersVerificationTests {
 
     @Test
     void verifyRoleFromPaper_NoSuchPaper() throws NotFoundException {
-        when(externalRepository.getSubmission(3L)).thenThrow(
+        when(submissionsCommunicator.getSubmission(3L)).thenThrow(
                 new NotFoundException("")
         );
         boolean result = usersVerification.verifyRoleFromPaper(0L, 3L, UserRole.CHAIR);
@@ -186,7 +208,7 @@ public class UsersVerificationTests {
 
     @Test
     void verifyIsAuthorToPaper_NoSuchPaper() throws NotFoundException {
-        when(externalRepository.getSubmission(3L)).thenThrow(
+        when(submissionsCommunicator.getSubmission(3L)).thenThrow(
                 new NotFoundException("")
         );
         boolean result = usersVerification.isAuthorToPaper(0L, 3L);
@@ -200,7 +222,7 @@ public class UsersVerificationTests {
         user1.setUserId(1L);
         user2.setUserId(2L);
         fakeSubmission.setAuthors(List.of(user1, user2));
-        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(3L)).thenReturn(fakeSubmission);
         boolean result = usersVerification.isAuthorToPaper(0L, 3L);
         assertThat(result).isFalse();
     }
@@ -212,7 +234,7 @@ public class UsersVerificationTests {
         user1.setUserId(1L);
         user2.setUserId(0L);
         fakeSubmission.setAuthors(List.of(user1, user2));
-        when(externalRepository.getSubmission(3L)).thenReturn(fakeSubmission);
+        when(submissionsCommunicator.getSubmission(3L)).thenReturn(fakeSubmission);
         boolean result = usersVerification.isAuthorToPaper(0L, 3L);
         assertThat(result).isTrue();
     }

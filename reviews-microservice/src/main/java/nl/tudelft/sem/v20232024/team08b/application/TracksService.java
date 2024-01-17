@@ -5,6 +5,8 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
@@ -14,7 +16,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,32 +31,36 @@ public class TracksService {
     private final UsersVerification usersVerification;
     private final TrackPhaseCalculator trackPhaseCalculator;
     private final TrackRepository trackRepository;
-    private final ExternalRepository externalRepository;
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private final UsersMicroserviceCommunicator usersCommunicator;
     private final PapersService papersService;
 
 
     /**
      * Default constructor for the service.
      *
+     * @param submissionsCommunicator  class, that talks to submissions microservices
      * @param trackPhaseCalculator object responsible for getting the current phase
      *                             of a track
-     * @param trackRepository repository storing the tracks
-     * @param externalRepository class, that talks to outside microservices
-     * @param tracksVerification object responsible for verifying track information
-     * @param usersVerification object responsible for verifying user information
-     * @param papersService service responsible for papers
+     * @param trackRepository      repository storing the tracks
+     * @param tracksVerification   object responsible for verifying track information
+     * @param usersVerification    object responsible for verifying user information
+     * @param usersCommunicator    class that talks with users microservice
+     * @param papersService        service responsible for papers
      */
     @Autowired
     public TracksService(TrackPhaseCalculator trackPhaseCalculator,
                          TrackRepository trackRepository,
-                         ExternalRepository externalRepository,
+                         SubmissionsMicroserviceCommunicator submissionsCommunicator,
                          TracksVerification tracksVerification,
-                         UsersVerification usersVerification, PapersService papersService) {
+                         UsersVerification usersVerification,
+                         UsersMicroserviceCommunicator usersCommunicator, PapersService papersService) {
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.trackRepository = trackRepository;
-        this.externalRepository = externalRepository;
+        this.submissionsCommunicator = submissionsCommunicator;
         this.tracksVerification = tracksVerification;
         this.usersVerification = usersVerification;
+        this.usersCommunicator = usersCommunicator;
         this.papersService = papersService;
     }
 
@@ -144,7 +149,7 @@ public class TracksService {
                                            Long trackID) throws NotFoundException {
         // Get the submission deadline from the other microservice
         Long submissionDeadlineUnix =
-                externalRepository.getTrack(conferenceID, trackID).getDeadline();
+                usersCommunicator.getTrack(conferenceID, trackID).getDeadline();
 
         // Add exactly 2 days (in milliseconds) to the submission deadline
         long biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);
@@ -242,7 +247,7 @@ public class TracksService {
             throw new ForbiddenAccessException();
         }
 
-        var submissions = externalRepository.getSubmissionsInTrack(trackID, requesterID);
+        var submissions = submissionsCommunicator.getSubmissionsInTrack(trackID, requesterID);
         var accepted = 0;
         var rejected = 0;
         var undecided = 0;
@@ -289,7 +294,7 @@ public class TracksService {
                 "Not Found. The requested track or conference was not found."
             );
         }
-        var submissions = externalRepository.getSubmissionsInTrack(trackID1, requesterID);
+        var submissions = submissionsCommunicator.getSubmissionsInTrack(trackID1, requesterID);
 
         final List<PaperSummaryWithID> papers = new ArrayList<>();
         for (Submission submission : submissions) {
@@ -300,8 +305,5 @@ public class TracksService {
             papers.add(paperSummaryWithID);
         }
         return papers;
-        //return submissions.stream()
-        //.map(x -> new PaperSummaryWithID(x.getTitle(), x.getAbstract(), x.getSubmissionId()))
-        //.collect(Collectors.toList());
     }
 }

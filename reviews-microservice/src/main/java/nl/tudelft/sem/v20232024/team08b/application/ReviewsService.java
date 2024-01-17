@@ -205,8 +205,10 @@ public class ReviewsService {
         verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
 
         // Get the review from local repository.
-        // TODO: make sure that if the requesting user is author, the confidential comment is stripped.
         Review review = getReview(reviewerID, paperID);
+        if (usersVerification.isAuthorToPaper(requesterID, paperID)) {
+            review.setConfidentialComments(null);
+        }
 
         // Map the review from local domain object to a DTO and return it
         return new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(review);
