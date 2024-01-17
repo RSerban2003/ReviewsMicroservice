@@ -46,7 +46,7 @@ public class AssignmentsController implements AssignmentsAPI {
         try {
             assignmentsService.assignManually(requesterID, reviewerID, paperID);
             return ResponseEntity
-                    .ok()
+                    .status(HttpStatus.CREATED)
                     .contentType(MediaType.APPLICATION_JSON)
                     .build();
         } catch (IllegalCallerException | NotFoundException e) {
@@ -110,13 +110,15 @@ public class AssignmentsController implements AssignmentsAPI {
     public ResponseEntity<Void> finalization(Long requesterID, Long conferenceID, Long trackID) {
         try {
             assignmentsService.finalization(requesterID, new TrackID(conferenceID, trackID));
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
+            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).build();
         } catch (ConflictException e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ForbiddenAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
