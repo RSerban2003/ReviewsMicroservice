@@ -22,7 +22,5 @@ public class Paper implements Serializable {
 
     private PaperStatus status = PaperStatus.NOT_DECIDED;
 
-    // TODO: make sure that when finalize is called
-    //       on a paper, that this is set to true
     private Boolean reviewsHaveBeenFinalized = false;
 }

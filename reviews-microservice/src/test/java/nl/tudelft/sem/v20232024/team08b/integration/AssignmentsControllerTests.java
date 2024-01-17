@@ -58,7 +58,7 @@ public class AssignmentsControllerTests {
         mockMvc.perform(post("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
                 .param("requesterID", String.valueOf(requesterID))
                 .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
+            .andExpect(status().isCreated())
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
 
         verify(assignmentsService).assignManually(requesterID, reviewerID, paperID);
@@ -313,7 +313,7 @@ public class AssignmentsControllerTests {
 
         mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
                         .param("requesterID", "3"))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
         verify(assignmentsService, times(1)).finalization(eq(3L),

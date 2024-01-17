@@ -143,7 +143,7 @@ pitest {
 
 	targetClasses = ['nl.tudelft.sem.v20232024.team08b.*']  //by default "${project.group}.*"
 	excludedClasses = ['nl.tudelft.sem.v20232024.team08b.config.*',
-					   'nl.tudelft.sem.v20232024.team08b.dtos.*']	// TODO: maybe include our DTOs for testing
+					   'nl.tudelft.sem.v20232024.team08b.dtos.*']	// exclude dtos from testing
 	pitestVersion = '1.15.2'
 	threads = 4
 	outputFormats = ['XML', 'HTML']

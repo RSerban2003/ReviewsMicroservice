@@ -17,7 +17,6 @@ public class Review implements Serializable {
     @Id
     private ReviewID reviewID;
 
-    // TODO: make sure that when an empty review is inserted, this is set to null.
     private ConfidenceScore confidenceScore;
 
     private String commentForAuthor;

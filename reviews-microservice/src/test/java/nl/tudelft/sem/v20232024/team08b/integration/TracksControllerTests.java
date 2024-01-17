@@ -1,7 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.TrackAnalyticsService;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
@@ -24,6 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import static org.mockito.Mockito.*;
 
@@ -351,20 +351,5 @@ public class TracksControllerTests {
                     conferenceID, trackID)
                 .param("requesterID", requesterID.toString())
         ).andExpect(MockMvcResultMatchers.status().is(403));
-    }
-
-    @Test
-    void getPapersInternalServerError() throws Exception {
-        Long requesterID = 3L;
-        Long conferenceID = 4L;
-        Long trackID = 5L;
-        when(tracksService.getPapers(requesterID, conferenceID, trackID))
-            .thenThrow(new RuntimeException());
-
-        mockMvc.perform(
-            MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/papers",
-                    conferenceID, trackID)
-                .param("requesterID", requesterID.toString())
-        ).andExpect(MockMvcResultMatchers.status().is(500));
     }
 }

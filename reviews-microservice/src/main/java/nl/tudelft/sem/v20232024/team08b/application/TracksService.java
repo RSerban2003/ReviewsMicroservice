@@ -143,10 +143,11 @@ public class TracksService {
     public void setDefaultBiddingDeadline(Long conferenceID,
                                           Long trackID) throws NotFoundException {
         // Get the submission deadline from the other microservice
-        Integer submissionDeadlineUnix = usersCommunicator.getTrack(conferenceID, trackID).getDeadline();
+        Long submissionDeadlineUnix =
+                usersCommunicator.getTrack(conferenceID, trackID).getDeadline();
 
         // Add exactly 2 days (in milliseconds) to the submission deadline
-        int biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);
+        long biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);
 
         // Convert from Unix timestamp to Date
         Date biddingDeadline = Date.from(Instant.ofEpochMilli(biddingDeadlineUnix));

@@ -39,8 +39,6 @@ checkStyle-reviews-microservice:
   stage: staticAnalysis
   script:
     gradle reviews-microservice:checkstyleMain reviews-microservice:checkStyleTest
-  allow_failure: true
-
 
 PMD-reviews-microservice:
   extends:
@@ -52,7 +50,6 @@ PMD-reviews-microservice:
   stage: staticAnalysis
   script:
     gradle reviews-microservice:pmdMain
-  allow_failure: true
 
 test-reviews-microservice:
   extends:

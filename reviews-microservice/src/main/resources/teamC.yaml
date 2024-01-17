@@ -4,8 +4,8 @@ info:
   description: User authentication service for easyConf
   version: 1.0.1
 servers:
-- url: http://localhost:8080
-  description: server url
+  - url: http://localhost:8082
+    description: server url
 paths:
   /track/{eventId}/{trackId}:
     get:
@@ -16,7 +16,7 @@ paths:
         - name: eventId
           in: path
           required: true
-          description: Id of the event we want to retreive, part of the composite key
+          description: Id of the event we want to retrieve, part of the composite key
           schema:
             type: integer
             format: int64
@@ -36,6 +36,8 @@ paths:
                 $ref: "#/components/schemas/track"
         '404':
           description: Track not found
+        '500':
+          description: Internal server error.
     delete:
       tags:
         - track
@@ -60,6 +62,8 @@ paths:
           description: Track deleted successfully
         '400':
           description: Error deleting track
+        '500':
+          description: Internal server error.
     put:
       tags:
         - track
@@ -70,22 +74,27 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
         - name: trackId
           in: path
           required: true
           schema:
             type: integer
+            format: int64
       requestBody:
         required: true
+        description: Roles can be left out.
         content:
           application/json:
             schema:
-                $ref: "#/components/schemas/track"
+              $ref: "#/components/schemas/track"
       responses:
         '200':
           description: Track updated successfully
         '400':
           description: Error updating track
+        '500':
+          description: Internal server error.
   /track/{eventId}:
     post:
       tags:
@@ -99,10 +108,12 @@ paths:
             type: integer
             format: int64
       requestBody:
+        required: true
+        description: Roles can be left out.
         content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/track"
+          application/json:
+            schema:
+              $ref: "#/components/schemas/track"
       responses:
         '200':
           description: Track created successfully
@@ -112,6 +123,8 @@ paths:
                 $ref: "#/components/schemas/track"
         '400':
           description: Error creating track
+        '500':
+          description: Internal server error.
   /paper/assignSection/{eventId}/{trackId}/{userIdR}/{userIdS}:
     get:
       tags:
@@ -139,12 +152,14 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the Reviewer
         - name: userIdS
           in: path
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the Sub-Reviewer
       responses:
         '200':
@@ -156,6 +171,8 @@ paths:
                 example: true
         '404':
           description: User not found
+        '500':
+          description: Internal server error.
   /paper/access/{eventId}/{trackId}/{userId}:
     get:
       tags:
@@ -181,6 +198,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the User to check
       responses:
         '200':
@@ -192,6 +210,8 @@ paths:
                 example: true
         '404':
           description: User not found
+        '500':
+          description: Internal server error.
   /paper/edit/{eventId}/{trackId}/{userId}:
     get:
       tags:
@@ -217,6 +237,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the User to check
       responses:
         '200':
@@ -228,6 +249,8 @@ paths:
                 example: true
         '404':
           description: User not found
+        '500':
+          description: Internal server error.
   /paper/review/{eventId}/{trackId}/{userId}:
     get:
       tags:
@@ -253,6 +276,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the User to check
       responses:
         '200':
@@ -264,6 +288,8 @@ paths:
                 example: true
         '404':
           description: User not found
+        '500':
+          description: Internal server error.
   /event:
     post:
       tags:
@@ -271,7 +297,8 @@ paths:
       summary: creates event
       description: creates event, assigns the user(s) in the body as a general chair and returns event with id filled in
       requestBody:
-        description: Post body containing name, description, a list of track id's. eventId can be left blank
+        required: true
+        description: Post body containing name, description, a list of track id's. eventId can be left blank and tracks can be left out.
         content:
           application/json:
             schema:
@@ -279,6 +306,28 @@ paths:
       responses:
         '200':
           description: Event successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/event"
+        '400':
+          description: Bad request.
+        '500':
+          description: Internal server error.
+    get:
+      tags:
+        - event
+      summary: gets all events
+      description: returns list of all the events in the database
+      responses:
+        '200':
+          description: Event successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/event"
         '400':
           description: Bad request.
         '500':
@@ -298,7 +347,8 @@ paths:
             format: int64
           description: eventId of the event
       requestBody:
-        description: stuff event needs idk
+        required: true
+        description: Put body containing name, description, a list of track id's
         content:
           application/json:
             schema:
@@ -355,7 +405,7 @@ paths:
           description: Internal server error.
   /user:
     post:
-      tags: 
+      tags:
         - User
       summary: Register a new user
       description: Registers a new user with the given information. The values name, surname, email and password are required
@@ -378,7 +428,7 @@ paths:
           description: Internal server error.
   /user/{userId}:
     put:
-      tags: 
+      tags:
         - User
       summary: Update user details
       description: update a users details with a specified body
@@ -389,8 +439,10 @@ paths:
           description: userId of the user to change
           schema:
             type: integer
+            format: int64
       requestBody:
         required: true
+        description: roles can be left out.
         content:
           application/json:
             schema:
@@ -402,8 +454,10 @@ paths:
           description: Invalid request payload
         '404':
           description: User not found
+        '500':
+          description: Internal server error.
     get:
-      tags: 
+      tags:
         - User
       summary: Get user details
       description: get all information about a user
@@ -413,6 +467,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '200':
           description: User details retrieved successfully
@@ -422,8 +477,10 @@ paths:
                 $ref: "#/components/schemas/user"
         '404':
           description: User not found
+        '500':
+          description: Internal server error.
     delete:
-      tags: 
+      tags:
         - User
       summary: Delete user
       description: Deletes the given user from the database
@@ -433,11 +490,14 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
       responses:
-        '204':
+        '202':
           description: User deleted successfully
         '404':
           description: User not found
+        '500':
+          description: Internal server error.
   /event/{eventId}/{trackId}/role/{userId}:
     put:
       tags:
@@ -467,18 +527,20 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the person who will be assigned to the role
         - name: Assignee
           in: query
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the person who assigns the role
         - name: roleType
           in: query
           required: true
           schema:
-            type: integer
+            type: string
           description: >-
             String containing the role being given to the User, valid roles are
             "PCmember", "PCchair", "Sub-reviewer", "Author"
@@ -489,6 +551,8 @@ paths:
           description: User is not allowed to assign these roles
         '404':
           description: Track not found
+        '500':
+          description: Internal server error.
     delete:
       tags:
         - Role
@@ -517,6 +581,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the person from which the role is unassigned
         - name: Remover
           in: query
@@ -534,6 +599,8 @@ paths:
           description: User is not allowed to unassign roles
         '404':
           description: Track not found
+        '500':
+          description: Internal server error.
   /event/{eventId}/{trackId}/{userId}/concludeSubmission:
     get:
       tags:
@@ -563,6 +630,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the User to check
       responses:
         '200':
@@ -574,6 +642,8 @@ paths:
                 example: true
         '404':
           description: User not found
+        '500':
+          description: Internal server error.
   /event/{eventId}/{trackId}/{userId}/AccessReviewProgress:
     get:
       tags:
@@ -603,6 +673,7 @@ paths:
           required: true
           schema:
             type: integer
+            format: int64
           description: userId of the User to check
       responses:
         '200':
@@ -614,19 +685,22 @@ paths:
                 example: true
         '404':
           description: User not found
+        '500':
+          description: Internal server error.
   /user/{userId}/tracks:
     get:
-      tags: 
+      tags:
         - User
       summary: Gets all the tracks this user is inside of
       description: Given the Id of a User, return a list of all tracks they are part of.
-      parameters: 
+      parameters:
         - name: userId
           in: path
           description: userId of the user we want to look up their tracks for
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         "200":
           description: Successful operation
@@ -636,13 +710,15 @@ paths:
                 $ref: "#/components/schemas/tracksOfUser"
         "404":
           description: User not found
+        '500':
+          description: Internal server error.
   /user/{userId}/tracks/role:
     get:
-      tags: 
+      tags:
         - User
       summary: Gets all the roles of this User
       description: Given the Id of a User, return a map of all Tracks they are part of, with the role they have there.
-      parameters: 
+      parameters:
         - name: userId
           in: path
           description: userId of the user we want to look up their roles for
@@ -658,31 +734,36 @@ paths:
                 $ref: "#/components/schemas/rolesOfUser"
         "404":
           description: User not found
+        '500':
+          description: Internal server error.
   /invite/{eventId}/{trackId}/:
     get:
-      tags: 
+      tags:
         - Invitation
       summary: Invite a user to a track
-      description: Invite a user to the specified track as PC member. Sends an Email to the user's email address containing a link which will assign the role when clicked. Only a PC chair or general chair can invite user's. 
-      parameters: 
+      description: Invite a user to the specified track as PC member. Sends an Email to the user's email address containing a link which will assign the role when clicked. Only a PC chair or general chair can invite user's.
+      parameters:
         - name: eventId
           in: path
           description: eventId we want to invite the user to
           required: true
           schema:
             type: integer
+            format: int64
         - name: trackId
           in: path
           description: trackId we want to invite the user to
           required: true
           schema:
             type: integer
+            format: int64
         - name: inviter
           in: query
           description: userId of the user sending the invite
           required: true
           schema:
             type: integer
+            format: int64
         - name: email adress
           in: query
           description: email adress of the user to invite
@@ -692,18 +773,22 @@ paths:
       responses:
         "200":
           description: Successful operation
-        '400':
-          description: User does not have this role/role does not exist
         '401':
           description: User is not allowed to invite people
+        '500':
+          description: Internal server error.
+
 components:
   schemas:
     event:
       type: object
+      x-class-extra-annotation: "@javax.persistence.Entity @lombok.Data @lombok.NoArgsConstructor"
       properties:
         id:
           type: integer
+          format: int64
           description: id of event
+          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue"
         name:
           type: string
           description: name of the event
@@ -711,20 +796,25 @@ components:
           type: string
           description: short description of the event
         tracks:
+          x-field-extra-annotation: "@javax.persistence.OneToMany(mappedBy=\"id\")"
           description: array containing id's of tracks in the event
           type: array
           items:
-            type: integer
+            $ref: '#/components/schemas/track'
         generalChairs:
+          x-field-extra-annotation: "@javax.persistence.OneToMany(mappedBy=\"id\")"
           description: array containing id's of the general chairs of the event
           type: array
           items:
-            type: integer
+            $ref: '#/components/schemas/user'
     track:
       type: object
+      x-class-extra-annotation: "@javax.persistence.Entity @lombok.Data @lombok.NoArgsConstructor"
       properties:
         id:
+          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue"
           type: integer
+          format: int64
           description: id of track
         name:
           type: string
@@ -737,17 +827,14 @@ components:
           description: short description of the track
         deadline:
           type: integer
+          format: int64
           description: The deadline of a track in the UNIX timestamp format in milliseconds
-        users:
-          description: array containing users and their roles
+        roles:
+          x-field-extra-annotation: "@javax.persistence.OneToMany(mappedBy=\"id\")"
+          description: array containing roles that further link to users (many to many with useres table)
           type: array
           items:
-            type: object
-            properties:
-              userId:
-                type: string
-              role:
-                type: string
+            $ref: '#/components/schemas/role'
     tracksOfUser:
       type: object
       properties:
@@ -758,8 +845,10 @@ components:
             properties:
               eventId:
                 type: integer
+                format: int64
               trackId:
                 type: integer
+                format: int64
       example:
         - eventId: 0
           trackId: 0
@@ -777,8 +866,10 @@ components:
             properties:
               eventId:
                 type: integer
+                format: int64
               trackId:
                 type: integer
+                format: int64
               RoleName:
                 type: string
       example:
@@ -793,9 +884,12 @@ components:
           RoleName: "Sub-reviewer"
     user:
       type: object
+      x-class-extra-annotation: "@javax.persistence.Entity @lombok.Data @lombok.NoArgsConstructor"
       properties:
         Id:
+          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue"
           type: integer
+          format: int64
         name:
           type: string
         surname:
@@ -808,3 +902,29 @@ components:
           type: string
         communicationMedium:
           type: string
+        roles:
+          x-field-extra-annotation: "@javax.persistence.OneToMany(mappedBy=\"id\")"
+          description: array containing roles that further link to users (many to many with users table)
+          type: array
+          items:
+            $ref: '#/components/schemas/role'
+    role:
+      type: object
+      x-class-extra-annotation: "@javax.persistence.Entity @lombok.Data @lombok.NoArgsConstructor"
+      properties:
+        Id:
+          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue"
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        trackId:
+          type: integer
+          format: int64
+        eventId:
+          type: integer
+          format: int64
+        RoleName:
+          type: string
+
