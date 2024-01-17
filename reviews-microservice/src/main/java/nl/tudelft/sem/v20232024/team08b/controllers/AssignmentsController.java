@@ -3,9 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.AssignmentsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +76,10 @@ public class AssignmentsController implements AssignmentsAPI {
                                            Long trackID) {
         try {
             assignmentsService.assignAuto(requesterID, conferenceID, trackID);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
 
         } catch (IllegalCallerException | NotFoundException e) {
             // The requested track or user was not found
@@ -109,16 +110,14 @@ public class AssignmentsController implements AssignmentsAPI {
     @Override
     public ResponseEntity<Void> finalization(Long requesterID, Long conferenceID, Long trackID) {
         try {
-            assignmentsService.finalization(requesterID, new TrackID(conferenceID, trackID));
+            assignmentsService.finalization(requesterID, conferenceID, trackID);
             return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).build();
-        } catch (ConflictException e) {
+        } catch (IllegalStateException e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ForbiddenAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -134,7 +133,7 @@ public class AssignmentsController implements AssignmentsAPI {
                                                   Long paperID) {
         try {
             return ResponseEntity.ok(assignmentsService.assignments(requesterID, paperID));
-        } catch (IllegalCallerException e) {
+        } catch (IllegalCallerException | NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
             // The requester must be a pc chair
@@ -160,7 +159,21 @@ public class AssignmentsController implements AssignmentsAPI {
     public ResponseEntity<Void> remove(Long requesterID,
                                        Long paperID,
                                        Long reviewerID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            assignmentsService.remove(requesterID, paperID, reviewerID);
+            return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .build();
+        } catch (IllegalCallerException | NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            // The requester must be a pc chair
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            // Internal server error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

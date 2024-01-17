@@ -1,13 +1,13 @@
 package nl.tudelft.sem.v20232024.team08b.communicators;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class SubmissionsMicroserviceCommunicator implements CommunicationWithSubmissionMicroservice {
@@ -71,10 +71,9 @@ public class SubmissionsMicroserviceCommunicator implements CommunicationWithSub
      * @return a list of submissions in the track
      */
     @Override
-    public List<Submission> getSubmissionsInTrack(TrackID trackID) throws NotFoundException {
-        return getSubmissionsInTrack(trackID, ourID);
+    public List<Submission> getSubmissionsInTrack(Long conferenceID, Long trackID) throws NotFoundException {
+        return getSubmissionsInTrack(conferenceID, trackID, ourID);
     }
-
 
     /**
      * Gets all submissions in a track.
@@ -84,10 +83,11 @@ public class SubmissionsMicroserviceCommunicator implements CommunicationWithSub
      * @return a list of submissions in the track
      */
     @Override
-    public List<Submission> getSubmissionsInTrack(TrackID trackID, Long requesterID) throws NotFoundException {
+    public List<Submission> getSubmissionsInTrack(Long conferenceID, Long trackID, Long requesterID)
+            throws NotFoundException {
         try {
-            String url = submissionsURL + "/submission/event/" + trackID.getConferenceID()
-                + "/track/" + trackID.getTrackID() + "/" + requesterID;
+            String url = submissionsURL + "/submission/event/" + conferenceID
+                + "/track/" + trackID + "/" + requesterID;
             String response = httpRequestSender.sendGetRequest(url);
             List<Submission> submissions;
             submissions = objectMapper.readValue(response, List.class);

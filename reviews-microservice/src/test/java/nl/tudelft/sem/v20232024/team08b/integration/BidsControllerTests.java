@@ -20,7 +20,6 @@ import nl.tudelft.sem.v20232024.team08b.application.BidsService;
 import nl.tudelft.sem.v20232024.team08b.controllers.BidsController;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -216,7 +215,7 @@ public class BidsControllerTests {
         Long paperID = 2L;
         Bid bid = Bid.CAN_REVIEW;
 
-        doThrow(new ConflictException()).when(bidsService).bid(eq(requesterID), eq(paperID), eq(bid));
+        doThrow(new IllegalStateException()).when(bidsService).bid(eq(requesterID), eq(paperID), eq(bid));
 
         mockMvc.perform(put("/papers/{paperID}/bids", paperID)
                         .param("requesterID", requesterID.toString())

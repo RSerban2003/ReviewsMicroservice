@@ -1,11 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.unit.communicators;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
@@ -14,6 +9,12 @@ import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 public class UsersMicroserviceCommunicatorTests {
     final HttpRequestSender httpRequestSender = Mockito.mock(HttpRequestSender.class);

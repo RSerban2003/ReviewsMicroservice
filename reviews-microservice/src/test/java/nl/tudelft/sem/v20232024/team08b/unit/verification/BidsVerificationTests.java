@@ -8,7 +8,6 @@ import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCom
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -117,7 +116,7 @@ public class BidsVerificationTests {
                 .thenReturn(true);
         when(trackPhaseCalculator.getTrackPhase(submission.getEventId(), submission.getTrackId()))
                 .thenReturn(TrackPhase.REVIEWING);
-        assertThrows(ConflictException.class,
+        assertThrows(IllegalStateException.class,
                 () -> bidsVerification.verifyPermissionToSubmitBid(requesterID, paperID));
     }
 

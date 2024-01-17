@@ -1,23 +1,14 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
-import java.util.ArrayList;
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -26,64 +17,29 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class TracksService {
+public class TrackDeadlineService {
     private final TracksVerification tracksVerification;
-    private final UsersVerification usersVerification;
-    private final TrackPhaseCalculator trackPhaseCalculator;
     private final TrackRepository trackRepository;
-    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
     private final UsersMicroserviceCommunicator usersCommunicator;
-    private final PapersService papersService;
-
+    private final UsersVerification usersVerification;
 
     /**
-     * Default constructor for the service.
+     * Constructs the service that handles track deadlines.
      *
-     * @param submissionsCommunicator  class, that talks to submissions microservices
-     * @param trackPhaseCalculator object responsible for getting the current phase
-     *                             of a track
-     * @param trackRepository      repository storing the tracks
-     * @param tracksVerification   object responsible for verifying track information
-     * @param usersVerification    object responsible for verifying user information
-     * @param usersCommunicator    class that talks with users microservice
-     * @param papersService        service responsible for papers
+     * @param tracksVerification responsible for track verification
+     * @param trackRepository responsible for storing tracks
+     * @param usersCommunicator communicates with users microservice
+     * @param usersVerification verifies users
      */
-    @Autowired
-    public TracksService(TrackPhaseCalculator trackPhaseCalculator,
-                         TrackRepository trackRepository,
-                         SubmissionsMicroserviceCommunicator submissionsCommunicator,
-                         TracksVerification tracksVerification,
-                         UsersVerification usersVerification,
-                         UsersMicroserviceCommunicator usersCommunicator, PapersService papersService) {
-        this.trackPhaseCalculator = trackPhaseCalculator;
-        this.trackRepository = trackRepository;
-        this.submissionsCommunicator = submissionsCommunicator;
+    public TrackDeadlineService(TracksVerification tracksVerification,
+                                TrackRepository trackRepository,
+                                UsersMicroserviceCommunicator usersCommunicator,
+                                UsersVerification usersVerification) {
         this.tracksVerification = tracksVerification;
-        this.usersVerification = usersVerification;
+        this.trackRepository = trackRepository;
         this.usersCommunicator = usersCommunicator;
-        this.papersService = papersService;
+        this.usersVerification = usersVerification;
     }
-
-    /**
-     * Returns the current phase of a given track. Also checks if the
-     * requesting user has access to the track.
-     *
-     * @param conferenceID the ID of the conference the track is in
-     * @param trackID the ID of the track
-     * @return the current phase of the track
-     * @throws NotFoundException if such track does not exist
-     * @throws IllegalAccessException if the requesting user does not have permissions
-     */
-    public TrackPhase getTrackPhase(Long requesterID,
-                                    Long conferenceID,
-                                    Long trackID) throws NotFoundException, IllegalAccessException {
-        // Verify if the user and track exist, and if the user is reviewer
-        // or chair of the track. Throws respective exceptions
-        tracksVerification.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
-
-        return trackPhaseCalculator.getTrackPhase(conferenceID, trackID);
-    }
-
 
     /**
      * Get a track from our local repository, but if it is not present there,
@@ -131,8 +87,8 @@ public class TracksService {
      * @throws NotFoundException if such track does not exist
      */
     private void setBiddingDeadlineCommon(Long conferenceID,
-                                   Long trackID,
-                                   Date deadline) throws NotFoundException {
+                                          Long trackID,
+                                          Date deadline) throws NotFoundException {
         Track track = getTrackWithInsertionToOurRepo(conferenceID, trackID);
         track.setBiddingDeadline(deadline);
         trackRepository.save(track);
@@ -146,7 +102,7 @@ public class TracksService {
      * @param trackID the ID of the track.
      */
     public void setDefaultBiddingDeadline(Long conferenceID,
-                                           Long trackID) throws NotFoundException {
+                                          Long trackID) throws NotFoundException {
         // Get the submission deadline from the other microservice
         Long submissionDeadlineUnix =
                 usersCommunicator.getTrack(conferenceID, trackID).getDeadline();
@@ -175,7 +131,7 @@ public class TracksService {
     public Date getBiddingDeadline(Long requesterID,
                                    Long conferenceID,
                                    Long trackID) throws NotFoundException,
-                                                        IllegalAccessException {
+            IllegalAccessException {
         // No phase verification needs to be done. We only need to check if
         // the requester belongs to the given track.
         tracksVerification.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
@@ -227,83 +183,5 @@ public class TracksService {
                 List.of(TrackPhase.BIDDING, TrackPhase.SUBMITTING));
 
         setBiddingDeadlineCommon(conferenceID, trackID, newDeadline);
-    }
-
-    /**
-     * Gets the analytics of a track. Analytics that provide a summary for a particular track of
-     * the amount of papers that have been accepted, rejected and those that haven't yet been decided
-     *
-     * @param trackID     the ID of the track
-     * @param requesterID the ID of the requester
-     * @return the numbers of accepted, rejected and undecided papers
-     * @throws NotFoundException        if the track does not exist
-     * @throws ForbiddenAccessException if the requester is not a chair of the track
-     */
-    public TrackAnalytics getAnalytics(TrackID trackID, Long requesterID)
-            throws NotFoundException, ForbiddenAccessException {
-        // Ensure the requester is a chair of the track
-        if (!usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
-                trackID.getTrackID(), UserRole.CHAIR)) {
-            throw new ForbiddenAccessException();
-        }
-
-        var submissions = submissionsCommunicator.getSubmissionsInTrack(trackID, requesterID);
-        var accepted = 0;
-        var rejected = 0;
-        var undecided = 0;
-        for (var submission : submissions) {
-            PaperStatus status;
-            try {
-                status = papersService.getState(requesterID, submission.getSubmissionId());
-            } catch (IllegalAccessException e) {
-                // We have already checked that the requester is a chair of the track
-                // so this shouldn't happen
-                throw new RuntimeException(e);
-            }
-
-            switch (status) {
-                case ACCEPTED -> accepted++;
-                case REJECTED -> rejected++;
-                default -> undecided++;
-            }
-        }
-        return new TrackAnalytics(accepted, rejected, undecided);
-    }
-
-    /**
-     * Gets the submissions of a track and transforms them into an instance of PaperSummaryWithID.
-     *
-     * @param requesterID the ID of the requester
-     * @param conferenceID the ID of the conference
-     * @param trackID the ID of the track
-     * @return A list of PaperSummaryWithID
-     * @throws ForbiddenAccessException if the track does not exist
-     * @throws NotFoundException if the user is not a pc chair
-     */
-    public List<PaperSummaryWithID> getPapers(Long requesterID,
-                                              Long conferenceID,
-                                              Long trackID) throws ForbiddenAccessException,
-        NotFoundException {
-        TrackID trackID1 = new TrackID(conferenceID, trackID);
-        if (!usersVerification.verifyRoleFromTrack(requesterID, trackID1.getConferenceID(),
-            trackID1.getTrackID(), UserRole.CHAIR)) {
-            throw new ForbiddenAccessException();
-        }
-        if (!tracksVerification.verifyTrack(conferenceID, trackID)) {
-            throw new NotFoundException(
-                "Not Found. The requested track or conference was not found."
-            );
-        }
-        var submissions = submissionsCommunicator.getSubmissionsInTrack(trackID1, requesterID);
-
-        final List<PaperSummaryWithID> papers = new ArrayList<>();
-        for (Submission submission : submissions) {
-            PaperSummaryWithID paperSummaryWithID = new PaperSummaryWithID();
-            paperSummaryWithID.setPaperID(submission.getSubmissionId());
-            paperSummaryWithID.setTitle(submission.getTitle());
-            paperSummaryWithID.setAbstractSection(submission.getAbstract());
-            papers.add(paperSummaryWithID);
-        }
-        return papers;
     }
 }

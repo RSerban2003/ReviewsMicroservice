@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.ReviewsAPI;
+import nl.tudelft.sem.v20232024.team08b.application.DiscussionService;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
@@ -19,18 +20,22 @@ import java.util.List;
 public class ReviewsController implements ReviewsAPI {
     private final ReviewsService reviewsService;
     private final PapersService papersService;
+    private final DiscussionService discussionService;
 
     /**
      * Default constructor for the controller.
      *
      * @param reviewsService the respective service to inject
      * @param papersService service responsible for papers
+     * @param discussionService service responsible for discussion phase handling
      */
     @Autowired
     public ReviewsController(ReviewsService reviewsService,
-                             PapersService papersService) {
+                             PapersService papersService,
+                             DiscussionService discussionService) {
         this.reviewsService = reviewsService;
         this.papersService = papersService;
+        this.discussionService = discussionService;
     }
 
     /**
@@ -156,7 +161,7 @@ public class ReviewsController implements ReviewsAPI {
     @Override
     public ResponseEntity<Void> finalization(Long requesterID, Long paperID) {
         try {
-            reviewsService.finalizeDiscussionPhase(requesterID, paperID);
+            discussionService.finalizeDiscussionPhase(requesterID, paperID);
         } catch (NotFoundException e) {
             // If paper is invalid, respond with 404 error.
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -189,7 +194,7 @@ public class ReviewsController implements ReviewsAPI {
                                                         Long paperID,
                                                         String comment) {
         try {
-            reviewsService.submitDiscussionComment(requesterID, reviewerID, paperID, comment);
+            discussionService.submitDiscussionComment(requesterID, reviewerID, paperID, comment);
         } catch (NotFoundException e) {
             // The paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -220,7 +225,7 @@ public class ReviewsController implements ReviewsAPI {
                                                                          Long paperID) {
         try {
             return ResponseEntity
-                    .ok(reviewsService.getDiscussionComments(requesterID, reviewerID, paperID));
+                    .ok(discussionService.getDiscussionComments(requesterID, reviewerID, paperID));
         } catch (NotFoundException e) {
             // The paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
