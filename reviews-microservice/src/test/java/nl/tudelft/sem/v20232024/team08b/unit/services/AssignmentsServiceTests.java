@@ -469,6 +469,66 @@ public class AssignmentsServiceTests {
     }
 
     @Test
+    void assignAuto_threeUsersAutomatic() throws NotFoundException, IllegalAccessException {
+        List<Paper> papers = new ArrayList<>();
+        Paper paper1 = new Paper();
+        paper1.setId(paperID);
+        papers.add(paper1);
+        Submission submission = new Submission();
+        submission.setTrackId(trackID);
+        submission.setEventId(conferenceID);
+        Bid bid1 = new Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid2 = new Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid3 = new Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<Bid> bids = new ArrayList<>();
+        bids.add(bid1);
+        bids.add(bid2);
+        bids.add(bid3);
+
+        Review review1 = new Review();
+        review1.setReviewID(new ReviewID(10L, 1L));
+        Review review2 = new Review();
+        review2.setReviewID(new ReviewID(10L, 2L));
+        Review review3 = new Review();
+        review3.setReviewID(new ReviewID(20L, 2L));
+        Review review4 = new Review();
+        review4.setReviewID(new ReviewID(10L, 3L));
+        List<Review> reviews1 = new ArrayList<>();
+        reviews1.add(review1);
+        List<Review> reviews2 = new ArrayList<>();
+        reviews2.add(review2);
+        reviews2.add(review3);
+        List<Review> reviews3 = new ArrayList<>();
+        reviews3.add(review4);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDReviewerID(1L)).thenReturn(reviews1);
+        when(reviewRepository.findByReviewIDReviewerID(2L)).thenReturn(reviews2);
+        when(reviewRepository.findByReviewIDReviewerID(3L)).thenReturn(reviews3);
+        when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
+        when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
+            trackOptional
+        );
+
+        assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+            && reviewCheck.getReviewID().getReviewerID().equals(1L)));
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+            && reviewCheck.getReviewID().getReviewerID().equals(3L)));
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+            && reviewCheck.getReviewID().getReviewerID().equals(2L)));
+
+
+
+
+    }
+
+    @Test
     void assignAuto_fourUsersNotInTrack() throws NotFoundException, IllegalAccessException {
         List<Paper> papers = new ArrayList<>();
         Paper paper1 = new Paper();
@@ -614,6 +674,24 @@ public class AssignmentsServiceTests {
                 && reviewCheck.getReviewID().getReviewerID().equals(4L)));
 
 
+
+
+    }
+
+    @Test
+    void optionalEmpty() throws NotFoundException, IllegalAccessException {
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)).thenReturn(true);
+
+        Optional<Track> trackOptional = Optional.empty();
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
+            trackOptional
+        );
+
+        assertThrows(NotFoundException.class, () -> {
+            assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+        });
 
 
     }
