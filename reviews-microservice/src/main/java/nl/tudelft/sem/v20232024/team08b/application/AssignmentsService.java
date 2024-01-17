@@ -1,15 +1,19 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
+import java.util.Optional;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.application.strategies.AutomaticAssignmentStrategy;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.domain.Track;
+
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
@@ -33,6 +37,7 @@ public class AssignmentsService {
     private final UsersVerification usersVerification;
     private final SubmissionsMicroserviceCommunicator submissionCommunicator;
     private final UsersMicroserviceCommunicator usersCommunicator;
+    private AutomaticAssignmentStrategy automaticAssignmentStrategy;
     private final TrackPhaseCalculator trackPhaseCalculator;
     private final TrackRepository trackRepository;
     private final TracksService tracksService;
@@ -156,6 +161,55 @@ public class AssignmentsService {
     }
 
     /**
+     * This method assigns automatically reviewers to papers.
+     *
+     * @param requesterID ID of a requester
+     * @param conferenceID ID of a conferenceID
+     * @param trackID ID of a trackID
+     * @throws IllegalAccessException If the requester does not have a permission to assign
+     * @throws NotFoundException If the reviewer is not in the track of paper
+     * @throws IllegalArgumentException If reviewer can not be assigned due to conflict of interest
+     */
+    public void assignAuto(Long requesterID, Long conferenceID, Long trackID)
+        throws NotFoundException, IllegalAccessException {
+        verificationOfTrack(conferenceID, trackID, requesterID);
+
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<Track> opTrack = trackRepository.findById(trackID1);
+        Track track = opTrack.get();
+        List<Paper> papers = track.getPapers();
+        automaticAssignmentStrategy.automaticAssignment(trackID1, papers);
+
+
+    }
+
+
+
+    private void verificationOfTrack(Long conferenceID, long trackID, long requesterID)
+        throws IllegalAccessException, NotFoundException {
+        if (!tracksVerification.verifyTrack(conferenceID, trackID)) {
+            throw new NotFoundException("No such track exists");
+        }
+        // Check if such user exists and has correct privileges
+        if (!usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID,
+            UserRole.REVIEWER)) {
+            throw new NotFoundException("No such user exists");
+        }
+        // Check if such user exists and has correct privileges
+        if (!usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID,
+            UserRole.CHAIR)) {
+            throw new IllegalAccessException("User is not a PC chair");
+        }
+
+    }
+
+    @Autowired
+    public void setAutomaticAssignmentStrategy(
+        AutomaticAssignmentStrategy automaticAssignmentStrategy) {
+        this.automaticAssignmentStrategy = automaticAssignmentStrategy;
+    }
+
+    /**
      * Removes assignment from paper.
      *
      * @param requesterID ID of a user making the request
@@ -202,7 +256,8 @@ public class AssignmentsService {
             ReviewID reviewID = review.getReviewID();
             Long paperID = reviewID.getPaperID();
             PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
-            Paper paper = new Paper(submissionCommunicator.getSubmission(paperID));
+            nl.tudelft.sem.v20232024.team08b.dtos.review.Paper paper =
+                new nl.tudelft.sem.v20232024.team08b.dtos.review.Paper(submissionCommunicator.getSubmission(paperID));
             summaryWithID.setPaperID(paperID);
             summaryWithID.setTitle(paper.getTitle());
             summaryWithID.setAbstractSection(paper.getAbstractSection());
