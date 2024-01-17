@@ -77,7 +77,10 @@ public class AssignmentsController implements AssignmentsAPI {
                                            Long trackID) {
         try {
             assignmentsService.assignAuto(requesterID, conferenceID, trackID);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
 
         } catch (IllegalCallerException | NotFoundException e) {
             // The requested track or user was not found

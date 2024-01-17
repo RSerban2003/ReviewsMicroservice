@@ -190,7 +190,7 @@ public class ReviewsService {
         // Get the review from local repository.
         Review review = getReview(reviewerID, paperID);
         if (usersVerification.isAuthorToPaper(requesterID, paperID)) {
-            review.setConfidentialComments(null);
+            review.setCommentForReviewers(null);
         }
 
         // Map the review from local domain object to a DTO and return it

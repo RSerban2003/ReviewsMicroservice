@@ -1,15 +1,5 @@
 package nl.tudelft.sem.v20232024.team08b.integration;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Arrays;
-import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
@@ -193,7 +183,8 @@ public class AssignmentsControllerTests {
         mockMvc.perform(put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
                 .param("requesterID", String.valueOf(requesterID))
                 .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
         verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
     }
