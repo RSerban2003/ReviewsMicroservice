@@ -10,12 +10,12 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerificat
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
-import nl.tudelft.sem.v20232024.team08b.domain.Review;
-import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
+import nl.tudelft.sem.v20232024.team08b.domain.*;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
@@ -258,14 +258,15 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignAuto_zeroUser() throws NotFoundException, IllegalAccessException {
-        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
+        List<Paper> papers = new ArrayList<>();
         TrackID trackID1 = new TrackID(conferenceID, trackID);
         Date date = new Date();
-        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, date, false, papers));
-        nl.tudelft.sem.v20232024.team08b.domain.Track track = trackOptional.get();
-        nl.tudelft.sem.v20232024.team08b.domain.Paper paper = new nl.tudelft.sem.v20232024.team08b.domain.Paper(123L, track, PaperStatus.ACCEPTED, false);
+        Optional<Track> trackOptional =
+                Optional.of(new Track(trackID1, date, false, papers));
+        Track track = trackOptional.get();
+        Paper paper = new Paper(123L, track, PaperStatus.ACCEPTED, false);
         papers.add(paper);
-        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        List<Bid> bids = new ArrayList<>();
         when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
         when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
         when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR))
@@ -282,14 +283,14 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignAuto_oneUser() throws NotFoundException, IllegalAccessException {
-        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
-        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        List<Paper> papers = new ArrayList<>();
+        List<Bid> bids = new ArrayList<>();
         TrackID trackID1 = new TrackID(conferenceID, trackID);
         Date date = new Date();
-        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, date, false, papers));
-        nl.tudelft.sem.v20232024.team08b.domain.Track track = trackOptional.get();
-        nl.tudelft.sem.v20232024.team08b.domain.Paper paper = new nl.tudelft.sem.v20232024.team08b.domain.Paper(123L, track, PaperStatus.ACCEPTED, false);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paper.getId(), 123L,
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, date, false, papers));
+        Track track = trackOptional.get();
+        Paper paper = new Paper(123L, track, PaperStatus.ACCEPTED, false);
+        Bid bid = new Bid(paper.getId(), 123L,
                 nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
         papers.add(paper);
         bids.add(bid);
@@ -310,16 +311,16 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignAuto_oneUserException() throws NotFoundException, IllegalAccessException {
-        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
-        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        List<Paper> papers = new ArrayList<>();
+        Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
         Submission submission = new Submission();
         submission.setTrackId(trackID);
         submission.setEventId(conferenceID);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        Bid bid1 = new Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid2 = new Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<Bid> bids = new ArrayList<>();
         bids.add(bid1);
         bids.add(bid2);
 
@@ -337,7 +338,7 @@ public class AssignmentsServiceTests {
         when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
         when(submissionsCommunicator.getSubmission(10L)).thenThrow((new NotFoundException("Track not found")));
         TrackID trackID1 = new TrackID(conferenceID, trackID);
-        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
                 trackOptional
         );
@@ -351,16 +352,16 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignAuto_twoUsersAutomatic() throws NotFoundException, IllegalAccessException {
-        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
-        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        List<Paper> papers = new ArrayList<>();
+        Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
         Submission submission = new Submission();
         submission.setTrackId(trackID);
         submission.setEventId(conferenceID);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        Bid bid1 = new Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid2 = new Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<Bid> bids = new ArrayList<>();
         bids.add(bid1);
         bids.add(bid2);
 
@@ -384,7 +385,7 @@ public class AssignmentsServiceTests {
         when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
         when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
-        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
                 trackOptional
         );
@@ -400,18 +401,18 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignAuto_fourUsersAutomatic() throws NotFoundException, IllegalAccessException {
-        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
-        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        List<Paper> papers = new ArrayList<>();
+        Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
         Submission submission = new Submission();
         submission.setTrackId(trackID);
         submission.setEventId(conferenceID);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid3 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid4 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        Bid bid1 = new Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid2 = new Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid3 = new Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid4 = new Bid(paperID, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<Bid> bids = new ArrayList<>();
         bids.add(bid1);
         bids.add(bid2);
         bids.add(bid3);
@@ -447,7 +448,7 @@ public class AssignmentsServiceTests {
         when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
         when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
-        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
                 trackOptional
         );
@@ -469,8 +470,8 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignAuto_fourUsersNotInTrack() throws NotFoundException, IllegalAccessException {
-        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
-        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        List<Paper> papers = new ArrayList<>();
+        Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
         Submission submission = new Submission();
@@ -479,11 +480,11 @@ public class AssignmentsServiceTests {
         Submission submission2 = new Submission();
         submission2.setTrackId(trackID + 1);
         submission2.setEventId(conferenceID);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid3 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid4 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        Bid bid1 = new Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid2 = new Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid3 = new Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid4 = new Bid(paperID, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<Bid> bids = new ArrayList<>();
         bids.add(bid1);
         bids.add(bid2);
         bids.add(bid3);
@@ -522,7 +523,7 @@ public class AssignmentsServiceTests {
         when(submissionsCommunicator.getSubmission(40L)).thenReturn(submission2);
         when(submissionsCommunicator.getSubmission(50L)).thenReturn(submission2);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
-        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
                 trackOptional
         );
@@ -544,8 +545,8 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignAuto_fourUsersNotInConference() throws NotFoundException, IllegalAccessException {
-        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
-        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        List<Paper> papers = new ArrayList<>();
+        Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
         Submission submission = new Submission();
@@ -554,11 +555,11 @@ public class AssignmentsServiceTests {
         Submission submission2 = new Submission();
         submission2.setTrackId(trackID);
         submission2.setEventId(conferenceID + 1);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid3 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        nl.tudelft.sem.v20232024.team08b.domain.Bid bid4 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
-        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        Bid bid1 = new Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid2 = new Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid3 = new Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        Bid bid4 = new Bid(paperID, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<Bid> bids = new ArrayList<>();
         bids.add(bid1);
         bids.add(bid2);
         bids.add(bid3);
@@ -597,7 +598,7 @@ public class AssignmentsServiceTests {
         when(submissionsCommunicator.getSubmission(40L)).thenReturn(submission2);
         when(submissionsCommunicator.getSubmission(50L)).thenReturn(submission2);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
-        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
                 trackOptional
         );
@@ -642,7 +643,7 @@ public class AssignmentsServiceTests {
     void testGetAssignedPaperWithAssignedPapers() throws NotFoundException {
         ReviewID reviewID = new ReviewID();
         reviewID.setPaperID(paperID);
-        Paper paper = new Paper();
+        nl.tudelft.sem.v20232024.team08b.dtos.review.Paper paper = new nl.tudelft.sem.v20232024.team08b.dtos.review.Paper();
         paper.setTitle("Sample Title");
         paper.setAbstractSection("Sample Abstract");
 
@@ -678,7 +679,8 @@ public class AssignmentsServiceTests {
         submissions.add(s);
         when(submissionsCommunicator.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
                 .thenReturn(submissions);
-        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenReturn(new nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification
                 .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
                 .thenReturn(true);
@@ -687,7 +689,7 @@ public class AssignmentsServiceTests {
         when(reviewRepository.findByReviewIDPaperID(5L)).thenReturn(List.of(new Review(), new Review(), new Review()));
         when(reviewRepository.findByReviewIDPaperID(6L)).thenReturn(List.of(new Review(),
                 new Review(), new Review(), new Review()));
-        var t = new nl.tudelft.sem.v20232024.team08b.domain.Track();
+        var t = new Track();
         when(trackRepository.findById(trackID.getConferenceID(), trackID.getTrackID()))
                 .thenReturn(Optional.of(t));
 
@@ -712,7 +714,8 @@ public class AssignmentsServiceTests {
         s.setSubmissionId(6L);
         submissions.add(s);
 
-        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenReturn(new nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification
                 .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
                 .thenReturn(true);
@@ -750,7 +753,8 @@ public class AssignmentsServiceTests {
         Long requesterID = 1L;
         TrackID trackID = new TrackID(2L, 3L);
 
-        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenReturn(new nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification
                 .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
                 .thenReturn(false);
@@ -767,7 +771,8 @@ public class AssignmentsServiceTests {
         Long requesterID = 1L;
         TrackID trackID = new TrackID(2L, 3L);
 
-        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenReturn(new nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
         when(trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID()))
@@ -791,7 +796,7 @@ public class AssignmentsServiceTests {
         submissions.add(s);
 
         when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
-                .thenReturn(new Track());
+                .thenReturn(new nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
         when(trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID()))
