@@ -179,7 +179,6 @@ public class AssignmentsService {
     public void finalization(Long requesterID, Long conferenceID, Long trackID)
             throws ForbiddenAccessException, NotFoundException, IllegalStateException {
         assignmentsVerification.verifyPermissionToFinalize(requesterID, conferenceID, trackID);
-
         // Ensure there is at least 3 reviewers assigned to each paper
         var submissions = submissionCommunicator.getSubmissionsInTrack(conferenceID, trackID, requesterID);
         if (submissions.stream().anyMatch(submission ->
@@ -187,13 +186,11 @@ public class AssignmentsService {
         )) {
             throw new IllegalStateException();
         }
-
         // Ensure the track is in our repository
         Optional<Track> optional =  trackRepository.findById(conferenceID, trackID);
         if (optional.isEmpty()) {
             throw new NotFoundException("");
         }
-
         // Get the track from our database
         Track track = optional.get();
         track.setReviewersHaveBeenFinalized(true);
