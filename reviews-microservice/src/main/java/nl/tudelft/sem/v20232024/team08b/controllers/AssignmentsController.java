@@ -118,8 +118,6 @@ public class AssignmentsController implements AssignmentsAPI {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ForbiddenAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
