@@ -100,6 +100,20 @@ public class BidsControllerTests {
     }
 
     @Test
+    public void testGetBidForPaperByReviewerInternalServerError() throws Exception {
+        Long requesterID = 1L;
+        Long paperID = 2L;
+        Long reviewerID = 3L;
+
+        when(bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID))
+                .thenThrow(new RuntimeException());
+
+        mockMvc.perform(get("/papers/{paperID}/bids/by-reviewer/{reviewerID}", paperID, reviewerID)
+                        .param("requesterID", requesterID.toString()))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
     void testGetBidsForPaperValidRequesterAndPaperReturnsBidsByReviewer() throws Exception {
         List<BidByReviewer> bids = new ArrayList<>();
         bids.add(new BidByReviewer(5L, Bid.CAN_REVIEW));
@@ -132,6 +146,14 @@ public class BidsControllerTests {
 
         mockMvc.perform(get("/papers/{paperID}/bids", 1L).param("requesterID", String.valueOf(6L)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testGetBidsForPaperInternalServerError() throws Exception {
+        when(bidsService.getBidsForPaper(6L, 1L)).thenThrow(new RuntimeException(""));
+
+        mockMvc.perform(get("/papers/{paperID}/bids", 1L).param("requesterID", String.valueOf(6L)))
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -201,6 +223,23 @@ public class BidsControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(bid)))
                 .andExpect(status().isConflict());
+
+        verify(bidsService, times(1)).bid(eq(requesterID), eq(paperID), eq(bid));
+    }
+
+    @Test
+    public void testBidInternalServerError() throws Exception {
+        Long requesterID = 1L;
+        Long paperID = 2L;
+        Bid bid = Bid.CAN_REVIEW;
+
+        doThrow(new RuntimeException()).when(bidsService).bid(eq(requesterID), eq(paperID), eq(bid));
+
+        mockMvc.perform(put("/papers/{paperID}/bids", paperID)
+                        .param("requesterID", requesterID.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(bid)))
+                .andExpect(status().isInternalServerError());
 
         verify(bidsService, times(1)).bid(eq(requesterID), eq(paperID), eq(bid));
     }

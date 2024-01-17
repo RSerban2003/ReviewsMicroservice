@@ -45,6 +45,8 @@ public class BidsController implements BidsAPI {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ForbiddenAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return  new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -66,6 +68,8 @@ public class BidsController implements BidsAPI {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ForbiddenAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -92,6 +96,8 @@ public class BidsController implements BidsAPI {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         } catch (ConflictException e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
