@@ -48,7 +48,6 @@ public class TracksController implements TracksAPI {
                 tracksService.getPapers(requesterID, conferenceID, trackID)
             );
         } catch (NotFoundException e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ForbiddenAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
