@@ -1,5 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
+import java.util.Optional;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.strategies.AutomaticAssignmentStrategy;
@@ -255,9 +256,8 @@ public class AssignmentsService {
             ReviewID reviewID = review.getReviewID();
             Long paperID = reviewID.getPaperID();
             PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
-            Paper paper = new Paper(submissionCommunicator.getSubmission(paperID));
             nl.tudelft.sem.v20232024.team08b.dtos.review.Paper paper =
-                new nl.tudelft.sem.v20232024.team08b.dtos.review.Paper(externalRepository.getSubmission(paperID));
+                new nl.tudelft.sem.v20232024.team08b.dtos.review.Paper(submissionCommunicator.getSubmission(paperID));
             summaryWithID.setPaperID(paperID);
             summaryWithID.setTitle(paper.getTitle());
             summaryWithID.setAbstractSection(paper.getAbstractSection());

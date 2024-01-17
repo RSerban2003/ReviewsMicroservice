@@ -26,20 +26,16 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -90,7 +86,7 @@ public class AssignmentsServiceTests {
             )
         );
         assignmentsService.setAutomaticAssignmentStrategy(new AssignmentWithThreeSmallest(
-                                                            bidRepository, reviewRepository, externalRepository));
+                                                            bidRepository, reviewRepository, submissionsCommunicator));
         fakeSubmission = new Submission();
         fakeSubmission.setEventId(4L);
         fakeSubmission.setTrackId(5L);
@@ -350,7 +346,7 @@ public class AssignmentsServiceTests {
         when(reviewRepository.findByReviewIDReviewerID(1L)).thenReturn(reviews1);
 
         when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
-        when(externalRepository.getSubmission(10L)).thenThrow((new NotFoundException("Track not found")));
+        when(submissionsCommunicator.getSubmission(10L)).thenThrow((new NotFoundException("Track not found")));
         TrackID trackID1 = new TrackID(conferenceID, trackID);
         Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
@@ -396,8 +392,8 @@ public class AssignmentsServiceTests {
         when(reviewRepository.findByReviewIDReviewerID(1L)).thenReturn(reviews1);
         when(reviewRepository.findByReviewIDReviewerID(2L)).thenReturn(reviews2);
         when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
-        when(externalRepository.getSubmission(10L)).thenReturn(submission);
-        when(externalRepository.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
         Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
@@ -463,8 +459,8 @@ public class AssignmentsServiceTests {
         when(reviewRepository.findByReviewIDReviewerID(3L)).thenReturn(reviews3);
         when(reviewRepository.findByReviewIDReviewerID(4L)).thenReturn(reviews4);
         when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
-        when(externalRepository.getSubmission(10L)).thenReturn(submission);
-        when(externalRepository.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
         Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
@@ -535,11 +531,11 @@ public class AssignmentsServiceTests {
         when(reviewRepository.findByReviewIDReviewerID(3L)).thenReturn(reviews3);
         when(reviewRepository.findByReviewIDReviewerID(4L)).thenReturn(reviews4);
         when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
-        when(externalRepository.getSubmission(10L)).thenReturn(submission);
-        when(externalRepository.getSubmission(20L)).thenReturn(submission);
-        when(externalRepository.getSubmission(20L)).thenReturn(submission);
-        when(externalRepository.getSubmission(40L)).thenReturn(submission2);
-        when(externalRepository.getSubmission(50L)).thenReturn(submission2);
+        when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(40L)).thenReturn(submission2);
+        when(submissionsCommunicator.getSubmission(50L)).thenReturn(submission2);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
         Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
@@ -610,11 +606,11 @@ public class AssignmentsServiceTests {
         when(reviewRepository.findByReviewIDReviewerID(3L)).thenReturn(reviews3);
         when(reviewRepository.findByReviewIDReviewerID(4L)).thenReturn(reviews4);
         when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
-        when(externalRepository.getSubmission(10L)).thenReturn(submission);
-        when(externalRepository.getSubmission(20L)).thenReturn(submission);
-        when(externalRepository.getSubmission(20L)).thenReturn(submission);
-        when(externalRepository.getSubmission(40L)).thenReturn(submission2);
-        when(externalRepository.getSubmission(50L)).thenReturn(submission2);
+        when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(40L)).thenReturn(submission2);
+        when(submissionsCommunicator.getSubmission(50L)).thenReturn(submission2);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
         Optional<Track> trackOptional = Optional.of(new Track(trackID1, new Date(), false, papers));
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
@@ -699,7 +695,8 @@ public class AssignmentsServiceTests {
         s.setSubmissionId(6L);
         submissions.add(s);
 
-        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new  nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(
+            new  nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification
                 .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
                 .thenReturn(true);
@@ -733,7 +730,8 @@ public class AssignmentsServiceTests {
         Long requesterID = 1L;
         TrackID trackID = new TrackID(2L, 3L);
 
-        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(
+            new nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification
                 .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
                 .thenReturn(false);
@@ -747,7 +745,8 @@ public class AssignmentsServiceTests {
         Long requesterID = 1L;
         TrackID trackID = new TrackID(2L, 3L);
 
-        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(
+            new nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
         when(trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID()))
@@ -771,7 +770,7 @@ public class AssignmentsServiceTests {
         submissions.add(s);
 
         when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
-                .thenReturn(new Track());
+                .thenReturn(new  nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
         when(trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID()))

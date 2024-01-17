@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
+
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,23 +20,23 @@ import org.springframework.stereotype.Component;
 public class AssignmentWithThreeSmallest implements AutomaticAssignmentStrategy {
     private final BidRepository bidRepository;
     private final ReviewRepository reviewRepository;
-    private final ExternalRepository externalRepository;
+    private final SubmissionsMicroserviceCommunicator submissionsMicroservice;
 
     /**
     * Method that adds automatically the three reviewers with the least amount of papers.
     *
     * @param bidRepository repository for storing the bids
     * @param reviewRepository repository for storing the reviews
-    * @param externalRepository repository for storing the external database
+    * @param submissionsMicroservice repository for storing the external database
     */
     @Autowired
     public AssignmentWithThreeSmallest(BidRepository bidRepository,
                                      ReviewRepository reviewRepository,
-                                     ExternalRepository externalRepository) {
+                                       SubmissionsMicroserviceCommunicator submissionsMicroservice) {
 
         this.bidRepository = bidRepository;
         this.reviewRepository = reviewRepository;
-        this.externalRepository = externalRepository;
+        this.submissionsMicroservice = submissionsMicroservice;
     }
 
     @Override
@@ -52,8 +53,8 @@ public class AssignmentWithThreeSmallest implements AutomaticAssignmentStrategy 
                 var reviews = reviewRepository.findByReviewIDReviewerID(user);
                 var paperAmount = reviews.stream().map(x -> {
                     try {
-                        return new TrackID(externalRepository.getSubmission(x.getReviewID().getPaperID())
-                            .getEventId(), externalRepository.getSubmission(x.getReviewID().getPaperID())
+                        return new TrackID(submissionsMicroservice.getSubmission(x.getReviewID().getPaperID())
+                            .getEventId(), submissionsMicroservice.getSubmission(x.getReviewID().getPaperID())
                             .getTrackId());
                     } catch (NotFoundException e) {
                         throw new RuntimeException("Track does not exist!");
