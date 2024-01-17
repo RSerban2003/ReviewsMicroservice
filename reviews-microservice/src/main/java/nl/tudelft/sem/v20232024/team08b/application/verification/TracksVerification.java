@@ -2,8 +2,8 @@ package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
-import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithUsersMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
@@ -18,8 +18,8 @@ import java.util.List;
 @Service
 public class TracksVerification {
     private final TrackRepository trackRepository;
-    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
-    private final UsersMicroserviceCommunicator usersCommunicator;
+    private final CommunicationWithSubmissionMicroservice submissionsCommunicator;
+    private final CommunicationWithUsersMicroservice usersCommunicator;
     private final TrackPhaseCalculator trackPhaseCalculator;
     private final UsersVerification usersVerification;
 
@@ -34,8 +34,8 @@ public class TracksVerification {
      */
     @Autowired
     public TracksVerification(TrackRepository trackRepository,
-                              SubmissionsMicroserviceCommunicator submissionsCommunicator,
-                              UsersMicroserviceCommunicator usersCommunicator,
+                              CommunicationWithSubmissionMicroservice submissionsCommunicator,
+                              CommunicationWithUsersMicroservice usersCommunicator,
                               TrackPhaseCalculator trackPhaseCalculator,
                               UsersVerification usersVerification) {
         this.trackRepository = trackRepository;

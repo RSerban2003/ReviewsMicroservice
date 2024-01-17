@@ -1,7 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.application.phase;
 
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
@@ -19,7 +19,7 @@ import java.util.Optional;
 public class PaperPhaseCalculator {
     private final PaperRepository paperRepository;
     private final TrackRepository trackRepository;
-    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private final CommunicationWithSubmissionMicroservice submissionsCommunicator;
     private final ReviewRepository reviewRepository;
 
     /**
@@ -33,7 +33,7 @@ public class PaperPhaseCalculator {
     @Autowired
     public PaperPhaseCalculator(PaperRepository paperRepository,
                          TrackRepository trackRepository,
-                         SubmissionsMicroserviceCommunicator submissionsCommunicator,
+                         CommunicationWithSubmissionMicroservice submissionsCommunicator,
                          ReviewRepository reviewRepository) {
         this.paperRepository = paperRepository;
         this.trackRepository = trackRepository;

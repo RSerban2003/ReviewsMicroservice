@@ -5,8 +5,8 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
-import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithUsersMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
@@ -31,8 +31,8 @@ public class TracksService {
     private final UsersVerification usersVerification;
     private final TrackPhaseCalculator trackPhaseCalculator;
     private final TrackRepository trackRepository;
-    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
-    private final UsersMicroserviceCommunicator usersCommunicator;
+    private final CommunicationWithSubmissionMicroservice submissionsCommunicator;
+    private final CommunicationWithUsersMicroservice usersCommunicator;
     private final PapersService papersService;
 
 
@@ -51,10 +51,10 @@ public class TracksService {
     @Autowired
     public TracksService(TrackPhaseCalculator trackPhaseCalculator,
                          TrackRepository trackRepository,
-                         SubmissionsMicroserviceCommunicator submissionsCommunicator,
+                         CommunicationWithSubmissionMicroservice submissionsCommunicator,
                          TracksVerification tracksVerification,
                          UsersVerification usersVerification,
-                         UsersMicroserviceCommunicator usersCommunicator, PapersService papersService) {
+                         CommunicationWithUsersMicroservice usersCommunicator, PapersService papersService) {
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.trackRepository = trackRepository;
         this.submissionsCommunicator = submissionsCommunicator;

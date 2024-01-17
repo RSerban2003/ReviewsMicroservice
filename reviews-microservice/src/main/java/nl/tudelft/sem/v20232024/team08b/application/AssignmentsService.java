@@ -7,9 +7,9 @@ import nl.tudelft.sem.v20232024.team08b.application.strategies.AutomaticAssignme
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithUsersMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
-import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
@@ -35,8 +35,8 @@ public class AssignmentsService {
     private final PapersVerification papersVerification;
     private final TracksVerification tracksVerification;
     private final UsersVerification usersVerification;
-    private final SubmissionsMicroserviceCommunicator submissionCommunicator;
-    private final UsersMicroserviceCommunicator usersCommunicator;
+    private final CommunicationWithSubmissionMicroservice submissionCommunicator;
+    private final CommunicationWithUsersMicroservice usersCommunicator;
     private AutomaticAssignmentStrategy automaticAssignmentStrategy;
     private final TrackPhaseCalculator trackPhaseCalculator;
     private final TrackRepository trackRepository;
@@ -61,8 +61,8 @@ public class AssignmentsService {
             PapersVerification papersVerification,
             TracksVerification tracksVerification,
             UsersVerification usersVerification,
-            SubmissionsMicroserviceCommunicator submissionCommunicator,
-            UsersMicroserviceCommunicator usersCommunicator,
+            CommunicationWithSubmissionMicroservice submissionCommunicator,
+            CommunicationWithUsersMicroservice usersCommunicator,
             TrackPhaseCalculator trackPhaseCalculator,
             TrackRepository trackRepository,
             TracksService tracksService

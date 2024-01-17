@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class AssignmentWithThreeSmallest implements AutomaticAssignmentStrategy {
     private final BidRepository bidRepository;
     private final ReviewRepository reviewRepository;
-    private final SubmissionsMicroserviceCommunicator submissionsMicroservice;
+    private final CommunicationWithSubmissionMicroservice submissionsMicroservice;
 
     /**
     * Method that adds automatically the three reviewers with the least amount of papers.
@@ -32,7 +32,7 @@ public class AssignmentWithThreeSmallest implements AutomaticAssignmentStrategy 
     @Autowired
     public AssignmentWithThreeSmallest(BidRepository bidRepository,
                                      ReviewRepository reviewRepository,
-                                       SubmissionsMicroserviceCommunicator submissionsMicroservice) {
+                                       CommunicationWithSubmissionMicroservice submissionsMicroservice) {
 
         this.bidRepository = bidRepository;
         this.reviewRepository = reviewRepository;

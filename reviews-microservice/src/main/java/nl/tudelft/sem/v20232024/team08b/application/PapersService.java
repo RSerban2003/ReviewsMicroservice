@@ -3,7 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.application;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Service
 public class PapersService {
-    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private final CommunicationWithSubmissionMicroservice submissionsCommunicator;
     private final PaperRepository paperRepository;
     private final PapersVerification papersVerification;
     private final PaperPhaseCalculator paperPhaseCalculator;
@@ -31,7 +31,7 @@ public class PapersService {
      * @param papersVerification object responsible for verifying paper information
      */
     @Autowired
-    public PapersService(SubmissionsMicroserviceCommunicator submissionsCommunicator,
+    public PapersService(CommunicationWithSubmissionMicroservice submissionsCommunicator,
                          PaperRepository paperRepository,
                          PaperPhaseCalculator paperPhaseCalculator,
                          PapersVerification papersVerification) {
