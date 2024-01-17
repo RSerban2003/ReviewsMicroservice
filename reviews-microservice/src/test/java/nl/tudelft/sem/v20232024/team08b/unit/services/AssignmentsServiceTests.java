@@ -13,6 +13,8 @@ import nl.tudelft.sem.v20232024.team08b.application.strategies.AssignmentWithThr
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
@@ -25,10 +27,20 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Assertions;
@@ -43,12 +55,14 @@ import static org.mockito.Mockito.*;
 public class AssignmentsServiceTests {
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
     private final BidRepository bidRepository = Mockito.mock(BidRepository.class);
-    private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
     private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator =
+        Mockito.mock(SubmissionsMicroserviceCommunicator.class);
+    private final UsersMicroserviceCommunicator usersCommunicator = Mockito.mock(UsersMicroserviceCommunicator.class);
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.mock(TrackPhaseCalculator.class);
+    private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
     private final TracksService tracksService = Mockito.mock(TracksService.class);
 
     private AssignmentsService assignmentsService;
@@ -65,12 +79,13 @@ public class AssignmentsServiceTests {
         assignmentsService = Mockito.spy(
             new AssignmentsService(
                 reviewRepository,
-                trackRepository,
                 papersVerification,
                 tracksVerification,
                     usersVerification,
-                    externalRepository,
+                    submissionsCommunicator,
+                    usersCommunicator,
                     trackPhaseCalculator,
+                    trackRepository,
                     tracksService
             )
         );
@@ -661,7 +676,7 @@ public class AssignmentsServiceTests {
         List<ReviewID> reviewIDs = Collections.singletonList(reviewID);
         List<Review> reviews = List.of(new Review(reviewID, null, null, null, null, null));
         when(reviewRepository.findByReviewIDReviewerID(requesterID)).thenReturn(reviews);
-        when(externalRepository.getSubmission(paperID)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(paperID)).thenReturn(submission);
 
         List<PaperSummaryWithID> result = assignmentsService.getAssignedPapers(requesterID);
 
@@ -684,14 +699,13 @@ public class AssignmentsServiceTests {
         s.setSubmissionId(6L);
         submissions.add(s);
 
-        when(externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(
-            new  nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new  nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
         when(usersVerification
                 .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
                 .thenReturn(true);
         when(trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID()))
                 .thenReturn(TrackPhase.ASSIGNING);
-        when(externalRepository.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
         when(reviewRepository.findByReviewIDPaperID(5L)).thenReturn(List.of(new Review(), new Review(), new Review()));
         when(reviewRepository.findByReviewIDPaperID(6L)).thenReturn(List.of(new Review(),
                 new Review(), new Review(), new Review()));
@@ -708,9 +722,66 @@ public class AssignmentsServiceTests {
         Long requesterID = 1L;
         TrackID trackID = new TrackID(2L, 3L);
 
-        when(externalRepository.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
-            .thenThrow(NotFoundException.class);
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenThrow(NotFoundException.class);
 
+        Assertions.assertThrows(NotFoundException.class, () -> assignmentsService.finalization(requesterID, trackID));
     }
 
+    @Test
+    void finalizationWhenRequesterIsNotPCChairThrowsForbiddenAccessException() throws NotFoundException {
+        Long requesterID = 1L;
+        TrackID trackID = new TrackID(2L, 3L);
+
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(usersVerification
+                .verifyRoleFromTrack(requesterID, trackID.getConferenceID(), trackID.getTrackID(), UserRole.CHAIR))
+                .thenReturn(false);
+
+        Assertions.assertThrows(ForbiddenAccessException.class,
+                () -> assignmentsService.finalization(requesterID, trackID));
+    }
+
+    @Test
+    void finalizationWhenTrackIsNotInAssigningPhaseThrowsConflictException() throws NotFoundException {
+        Long requesterID = 1L;
+        TrackID trackID = new TrackID(2L, 3L);
+
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID())).thenReturn(new Track());
+        when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
+                trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
+        when(trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenReturn(TrackPhase.REVIEWING);
+
+        Assertions.assertThrows(ConflictException.class,
+                () -> assignmentsService.finalization(requesterID, trackID));
+    }
+
+    @Test
+    void finalizationWhenNotEnoughReviewersAssignedToEachPaperThrowsConflictException()
+            throws NotFoundException {
+        final Long requesterID = 1L;
+        final TrackID trackID = new TrackID(1L, 1L);
+        List<Submission> submissions = new ArrayList<>();
+        var s = new Submission();
+        s.setSubmissionId(5L);
+        submissions.add(s);
+        s = new Submission();
+        s.setSubmissionId(6L);
+        submissions.add(s);
+
+        when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenReturn(new Track());
+        when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
+                trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
+        when(trackPhaseCalculator.getTrackPhase(trackID.getConferenceID(), trackID.getTrackID()))
+                .thenReturn(TrackPhase.ASSIGNING);
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID, requesterID)).thenReturn(submissions);
+        when(reviewRepository.findByReviewIDPaperID(5L))
+                .thenReturn(List.of(new Review(), new Review(), new Review()));
+        when(reviewRepository.findByReviewIDPaperID(6L)).thenReturn(List.of(new Review(),
+                new Review()));
+
+        Assertions.assertThrows(ConflictException.class, () -> assignmentsService.finalization(requesterID, trackID));
+    }
 }

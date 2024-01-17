@@ -43,7 +43,17 @@ public class TracksController implements TracksAPI {
     public ResponseEntity<List<PaperSummaryWithID>> getPapers(Long requesterID,
                                                               Long conferenceID,
                                                               Long trackID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            return ResponseEntity.ok(
+                tracksService.getPapers(requesterID, conferenceID, trackID)
+            );
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ForbiddenAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
