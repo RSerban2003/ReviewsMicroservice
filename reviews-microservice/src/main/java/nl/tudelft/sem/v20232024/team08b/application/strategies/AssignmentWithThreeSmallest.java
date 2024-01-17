@@ -1,5 +1,6 @@
 package nl.tudelft.sem.v20232024.team08b.application.strategies;
 
+import static java.lang.Math.min;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,10 +96,9 @@ public class AssignmentWithThreeSmallest implements AutomaticAssignmentStrategy 
 
     private List<Integer> gettingSmallest(List<Integer> numberOfPapers) {
         List<Integer> smallest = new ArrayList<>();
-        int numberOfRepeats = 3;
-        if (numberOfPapers.size() < numberOfRepeats) {
-            numberOfRepeats = numberOfPapers.size();
-        }
+        int numberOfRepeats = min(3,numberOfPapers.size());
+
+
         for (int j = 0; j < numberOfRepeats; j++) {
             int minIndex = 0;
             // Find the index of the minimum element
