@@ -293,7 +293,7 @@ public class TracksService {
                 "Not Found. The requested track or conference was not found."
             );
         }
-        var submissions = externalRepository.getSubmissionsInTrack(trackID1, requesterID);
+        var submissions = submissionsCommunicator.getSubmissionsInTrack(trackID1, requesterID);
 
         final List<PaperSummaryWithID> papers = new ArrayList<>();
         for (Submission submission : submissions) {
