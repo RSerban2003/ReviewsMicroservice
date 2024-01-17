@@ -415,7 +415,7 @@ public class TracksServicesTests {
             trackID, UserRole.CHAIR)).thenReturn(true);
         when(tracksVerification.verifyTrack(conferenceID,
             trackID)).thenReturn(true);
-        when(externalRepository.getSubmissionsInTrack(trackID1, requesterID)).thenReturn(new ArrayList<>());
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID1, requesterID)).thenReturn(new ArrayList<>());
         List<PaperSummaryWithID> papers = new ArrayList<>();
         assertThat(tracksService.getPapers(requesterID, conferenceID, trackID)).isEqualTo(papers);
     }
@@ -436,7 +436,7 @@ public class TracksServicesTests {
         List<Submission> submissions = new ArrayList<>();
         submissions.add(submission1);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
-        when(externalRepository.getSubmissionsInTrack(trackID1, requesterID)).thenReturn(submissions);
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID1, requesterID)).thenReturn(submissions);
         var paper1 = new PaperSummaryWithID();
         paper1.setPaperID(1L);
         paper1.setTitle("abc");
@@ -476,7 +476,7 @@ public class TracksServicesTests {
         submissions.add(submission1);
         submissions.add(submission2);
         TrackID trackID1 = new TrackID(conferenceID, trackID);
-        when(externalRepository.getSubmissionsInTrack(trackID1, requesterID)).thenReturn(submissions);
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID1, requesterID)).thenReturn(submissions);
         var paper1 = new PaperSummaryWithID();
         paper1.setPaperID(1L);
         paper1.setTitle("abc");
