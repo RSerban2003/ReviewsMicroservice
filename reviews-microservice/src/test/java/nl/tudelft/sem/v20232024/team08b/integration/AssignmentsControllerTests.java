@@ -1,23 +1,11 @@
 package nl.tudelft.sem.v20232024.team08b.integration;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Arrays;
-import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.controllers.AssignmentsController;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
@@ -35,8 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -186,6 +173,18 @@ public class AssignmentsControllerTests {
         verify(assignmentsService).assignments(requesterID, paperID);
     }
 
+    @Test
+    void assignmentsReturnsConflict() throws Exception {
+
+        when(assignmentsService.assignments(requesterID, paperID)).thenThrow(new IllegalArgumentException());
+
+        mockMvc.perform(get("/papers/{paperID}/assignees", paperID)
+                        .param("requesterID", String.valueOf(requesterID))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+
+        verify(assignmentsService).assignments(requesterID, paperID);
+    }
 
     @Test
     void assignAutoReturnsOk() throws Exception {
@@ -195,7 +194,8 @@ public class AssignmentsControllerTests {
         mockMvc.perform(put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
                 .param("requesterID", String.valueOf(requesterID))
                 .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
         verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
     }
@@ -250,7 +250,8 @@ public class AssignmentsControllerTests {
 
         mockMvc.perform(put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
             .param("requesterID", String.valueOf(requesterID))
-            .contentType(MediaType.APPLICATION_JSON));
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError());
 
         verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
     }
@@ -271,7 +272,6 @@ public class AssignmentsControllerTests {
                                 .param("requesterID", Long.toString(requesterID))
                 ).andExpect(MockMvcResultMatchers.status().is(200))
                 .andExpect(MockMvcResultMatchers.content().json(paperSummaryJSON));
-
         verify(assignmentsService).getAssignedPapers(requesterID);
     }
 
@@ -308,7 +308,7 @@ public class AssignmentsControllerTests {
 
     @Test
     public void testFinalizationSuccess() throws Exception {
-        doNothing().when(assignmentsService).finalization(anyLong(), any(TrackID.class));
+        doNothing().when(assignmentsService).finalization(anyLong(), anyLong(), anyLong());
 
         mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
                         .param("requesterID", "3"))
@@ -316,54 +316,96 @@ public class AssignmentsControllerTests {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
         verify(assignmentsService, times(1)).finalization(eq(3L),
-                eq(new TrackID(1L, 2L)));
+                eq(1L), eq(2L));
     }
 
     @Test
-    public void testFinalizationConflictException() throws Exception {
-        doThrow(new ConflictException()).when(assignmentsService).finalization(anyLong(), any(TrackID.class));
+    public void testFinalizationIllegalStateException() throws Exception {
+        doThrow(new IllegalStateException()).when(assignmentsService).finalization(anyLong(), anyLong(), anyLong());
 
         mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
                         .param("requesterID", "3"))
                 .andExpect(status().isConflict());
 
-        verify(assignmentsService, times(1)).finalization(eq(3L),
-                eq(new TrackID(1L, 2L)));
+        verify(assignmentsService, times(1)).finalization(3L,
+                1L, 2L);
     }
 
     @Test
     public void testFinalizationNotFoundException() throws Exception {
-        doThrow(new NotFoundException("")).when(assignmentsService).finalization(anyLong(), any(TrackID.class));
+        doThrow(new NotFoundException("")).when(assignmentsService).finalization(anyLong(), anyLong(), anyLong());
 
         mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
                         .param("requesterID", "3"))
                 .andExpect(status().isNotFound());
 
-        verify(assignmentsService, times(1)).finalization(eq(3L),
-                eq(new TrackID(1L, 2L)));
+        verify(assignmentsService, times(1)).finalization(3L, 1L, 2L);
     }
 
     @Test
     public void testFinalizationForbiddenAccessException() throws Exception {
-        doThrow(new ForbiddenAccessException()).when(assignmentsService).finalization(anyLong(), any(TrackID.class));
+        doThrow(new ForbiddenAccessException()).when(assignmentsService).finalization(anyLong(), anyLong(), anyLong());
 
         mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
                         .param("requesterID", "3"))
                 .andExpect(status().isForbidden());
 
-        verify(assignmentsService, times(1)).finalization(eq(3L),
-                eq(new TrackID(1L, 2L)));
+        verify(assignmentsService, times(1)).finalization(3L,
+                1L, 2L);
     }
 
     @Test
-    public void testFinalizationInternalServerException() throws Exception {
-        doThrow(new RuntimeException()).when(assignmentsService).finalization(anyLong(), any(TrackID.class));
+    void testRemoveSuccessful() throws Exception {
 
-        mockMvc.perform(post("/conferences/{conferenceID}/tracks/{trackID}/finalization", 1L, 2L)
-                        .param("requesterID", "3"))
-                .andExpect(status().isInternalServerError());
+        doNothing().when(assignmentsService).remove(requesterID, paperID, reviewerID);
 
-        verify(assignmentsService, times(1)).finalization(eq(3L),
-                eq(new TrackID(1L, 2L)));
+        mockMvc.perform(delete("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().is(200))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
+
+
+        verify(assignmentsService, times(1)).remove(requesterID, paperID, reviewerID);
+    }
+
+    @Test
+    void testRemoveNotFound() throws Exception {
+
+
+        doThrow(new NotFoundException("")).when(assignmentsService).remove(requesterID, paperID, reviewerID);
+
+        mockMvc.perform(delete("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+
+        verify(assignmentsService, times(1)).remove(requesterID, paperID, reviewerID);
+    }
+
+    @Test
+    void testRemoveForbidden() throws Exception {
+
+        doThrow(new IllegalAccessException()).when(assignmentsService).remove(requesterID, paperID, reviewerID);
+
+        mockMvc.perform(delete("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+
+        verify(assignmentsService, times(1)).remove(requesterID, paperID, reviewerID);
+    }
+
+    @Test
+    void testRemoveInternalServerError() throws Exception {
+
+        doThrow(new RuntimeException()).when(assignmentsService).remove(requesterID, paperID, reviewerID);
+
+        mockMvc.perform(delete("/papers/{paperID}/assignees/{reviewerID}", paperID, reviewerID)
+                .param("requesterID", String.valueOf(requesterID))
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError());
+
+        verify(assignmentsService, times(1)).remove(requesterID, paperID, reviewerID);
     }
 }

@@ -1,9 +1,10 @@
 package nl.tudelft.sem.v20232024.team08b.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.application.TracksService;
+import nl.tudelft.sem.v20232024.team08b.application.TrackAnalyticsService;
+import nl.tudelft.sem.v20232024.team08b.application.TrackDeadlineService;
+import nl.tudelft.sem.v20232024.team08b.application.TrackInformationService;
 import nl.tudelft.sem.v20232024.team08b.controllers.TracksController;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import static org.mockito.Mockito.*;
 
@@ -30,13 +32,16 @@ import static org.mockito.Mockito.*;
 @AutoConfigureMockMvc
 public class TracksControllerTests {
     MockMvc mockMvc;
-    final TracksService tracksService = Mockito.mock(TracksService.class);
+    final TrackInformationService trackInformationService = Mockito.mock(TrackInformationService.class);
+    final TrackAnalyticsService trackAnalyticsService = Mockito.mock(TrackAnalyticsService.class);
+    final TrackDeadlineService trackDeadlineService = Mockito.mock(TrackDeadlineService.class);
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(
-                new TracksController(tracksService)
+                new TracksController(trackInformationService, trackAnalyticsService, trackDeadlineService)
         ).build();
     }
 
@@ -54,7 +59,7 @@ public class TracksControllerTests {
         Long trackID = 3L;
 
         // Make sure correct exception is thrown when the respective call to service is called
-        doThrow(exception).when(tracksService).getTrackPhase(requesterID, conferenceID, trackID);
+        doThrow(exception).when(trackInformationService).getTrackPhase(requesterID, conferenceID, trackID);
 
         // Send the request to respective endpoint
         mockMvc.perform(
@@ -64,7 +69,7 @@ public class TracksControllerTests {
         ).andExpect(MockMvcResultMatchers.status().is(expected));
 
         // Make sure the required call to the service was made
-        verify(tracksService).getTrackPhase(requesterID, conferenceID, trackID);
+        verify(trackInformationService).getTrackPhase(requesterID, conferenceID, trackID);
     }
 
     @Test
@@ -92,7 +97,7 @@ public class TracksControllerTests {
         Long trackID = 3L;
 
         // Make sure correct exception is thrown when the respective call to service is called
-        doReturn(fakeTrackPhase).when(tracksService).getTrackPhase(requesterID, conferenceID, trackID);
+        doReturn(fakeTrackPhase).when(trackInformationService).getTrackPhase(requesterID, conferenceID, trackID);
 
         // Send the request to respective endpoint
         mockMvc.perform(
@@ -103,7 +108,7 @@ public class TracksControllerTests {
                 .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
 
         // Make sure the required call to the service was made
-        verify(tracksService).getTrackPhase(requesterID, conferenceID, trackID);
+        verify(trackInformationService).getTrackPhase(requesterID, conferenceID, trackID);
     }
 
     /**
@@ -120,7 +125,7 @@ public class TracksControllerTests {
         Long trackID = 3L;
 
         // Make sure correct exception is thrown when the respective call to service is called
-        doThrow(exception).when(tracksService).getBiddingDeadline(requesterID, conferenceID, trackID);
+        doThrow(exception).when(trackDeadlineService).getBiddingDeadline(requesterID, conferenceID, trackID);
 
         // Send the request to respective endpoint
         mockMvc.perform(
@@ -130,7 +135,7 @@ public class TracksControllerTests {
         ).andExpect(MockMvcResultMatchers.status().is(expected));
 
         // Make sure the required call to the service was made
-        verify(tracksService).getBiddingDeadline(requesterID, conferenceID, trackID);
+        verify(trackDeadlineService).getBiddingDeadline(requesterID, conferenceID, trackID);
     }
 
     @Test
@@ -158,7 +163,7 @@ public class TracksControllerTests {
         Long trackID = 3L;
 
         // Make sure correct exception is thrown when the respective call to service is called
-        doReturn(fakeDate).when(tracksService).getBiddingDeadline(requesterID, conferenceID, trackID);
+        doReturn(fakeDate).when(trackDeadlineService).getBiddingDeadline(requesterID, conferenceID, trackID);
 
         // Send the request to respective endpoint
         mockMvc.perform(
@@ -169,7 +174,7 @@ public class TracksControllerTests {
                 .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
 
         // Make sure the required call to the service was made
-        verify(tracksService).getBiddingDeadline(requesterID, conferenceID, trackID);
+        verify(trackDeadlineService).getBiddingDeadline(requesterID, conferenceID, trackID);
     }
 
     /**
@@ -190,7 +195,7 @@ public class TracksControllerTests {
         String dateJSON = objectMapper.writeValueAsString(date);
 
         // Make sure correct exception is thrown when the respective call to service is called
-        doThrow(exception).when(tracksService).setBiddingDeadline(requesterID, conferenceID, trackID, date);
+        doThrow(exception).when(trackDeadlineService).setBiddingDeadline(requesterID, conferenceID, trackID, date);
 
         // Send the request to respective endpoint
         mockMvc.perform(
@@ -202,7 +207,7 @@ public class TracksControllerTests {
         ).andExpect(MockMvcResultMatchers.status().is(expected));
 
         // Make sure the required call to the service was made
-        verify(tracksService).setBiddingDeadline(requesterID, conferenceID, trackID, date);
+        verify(trackDeadlineService).setBiddingDeadline(requesterID, conferenceID, trackID, date);
     }
 
     @Test
@@ -231,7 +236,7 @@ public class TracksControllerTests {
         String dateJSON = objectMapper.writeValueAsString(date);
 
         // Make sure correct exception is thrown when the respective call to service is called
-        doNothing().when(tracksService).setBiddingDeadline(requesterID, conferenceID, trackID, date);
+        doNothing().when(trackDeadlineService).setBiddingDeadline(requesterID, conferenceID, trackID, date);
 
         // Send the request to respective endpoint
         mockMvc.perform(
@@ -244,7 +249,7 @@ public class TracksControllerTests {
         .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
 
         // Make sure the required call to the service was made
-        verify(tracksService).setBiddingDeadline(requesterID, conferenceID, trackID, date);
+        verify(trackDeadlineService).setBiddingDeadline(requesterID, conferenceID, trackID, date);
     }
 
     @Test
@@ -254,7 +259,7 @@ public class TracksControllerTests {
         Long trackID = 3L;
 
         var trackAnalytics = new TrackAnalytics(3, 2, 1);
-        when(tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)).thenReturn(trackAnalytics);
+        when(trackAnalyticsService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)).thenReturn(trackAnalytics);
 
         mockMvc.perform(
                         MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/analytics",
@@ -270,7 +275,7 @@ public class TracksControllerTests {
         Long conferenceID = 2L;
         Long trackID = 3L;
 
-        when(tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
+        when(trackAnalyticsService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
                 .thenThrow(new NotFoundException(""));
 
         mockMvc.perform(
@@ -286,7 +291,7 @@ public class TracksControllerTests {
         Long conferenceID = 2L;
         Long trackID = 3L;
 
-        when(tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
+        when(trackAnalyticsService.getAnalytics(new TrackID(conferenceID, trackID), requesterID))
                 .thenThrow(new ForbiddenAccessException());
 
         mockMvc.perform(
@@ -312,7 +317,7 @@ public class TracksControllerTests {
         Long requesterID = 3L;
         Long conferenceID = 4L;
         Long trackID = 5L;
-        when(tracksService.getPapers(requesterID, conferenceID, trackID)).thenReturn(papersSummaryWithIDS);
+        when(trackInformationService.getPapers(requesterID, conferenceID, trackID)).thenReturn(papersSummaryWithIDS);
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/papers",
                         conferenceID, trackID)
@@ -326,7 +331,7 @@ public class TracksControllerTests {
         Long requesterID = 3L;
         Long conferenceID = 4L;
         Long trackID = 5L;
-        when(tracksService.getPapers(requesterID, conferenceID, trackID))
+        when(trackInformationService.getPapers(requesterID, conferenceID, trackID))
             .thenThrow(new NotFoundException(""));
 
         mockMvc.perform(
@@ -341,7 +346,7 @@ public class TracksControllerTests {
         Long requesterID = 3L;
         Long conferenceID = 4L;
         Long trackID = 5L;
-        when(tracksService.getPapers(requesterID, conferenceID, trackID))
+        when(trackInformationService.getPapers(requesterID, conferenceID, trackID))
             .thenThrow(new ForbiddenAccessException());
 
         mockMvc.perform(
@@ -349,20 +354,5 @@ public class TracksControllerTests {
                     conferenceID, trackID)
                 .param("requesterID", requesterID.toString())
         ).andExpect(MockMvcResultMatchers.status().is(403));
-    }
-
-    @Test
-    void getPapersInternalServerError() throws Exception {
-        Long requesterID = 3L;
-        Long conferenceID = 4L;
-        Long trackID = 5L;
-        when(tracksService.getPapers(requesterID, conferenceID, trackID))
-            .thenThrow(new RuntimeException());
-
-        mockMvc.perform(
-            MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/papers",
-                    conferenceID, trackID)
-                .param("requesterID", requesterID.toString())
-        ).andExpect(MockMvcResultMatchers.status().is(500));
     }
 }

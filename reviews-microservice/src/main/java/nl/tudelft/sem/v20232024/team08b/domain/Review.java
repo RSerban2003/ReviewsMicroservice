@@ -29,6 +29,18 @@ public class Review implements Serializable {
     private List<Comment> confidentialComments;
 
     /**
+     * Constructs an empty review given paperID and reviewID of
+     * that review.
+     *
+     * @param paperID the paper that is reviewed
+     * @param reviewerID the ID of the reviewer
+     */
+    public Review(Long paperID, Long reviewerID) {
+        this.reviewID = new ReviewID(paperID, reviewerID);
+        this.confidentialComments = new ArrayList<>();
+    }
+
+    /**
      * A constructor that parses the DTO into the domain object.
      *
      * @param reviewDTO the review data transfer object

@@ -5,7 +5,6 @@ import nl.tudelft.sem.v20232024.team08b.application.verification.BidsVerificatio
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.BidID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,12 +81,12 @@ public class BidsService {
      * @param bid         the preference of the reviewer in regard to reviewing the paper
      * @throws ForbiddenAccessException if the requester is not a reviewer of the track the paper is in
      * @throws NotFoundException        if the paper/track doesn't exist
-     * @throws ConflictException        if the bidding phase has passed or if it hasn't started
+     * @throws IllegalStateException    if the bidding phase has passed or if it hasn't started
      */
     public void bid(Long requesterID,
                     Long paperID,
                     nl.tudelft.sem.v20232024.team08b.dtos.review.Bid bid)
-            throws ForbiddenAccessException, NotFoundException, ConflictException {
+            throws ForbiddenAccessException, NotFoundException, IllegalStateException {
         bidsVerification.verifyPermissionToSubmitBid(requesterID, paperID);
         bidRepository.save(new Bid(paperID, requesterID, bid));
     }

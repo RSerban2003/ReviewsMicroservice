@@ -6,7 +6,6 @@ import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissio
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,11 +72,11 @@ public class BidsVerification {
      * @param paperID the paper which is bid for
      * @throws NotFoundException if no such paper was found
      * @throws ForbiddenAccessException if the requester is not a reviewer
-     * @throws ConflictException if the track phase is incorrect
+     * @throws IllegalStateException if the track phase is incorrect
      */
     public void verifyPermissionToSubmitBid(Long requesterID, Long paperID) throws NotFoundException,
                                                                                 ForbiddenAccessException,
-                                                                                ConflictException {
+                                                                                IllegalStateException {
         boolean isReviewer = usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER);
         if (!isReviewer) {
             throw new ForbiddenAccessException();
@@ -85,7 +84,7 @@ public class BidsVerification {
 
         Submission paper = submissionsCommunicator.getSubmission(paperID);
         if (trackPhaseCalculator.getTrackPhase(paper.getEventId(), paper.getTrackId()) != TrackPhase.BIDDING) {
-            throw new ConflictException();
+            throw new IllegalStateException();
         }
     }
 }

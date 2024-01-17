@@ -2,7 +2,9 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.TracksAPI;
-import nl.tudelft.sem.v20232024.team08b.application.TracksService;
+import nl.tudelft.sem.v20232024.team08b.application.TrackAnalyticsService;
+import nl.tudelft.sem.v20232024.team08b.application.TrackDeadlineService;
+import nl.tudelft.sem.v20232024.team08b.application.TrackInformationService;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
@@ -19,16 +21,24 @@ import java.util.List;
 
 @RestController
 public class TracksController implements TracksAPI {
-    private final TracksService tracksService;
+    private final TrackInformationService trackInformationService;
+    private final TrackAnalyticsService trackAnalyticsService;
+    private final TrackDeadlineService trackDeadlineService;
 
     /**
      * Default constructor for the controller.
      *
-     * @param tracksService the respective service to inject
+     * @param trackInformationService service that manages track information
+     * @param trackAnalyticsService service that manages the analytics of tracks
+     * @param trackDeadlineService service that manages the deadlines of tracks
      */
     @Autowired
-    public TracksController(TracksService tracksService) {
-        this.tracksService = tracksService;
+    public TracksController(TrackInformationService trackInformationService,
+                            TrackAnalyticsService trackAnalyticsService,
+                            TrackDeadlineService trackDeadlineService) {
+        this.trackInformationService = trackInformationService;
+        this.trackAnalyticsService = trackAnalyticsService;
+        this.trackDeadlineService = trackDeadlineService;
     }
 
     /**
@@ -45,14 +55,12 @@ public class TracksController implements TracksAPI {
                                                               Long trackID) {
         try {
             return ResponseEntity.ok(
-                tracksService.getPapers(requesterID, conferenceID, trackID)
+                trackInformationService.getPapers(requesterID, conferenceID, trackID)
             );
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (ForbiddenAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -70,7 +78,7 @@ public class TracksController implements TracksAPI {
     ) {
         try {
             return ResponseEntity.ok(
-                    tracksService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)
+                    trackAnalyticsService.getAnalytics(new TrackID(conferenceID, trackID), requesterID)
             );
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -94,7 +102,7 @@ public class TracksController implements TracksAPI {
                                                    Long trackID,
                                                    Date newDeadline) {
         try {
-            tracksService.setBiddingDeadline(
+            trackDeadlineService.setBiddingDeadline(
                     requesterID,
                     conferenceID,
                     trackID,
@@ -126,7 +134,7 @@ public class TracksController implements TracksAPI {
                                                    Long conferenceID,
                                                    Long trackID) {
         try {
-            Date biddingDeadline = tracksService.getBiddingDeadline(
+            Date biddingDeadline = trackDeadlineService.getBiddingDeadline(
                     requesterID,
                     conferenceID,
                     trackID
@@ -154,7 +162,7 @@ public class TracksController implements TracksAPI {
                                                Long conferenceID,
                                                Long trackID) {
         try {
-            TrackPhase trackPhase = tracksService.getTrackPhase(
+            TrackPhase trackPhase = trackInformationService.getTrackPhase(
                     requesterID,
                     conferenceID,
                     trackID

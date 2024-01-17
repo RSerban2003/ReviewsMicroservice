@@ -1,21 +1,21 @@
 package nl.tudelft.sem.v20232024.team08b.unit.communicators;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.List;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
-import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.utils.HttpRequestSender;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 public class SubmissionsMicroserviceCommunicatorTests {
     final HttpRequestSender httpRequestSender = Mockito.mock(HttpRequestSender.class);
@@ -61,7 +61,7 @@ public class SubmissionsMicroserviceCommunicatorTests {
         when(
             objectMapper.readValue("json", List.class)
         ).thenReturn(expected);
-        assertThat(submissionsCommunicator.getSubmissionsInTrack(new TrackID(1L, 2L),
+        assertThat(submissionsCommunicator.getSubmissionsInTrack(1L, 2L,
             3L)).isEqualTo(expected);
     }
 
@@ -70,7 +70,7 @@ public class SubmissionsMicroserviceCommunicatorTests {
         when(httpRequestSender.sendGetRequest(ArgumentMatchers.any()))
             .thenThrow(new NotFoundException(""));
         assertThrows(NotFoundException.class, () ->
-            submissionsCommunicator.getSubmissionsInTrack(new TrackID(1L, 2L), 3L));
+            submissionsCommunicator.getSubmissionsInTrack(1L, 2L, 3L));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class SubmissionsMicroserviceCommunicatorTests {
         when(
             objectMapper.readValue("json", List.class)
         ).thenReturn(expected);
-        assertThat(submissionsCommunicator.getSubmissionsInTrack(new TrackID(1L, 2L)))
+        assertThat(submissionsCommunicator.getSubmissionsInTrack(1L, 2L))
             .isEqualTo(expected);
     }
 
@@ -91,6 +91,6 @@ public class SubmissionsMicroserviceCommunicatorTests {
             objectMapper.readValue("json", List.class)
         ).thenThrow(new RuntimeException(""));
         assertThrows(RuntimeException.class, () ->
-            submissionsCommunicator.getSubmissionsInTrack(new TrackID(1L, 2L), 3L));
+            submissionsCommunicator.getSubmissionsInTrack(1L, 2L, 3L));
     }
 }

@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.DiscussionService;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.controllers.ReviewsController;
@@ -29,9 +30,14 @@ import static org.mockito.Mockito.*;
 @AutoConfigureMockMvc
 public class ReviewsControllerTests {
     MockMvc mockMvc;
+
     private final ReviewsService reviewsService = Mockito.mock(ReviewsService.class);
     private final PapersService papersService = Mockito.mock(PapersService.class);
+
+    private final DiscussionService discussionService = Mockito.mock(DiscussionService.class);
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
     private nl.tudelft.sem.v20232024.team08b.dtos.review.Review fakeReviewDTO;
 
     private Long requesterID;
@@ -41,7 +47,7 @@ public class ReviewsControllerTests {
     @BeforeEach
     void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(
-                new ReviewsController(reviewsService, papersService)
+                new ReviewsController(reviewsService, papersService, discussionService)
         ).build();
         fakeReviewDTO = new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(
                 ConfidenceScore.BASIC,
@@ -66,7 +72,7 @@ public class ReviewsControllerTests {
         Long requesterID = 1L;
         Long paperID = 2L;
 
-        doThrow(exception).when(reviewsService).finalizeDiscussionPhase(requesterID, paperID);
+        doThrow(exception).when(discussionService).finalizeDiscussionPhase(requesterID, paperID);
 
         // Send the request to respective endpoint
         mockMvc.perform(
@@ -75,7 +81,7 @@ public class ReviewsControllerTests {
         ).andExpect(MockMvcResultMatchers.status().is(expected));
 
         // Make sure the required call to the service was made
-        verify(reviewsService, times(1)).finalizeDiscussionPhase(requesterID, paperID);
+        verify(discussionService, times(1)).finalizeDiscussionPhase(requesterID, paperID);
     }
 
     @Test
@@ -107,14 +113,14 @@ public class ReviewsControllerTests {
     public void finalizeDiscussionSuccessful() throws Exception {
         Long requesterID = 1L;
         Long paperID = 2L;
-        doNothing().when(reviewsService).finalizeDiscussionPhase(requesterID, paperID);
+        doNothing().when(discussionService).finalizeDiscussionPhase(requesterID, paperID);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/papers/{paperID}/reviews/finalization", paperID.toString())
                         .param("requesterID", requesterID.toString())
                 ).andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
-        verify(reviewsService, times(1)).finalizeDiscussionPhase(requesterID, paperID);
+        verify(discussionService, times(1)).finalizeDiscussionPhase(requesterID, paperID);
     }
 
     @Test
@@ -368,7 +374,7 @@ public class ReviewsControllerTests {
 
         String text = "text";
 
-        doNothing().when(reviewsService).submitDiscussionComment(requesterID, reviewerID, paperID, text);
+        doNothing().when(discussionService).submitDiscussionComment(requesterID, reviewerID, paperID, text);
 
         mockMvc.perform(
                 MockMvcRequestBuilders
@@ -380,7 +386,7 @@ public class ReviewsControllerTests {
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
 
-        verify(reviewsService).submitDiscussionComment(requesterID, reviewerID, paperID, "text");
+        verify(discussionService).submitDiscussionComment(requesterID, reviewerID, paperID, "text");
     }
 
     /**
@@ -395,7 +401,7 @@ public class ReviewsControllerTests {
 
         String text = "text";
 
-        doThrow(exception).when(reviewsService).submitDiscussionComment(requesterID, reviewerID, paperID, text);
+        doThrow(exception).when(discussionService).submitDiscussionComment(requesterID, reviewerID, paperID, text);
 
         mockMvc.perform(
                 MockMvcRequestBuilders
@@ -406,7 +412,7 @@ public class ReviewsControllerTests {
                 )
                 .andExpect(MockMvcResultMatchers.status().is(expected));
 
-        verify(reviewsService).submitDiscussionComment(requesterID, reviewerID, paperID, "text");
+        verify(discussionService).submitDiscussionComment(requesterID, reviewerID, paperID, "text");
     }
 
     @Test
@@ -431,7 +437,7 @@ public class ReviewsControllerTests {
         comments.add(new DiscussionComment(2L, "comment"));
         comments.add(new DiscussionComment(3L, "comment"));
 
-        when(reviewsService.getDiscussionComments(requesterID, reviewerID, paperID)).thenReturn(comments);
+        when(discussionService.getDiscussionComments(requesterID, reviewerID, paperID)).thenReturn(comments);
 
         String expectedJSON = objectMapper.writeValueAsString(comments);
 
@@ -444,7 +450,7 @@ public class ReviewsControllerTests {
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andExpect(MockMvcResultMatchers.content().json(expectedJSON));
 
-        verify(reviewsService).getDiscussionComments(requesterID, reviewerID, paperID);
+        verify(discussionService).getDiscussionComments(requesterID, reviewerID, paperID);
     }
 
     /**
@@ -457,7 +463,7 @@ public class ReviewsControllerTests {
      */
     public void getDiscussionCommentsWithException(Exception exception, int expected) throws Exception {
 
-        doThrow(exception).when(reviewsService).getDiscussionComments(requesterID, reviewerID, paperID);
+        doThrow(exception).when(discussionService).getDiscussionComments(requesterID, reviewerID, paperID);
 
         mockMvc.perform(
                 MockMvcRequestBuilders
@@ -467,7 +473,7 @@ public class ReviewsControllerTests {
                 )
                 .andExpect(MockMvcResultMatchers.status().is(expected));
 
-        verify(reviewsService).getDiscussionComments(requesterID, reviewerID, paperID);
+        verify(discussionService).getDiscussionComments(requesterID, reviewerID, paperID);
     }
 
     @Test
