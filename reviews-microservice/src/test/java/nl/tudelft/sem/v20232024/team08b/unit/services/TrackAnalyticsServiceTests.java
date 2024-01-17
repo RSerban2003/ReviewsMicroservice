@@ -4,13 +4,13 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.PapersService;
 import nl.tudelft.sem.v20232024.team08b.application.TrackAnalyticsService;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,13 +22,14 @@ import static org.mockito.Mockito.when;
 
 public class TrackAnalyticsServiceTests {
     private final UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator =
+            Mockito.mock(SubmissionsMicroserviceCommunicator.class);
     private final PapersService papersService = Mockito.mock(PapersService.class);
 
     private final TrackAnalyticsService trackAnalyticsService = Mockito.spy(
             new TrackAnalyticsService(
                     usersVerification,
-                    externalRepository,
+                    submissionsCommunicator,
                     papersService
             )
     );
@@ -68,7 +69,7 @@ public class TrackAnalyticsServiceTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
 
-        when(externalRepository.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
                 .thenReturn(submissions);
 
         when(papersService.getState(requesterID, 1L)).thenReturn(PaperStatus.ACCEPTED);
@@ -95,7 +96,7 @@ public class TrackAnalyticsServiceTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
 
-        when(externalRepository.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
                 .thenThrow(NotFoundException.class);
 
         Assertions.assertThrows(NotFoundException.class, () -> {
@@ -134,7 +135,7 @@ public class TrackAnalyticsServiceTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(true);
 
-        when(externalRepository.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
+        when(submissionsCommunicator.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
                 .thenReturn(submissions);
 
         when(papersService.getState(1L, requesterID)).thenThrow(new IllegalAccessException());

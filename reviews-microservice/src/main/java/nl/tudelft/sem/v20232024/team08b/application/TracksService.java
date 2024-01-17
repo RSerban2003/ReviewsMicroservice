@@ -4,16 +4,21 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
+import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +29,8 @@ public class TracksService {
     private final UsersVerification usersVerification;
     private final TrackPhaseCalculator trackPhaseCalculator;
     private final TrackRepository trackRepository;
-    private final ExternalRepository externalRepository;
+    private final UsersMicroserviceCommunicator usersCommunicator;
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
 
 
     /**
@@ -33,21 +39,24 @@ public class TracksService {
      * @param trackPhaseCalculator object responsible for getting the current phase
      *                             of a track
      * @param trackRepository repository storing the tracks
-     * @param externalRepository class, that talks to outside microservices
+     * @param usersCommunicator class, that talks to outside microservice
      * @param tracksVerification object responsible for verifying track information
      * @param usersVerification object responsible for verifying user information
+     * @param submissionsCommunicator gets objects from submissions microservice
      */
     @Autowired
     public TracksService(TrackPhaseCalculator trackPhaseCalculator,
                          TrackRepository trackRepository,
-                         ExternalRepository externalRepository,
+                         UsersMicroserviceCommunicator usersCommunicator,
                          TracksVerification tracksVerification,
-                         UsersVerification usersVerification) {
+                         UsersVerification usersVerification,
+                         SubmissionsMicroserviceCommunicator submissionsCommunicator) {
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.trackRepository = trackRepository;
-        this.externalRepository = externalRepository;
+        this.usersCommunicator = usersCommunicator;
         this.tracksVerification = tracksVerification;
         this.usersVerification = usersVerification;
+        this.submissionsCommunicator = submissionsCommunicator;
     }
 
     /**
@@ -117,8 +126,8 @@ public class TracksService {
      * @throws NotFoundException if such track does not exist
      */
     private void setBiddingDeadlineCommon(Long conferenceID,
-                                   Long trackID,
-                                   Date deadline) throws NotFoundException {
+                                          Long trackID,
+                                          Date deadline) throws NotFoundException {
         Track track = getTrackWithInsertionToOurRepo(conferenceID, trackID);
         track.setBiddingDeadline(deadline);
         trackRepository.save(track);
@@ -132,9 +141,9 @@ public class TracksService {
      * @param trackID the ID of the track.
      */
     public void setDefaultBiddingDeadline(Long conferenceID,
-                                           Long trackID) throws NotFoundException {
+                                          Long trackID) throws NotFoundException {
         // Get the submission deadline from the other microservice
-        Integer submissionDeadlineUnix = externalRepository.getTrack(conferenceID, trackID).getDeadline();
+        Integer submissionDeadlineUnix = usersCommunicator.getTrack(conferenceID, trackID).getDeadline();
 
         // Add exactly 2 days (in milliseconds) to the submission deadline
         int biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);
@@ -214,6 +223,38 @@ public class TracksService {
         setBiddingDeadlineCommon(conferenceID, trackID, newDeadline);
     }
 
+    /**
+     * Gets the submissions of a track and transforms them into an instance of PaperSummaryWithID.
+     *
+     * @param requesterID the ID of the requester
+     * @param conferenceID the ID of the conference
+     * @param trackID the ID of the track
+     * @return A list of PaperSummaryWithID
+     * @throws ForbiddenAccessException if the track does not exist
+     * @throws NotFoundException if the user is not a pc chair
+     */
+    public List<PaperSummaryWithID> getPapers(Long requesterID,
+                                              Long conferenceID,
+                                              Long trackID) throws ForbiddenAccessException,
+            NotFoundException {
+        if (!usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)) {
+            throw new ForbiddenAccessException();
+        }
+        if (!tracksVerification.verifyTrack(conferenceID, trackID)) {
+            throw new NotFoundException(
+                    "Not Found. The requested track or conference was not found."
+            );
+        }
+        var submissions = submissionsCommunicator.getSubmissionsInTrack(conferenceID, trackID, requesterID);
 
-
+        final List<PaperSummaryWithID> papers = new ArrayList<>();
+        for (Submission submission : submissions) {
+            PaperSummaryWithID paperSummaryWithID = new PaperSummaryWithID();
+            paperSummaryWithID.setPaperID(submission.getSubmissionId());
+            paperSummaryWithID.setTitle(submission.getTitle());
+            paperSummaryWithID.setAbstractSection(submission.getAbstract());
+            papers.add(paperSummaryWithID);
+        }
+        return papers;
+    }
 }

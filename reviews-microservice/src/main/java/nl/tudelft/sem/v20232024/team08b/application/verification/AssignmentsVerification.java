@@ -2,12 +2,12 @@ package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class AssignmentsVerification {
     private final PapersVerification papersVerification;
     private final UsersVerification usersVerification;
     private final TracksVerification tracksVerification;
-    private final ExternalRepository externalRepository;
+    private final UsersMicroserviceCommunicator userCommunicator;
     private final TrackPhaseCalculator trackPhaseCalculator;
 
     /**
@@ -27,19 +27,19 @@ public class AssignmentsVerification {
      * @param papersVerification object that does paper verification
      * @param usersVerification object that performs users verification
      * @param tracksVerification object that performs tracks verification
-     * @param externalRepository object that stores objects from external repository
+     * @param userCommunicator object that stores objects from users microservice
      * @param trackPhaseCalculator calculates track phases
      */
     @Autowired
     public AssignmentsVerification(PapersVerification papersVerification,
                                    UsersVerification usersVerification,
                                    TracksVerification tracksVerification,
-                                   ExternalRepository externalRepository,
+                                   UsersMicroserviceCommunicator userCommunicator,
                                    TrackPhaseCalculator trackPhaseCalculator) {
         this.papersVerification = papersVerification;
         this.usersVerification = usersVerification;
         this.tracksVerification = tracksVerification;
-        this.externalRepository = externalRepository;
+        this.userCommunicator = userCommunicator;
         this.trackPhaseCalculator = trackPhaseCalculator;
     }
 
@@ -79,7 +79,7 @@ public class AssignmentsVerification {
                                                                 ForbiddenAccessException,
                                                                 NotFoundException {
         // Ensure the track exists
-        externalRepository.getTrack(conferenceID, trackID);
+        userCommunicator.getTrack(conferenceID, trackID);
 
         // Ensure the requester is a PC chair
         if (!usersVerification.verifyRoleFromTrack(

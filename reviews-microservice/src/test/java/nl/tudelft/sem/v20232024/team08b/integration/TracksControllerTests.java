@@ -1,11 +1,13 @@
 package nl.tudelft.sem.v20232024.team08b.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.TrackAnalyticsService;
 import nl.tudelft.sem.v20232024.team08b.application.TracksService;
 import nl.tudelft.sem.v20232024.team08b.controllers.TracksController;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
@@ -294,5 +296,75 @@ public class TracksControllerTests {
                                 conferenceID.toString(), trackID.toString())
                         .param("requesterID", requesterID.toString())
         ).andExpect(MockMvcResultMatchers.status().is(403));
+    }
+
+    @Test
+    void getPapersSuccess() throws Exception {
+        var paper1 = new PaperSummaryWithID();
+        paper1.setPaperID(1L);
+        paper1.setTitle("abc");
+        paper1.setAbstractSection("def");
+        var paper2 = new PaperSummaryWithID();
+        paper2.setPaperID(2L);
+        paper2.setTitle("zyx");
+        paper2.setAbstractSection("wvu");
+        var papersSummaryWithIDS = new ArrayList<PaperSummaryWithID>();
+        papersSummaryWithIDS.add(paper1);
+        papersSummaryWithIDS.add(paper2);
+        Long requesterID = 3L;
+        Long conferenceID = 4L;
+        Long trackID = 5L;
+        when(tracksService.getPapers(requesterID, conferenceID, trackID)).thenReturn(papersSummaryWithIDS);
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/papers",
+                        conferenceID, trackID)
+                    .param("requesterID", requesterID.toString())
+            ).andExpect(MockMvcResultMatchers.status().is(200))
+            .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(papersSummaryWithIDS)));
+    }
+
+    @Test
+    void getPapersNotFound() throws Exception {
+        Long requesterID = 3L;
+        Long conferenceID = 4L;
+        Long trackID = 5L;
+        when(tracksService.getPapers(requesterID, conferenceID, trackID))
+            .thenThrow(new NotFoundException(""));
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/papers",
+                    conferenceID, trackID)
+                .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(404));
+    }
+
+    @Test
+    void getPapersForbiddenAccess() throws Exception {
+        Long requesterID = 3L;
+        Long conferenceID = 4L;
+        Long trackID = 5L;
+        when(tracksService.getPapers(requesterID, conferenceID, trackID))
+            .thenThrow(new ForbiddenAccessException());
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/papers",
+                    conferenceID, trackID)
+                .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(403));
+    }
+
+    @Test
+    void getPapersInternalServerError() throws Exception {
+        Long requesterID = 3L;
+        Long conferenceID = 4L;
+        Long trackID = 5L;
+        when(tracksService.getPapers(requesterID, conferenceID, trackID))
+            .thenThrow(new RuntimeException());
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/conferences/{conferenceID}/tracks/{trackID}/papers",
+                    conferenceID, trackID)
+                .param("requesterID", requesterID.toString())
+        ).andExpect(MockMvcResultMatchers.status().is(500));
     }
 }

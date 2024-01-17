@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.verification.AssignmentsVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
@@ -9,7 +10,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @Service
 public class AssignmentsService {
     private final ReviewRepository reviewRepository;
-    private final ExternalRepository externalRepository;
+    private final SubmissionsMicroserviceCommunicator submissionCommunicator;
     private final TrackRepository trackRepository;
     private final AssignmentsVerification assignmentsVerification;
 
@@ -30,7 +30,7 @@ public class AssignmentsService {
      * Default constructor for the service.
      *
      * @param reviewRepository repository storing the reviews
-     * @param externalRepository class, that talks to outside microservices
+     * @param submissionCommunicator class, that talks to submissions microservice
      * @param trackRepository repository storing the tracks
      * @param assignmentsVerification object responsible for verifying assignments
      *
@@ -38,12 +38,12 @@ public class AssignmentsService {
     @Autowired
     public AssignmentsService(
             ReviewRepository reviewRepository,
-            ExternalRepository externalRepository,
+            SubmissionsMicroserviceCommunicator submissionCommunicator,
             TrackRepository trackRepository,
             AssignmentsVerification assignmentsVerification
     ) {
         this.reviewRepository = reviewRepository;
-        this.externalRepository = externalRepository;
+        this.submissionCommunicator = submissionCommunicator;
         this.trackRepository = trackRepository;
         this.assignmentsVerification = assignmentsVerification;
     }
@@ -59,7 +59,7 @@ public class AssignmentsService {
      * @throws ConflictOfInterestException If reviewer can not be assigned due to conflict of interest
      */
     public void assignManually(Long requesterID, Long reviewerID, Long paperID)
-        throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
+            throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
 
         assignmentsVerification.verifyIfManualAssignmentIsPossible(requesterID, paperID, reviewerID);
 
@@ -122,7 +122,7 @@ public class AssignmentsService {
         List<PaperSummaryWithID> list = new ArrayList<>();
         for (Long paperID : paperIDs) {
             PaperSummaryWithID summaryWithID = new PaperSummaryWithID();
-            Submission paper = externalRepository.getSubmission(paperID);
+            Submission paper = submissionCommunicator.getSubmission(paperID);
             summaryWithID.setPaperID(paperID);
             summaryWithID.setTitle(paper.getTitle());
             summaryWithID.setAbstractSection(paper.getAbstract());
@@ -147,7 +147,7 @@ public class AssignmentsService {
         assignmentsVerification.verifyPermissionToFinalize(requesterID, conferenceID, trackID);
 
         // Ensure there is at least 3 reviewers assigned to each paper
-        var submissions = externalRepository.getSubmissionsInTrack(conferenceID, trackID, requesterID);
+        var submissions = submissionCommunicator.getSubmissionsInTrack(conferenceID, trackID, requesterID);
         if (submissions.stream().anyMatch(submission ->
                 reviewRepository.findByReviewIDPaperID(submission.getSubmissionId()).size() < 3
         )) {

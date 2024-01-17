@@ -2,34 +2,34 @@ package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TrackAnalyticsService {
     private final UsersVerification usersVerification;
-    private final ExternalRepository externalRepository;
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
     private final PapersService papersService;
 
     /**
      * Creates a calculator for track analytics.
      *
      * @param usersVerification object that performs user verification
-     * @param externalRepository repository storing external objects
+     * @param submissionsCommunicator object storing external objects
      * @param papersService service that handles paper operations
      */
     @Autowired
     public TrackAnalyticsService(UsersVerification usersVerification,
-                                 ExternalRepository externalRepository,
+                                 SubmissionsMicroserviceCommunicator submissionsCommunicator,
                                  PapersService papersService) {
         this.usersVerification = usersVerification;
-        this.externalRepository = externalRepository;
+        this.submissionsCommunicator = submissionsCommunicator;
         this.papersService = papersService;
     }
 
@@ -63,7 +63,7 @@ public class TrackAnalyticsService {
         // Verify if the user is a chair
         verifyIfChair(trackID, requesterID);
 
-        var submissions = externalRepository.getSubmissionsInTrack(
+        var submissions = submissionsCommunicator.getSubmissionsInTrack(
                 trackID.getConferenceID(), trackID.getTrackID(), requesterID
         );
         var accepted = 0;
