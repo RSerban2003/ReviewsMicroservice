@@ -383,7 +383,7 @@ public class ReviewsServiceTests {
     void getReview_SuccessfulForAuthor() throws NotFoundException, IllegalAccessException {
         // We are going to mock the "verifyIfUserCanAccessReview" method
         reviewsService = Mockito.spy(reviewsService);
-
+        fakeReview.setCommentForAuthor("some nice comment");
         doNothing().when(reviewsService).verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
         when(reviewRepository.findById(new ReviewID(paperID, reviewerID))).thenReturn(Optional.of(fakeReview));
         when(usersVerification.isAuthorToPaper(requesterID, paperID)).thenReturn(true);

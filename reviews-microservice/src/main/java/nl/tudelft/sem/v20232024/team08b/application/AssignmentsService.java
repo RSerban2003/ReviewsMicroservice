@@ -1,10 +1,13 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.application.strategies.AutomaticAssignmentStrategy;
 import nl.tudelft.sem.v20232024.team08b.application.verification.AssignmentsVerification;
 import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
+import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
@@ -25,6 +28,7 @@ public class AssignmentsService {
     private final SubmissionsMicroserviceCommunicator submissionCommunicator;
     private final TrackRepository trackRepository;
     private final AssignmentsVerification assignmentsVerification;
+    private AutomaticAssignmentStrategy automaticAssignmentStrategy;
 
     /**
      * Default constructor for the service.
@@ -83,6 +87,33 @@ public class AssignmentsService {
             userIds.add(review.getReviewID().getReviewerID());
         }
         return userIds;
+    }
+
+    /**
+     * This method assigns automatically reviewers to papers.
+     *
+     * @param requesterID ID of a requester
+     * @param conferenceID ID of a conferenceID
+     * @param trackID ID of a trackID
+     * @throws IllegalAccessException If the requester does not have a permission to assign
+     * @throws NotFoundException If the reviewer is not in the track of paper
+     * @throws IllegalArgumentException If reviewer can not be assigned due to conflict of interest
+     */
+    public void assignAuto(Long requesterID, Long conferenceID, Long trackID)
+            throws NotFoundException, IllegalAccessException {
+        assignmentsVerification.verifyAutoAssignmentIsPossible(conferenceID, trackID, requesterID);
+
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<Track> opTrack = trackRepository.findById(trackID1);
+        Track track = opTrack.get();
+        List<Paper> papers = track.getPapers();
+        automaticAssignmentStrategy.automaticAssignment(trackID1, papers);
+    }
+
+    @Autowired
+    public void setAutomaticAssignmentStrategy(
+            AutomaticAssignmentStrategy automaticAssignmentStrategy) {
+        this.automaticAssignmentStrategy = automaticAssignmentStrategy;
     }
 
     /**

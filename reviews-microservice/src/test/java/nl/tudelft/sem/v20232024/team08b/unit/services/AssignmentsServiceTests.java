@@ -3,6 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.unit.services;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.application.strategies.AssignmentWithThreeSmallest;
 import nl.tudelft.sem.v20232024.team08b.application.verification.AssignmentsVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.PapersVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
@@ -12,15 +13,13 @@ import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunica
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
+import nl.tudelft.sem.v20232024.team08b.repos.BidRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.Assertions;
@@ -28,10 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -41,6 +37,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class AssignmentsServiceTests {
+    private final BidRepository bidRepository = Mockito.mock(BidRepository.class);
     private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
     private final PapersVerification papersVerification = Mockito.mock(PapersVerification.class);
     private final TracksVerification tracksVerification = Mockito.mock(TracksVerification.class);
@@ -64,29 +61,32 @@ public class AssignmentsServiceTests {
     private final Long reviewerID = 1L;
     private final Long paperID = 2L;
     private final Long requesterID = 3L;
+    private final Long trackID = 4L;
+    private final Long conferenceID = 5L;
     private Submission fakeSubmission;
 
     @BeforeEach
     void setUp() {
         assignmentsService = Mockito.spy(
-            new AssignmentsService(
-                    reviewRepository,
-                    submissionsCommunicator,
-                    trackRepository,
-                    assignmentsVerification
-            )
+                new AssignmentsService(
+                        reviewRepository,
+                        submissionsCommunicator,
+                        trackRepository,
+                        assignmentsVerification
+                )
         );
-
         fakeSubmission = new Submission();
         fakeSubmission.setEventId(4L);
         fakeSubmission.setTrackId(5L);
+        assignmentsService.setAutomaticAssignmentStrategy(new AssignmentWithThreeSmallest(
+                bidRepository, reviewRepository, submissionsCommunicator));
     }
 
     @Test
     void verifyIfRequesterCanAssignRequesterIsChair()
-        throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
+            throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
-            .thenReturn(true);
+                .thenReturn(true);
 
         assertTrue(assignmentsVerification.verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR));
 
@@ -97,9 +97,9 @@ public class AssignmentsServiceTests {
     void verifyIfRequesterCanAssignRequesterIsNotChair() {
 
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
-            .thenReturn(false);
+                .thenReturn(false);
         assertThrows(IllegalAccessException.class, () ->
-            assignmentsVerification.verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR)
+                assignmentsVerification.verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR)
         );
 
         verify(usersVerification).verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
@@ -109,9 +109,9 @@ public class AssignmentsServiceTests {
     void verifyIfReviewerCanBeAssignedUserNotInTrack() throws NotFoundException, ConflictOfInterestException {
 
         when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-            .thenReturn(false);
+                .thenReturn(false);
         assertThrows(NotFoundException.class, () ->
-            assignmentsVerification.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER)
+                assignmentsVerification.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER)
         );
 
         verify(papersVerification, never()).verifyCOI(anyLong(), anyLong());
@@ -119,10 +119,10 @@ public class AssignmentsServiceTests {
 
     @Test
     void verifyIfReviewerCanBeAssignedUserInTrackNoConflictOfInterest()
-        throws NotFoundException, ConflictOfInterestException, IllegalAccessException {
+            throws NotFoundException, ConflictOfInterestException, IllegalAccessException {
 
         when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-            .thenReturn(true);
+                .thenReturn(true);
         doNothing().when(papersVerification).verifyCOI(anyLong(), anyLong());
         assertTrue(assignmentsVerification.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER));
 
@@ -131,10 +131,10 @@ public class AssignmentsServiceTests {
 
     @Test
     void verifyIfReviewerCanBeAssignedUserInTrackConflictOfInterest()
-        throws NotFoundException, ConflictOfInterestException {
+            throws NotFoundException, ConflictOfInterestException {
 
         when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
-            .thenReturn(true);
+                .thenReturn(true);
         doThrow(new ConflictOfInterestException("there is coi")).when(papersVerification).verifyCOI(anyLong(), anyLong());
         assertThrows(ConflictOfInterestException.class, () -> {
             assignmentsVerification.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
@@ -171,7 +171,7 @@ public class AssignmentsServiceTests {
 
         // Verify that reviewRepository.save is called with the correct argument
         verify(reviewRepository).save(argThat(review -> review.getReviewID().getPaperID().equals(paperID)
-            && review.getReviewID().getReviewerID().equals(reviewerID)));
+                && review.getReviewID().getReviewerID().equals(reviewerID)));
     }
 
     @Test
@@ -229,6 +229,396 @@ public class AssignmentsServiceTests {
         assertThat(assignmentsService.assignments(requesterID, paperID).size()).isEqualTo(3);
     }
 
+
+    @Test
+    void assignAuto_trackNotExist() throws NotFoundException, IllegalAccessException {
+        when(tracksVerification.verifyTrack(123L, 123L)).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> {
+            assignmentsService.assignAuto(123L, 123L, 123L);
+        });
+    }
+
+    @Test
+    void assignAuto_userNotExist() throws NotFoundException, IllegalAccessException {
+        when(tracksVerification.verifyTrack(123L, 123L)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(123L, 123L, 123L, UserRole.REVIEWER)).thenReturn(false);
+        assertThrows(NotFoundException.class, () -> {
+            assignmentsService.assignAuto(123L, 123L, 123L);
+        });
+    }
+
+    @Test
+    void assignAuto_notPcChair() throws NotFoundException, IllegalAccessException {
+        when(tracksVerification.verifyTrack(123L, 123L)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(123L, 123L, 123L, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(123L, 123L, 123L, UserRole.CHAIR)).thenReturn(false);
+        assertThrows(IllegalAccessException.class, () -> {
+            assignmentsService.assignAuto(123L, 123L, 123L);
+        });
+    }
+
+    @Test
+    void assignAuto_zeroUser() throws NotFoundException, IllegalAccessException {
+        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Date date = new Date();
+        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, date, false, papers));
+        nl.tudelft.sem.v20232024.team08b.domain.Track track = trackOptional.get();
+        nl.tudelft.sem.v20232024.team08b.domain.Paper paper = new nl.tudelft.sem.v20232024.team08b.domain.Paper(123L, track, PaperStatus.ACCEPTED, false);
+        papers.add(paper);
+        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR))
+                .thenReturn(true);
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(trackOptional);
+
+        when(bidRepository.findByPaperID(paper.getId())).thenReturn(bids);
+        assertThrows(IllegalArgumentException.class, () -> {
+            assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+        });
+
+
+    }
+
+    @Test
+    void assignAuto_oneUser() throws NotFoundException, IllegalAccessException {
+        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
+        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Date date = new Date();
+        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, date, false, papers));
+        nl.tudelft.sem.v20232024.team08b.domain.Track track = trackOptional.get();
+        nl.tudelft.sem.v20232024.team08b.domain.Paper paper = new nl.tudelft.sem.v20232024.team08b.domain.Paper(123L, track, PaperStatus.ACCEPTED, false);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paper.getId(), 123L,
+                nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        papers.add(paper);
+        bids.add(bid);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)).thenReturn(true);
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
+                trackOptional
+        );
+
+        when(bidRepository.findByPaperID(paper.getId())).thenReturn(bids);
+        assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+        verify(reviewRepository).save(argThat(review -> review.getReviewID().getPaperID().equals(123L)
+                && review.getReviewID().getReviewerID().equals(123L)));
+
+
+    }
+
+    @Test
+    void assignAuto_oneUserException() throws NotFoundException, IllegalAccessException {
+        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
+        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        paper1.setId(paperID);
+        papers.add(paper1);
+        Submission submission = new Submission();
+        submission.setTrackId(trackID);
+        submission.setEventId(conferenceID);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        bids.add(bid1);
+        bids.add(bid2);
+
+        Review review1 = new Review();
+        review1.setReviewID(new ReviewID(10L, 1L));
+
+        List<Review> reviews1 = new ArrayList<>();
+        reviews1.add(review1);
+
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDReviewerID(1L)).thenReturn(reviews1);
+
+        when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
+        when(submissionsCommunicator.getSubmission(10L)).thenThrow((new NotFoundException("Track not found")));
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
+                trackOptional
+        );
+
+        assertThrows(RuntimeException.class, () -> {
+            assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+        });
+
+
+    }
+
+    @Test
+    void assignAuto_twoUsersAutomatic() throws NotFoundException, IllegalAccessException {
+        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
+        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        paper1.setId(paperID);
+        papers.add(paper1);
+        Submission submission = new Submission();
+        submission.setTrackId(trackID);
+        submission.setEventId(conferenceID);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        bids.add(bid1);
+        bids.add(bid2);
+
+        Review review1 = new Review();
+        review1.setReviewID(new ReviewID(10L, 1L));
+        Review review2 = new Review();
+        review2.setReviewID(new ReviewID(10L, 2L));
+        Review review3 = new Review();
+        review3.setReviewID(new ReviewID(20L, 2L));
+        List<Review> reviews1 = new ArrayList<>();
+        reviews1.add(review1);
+        List<Review> reviews2 = new ArrayList<>();
+        reviews2.add(review2);
+        reviews2.add(review3);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDReviewerID(1L)).thenReturn(reviews1);
+        when(reviewRepository.findByReviewIDReviewerID(2L)).thenReturn(reviews2);
+        when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
+        when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
+                trackOptional
+        );
+
+        assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(1L)));
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(2L)));
+    }
+
+
+
+    @Test
+    void assignAuto_fourUsersAutomatic() throws NotFoundException, IllegalAccessException {
+        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
+        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        paper1.setId(paperID);
+        papers.add(paper1);
+        Submission submission = new Submission();
+        submission.setTrackId(trackID);
+        submission.setEventId(conferenceID);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid3 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid4 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        bids.add(bid1);
+        bids.add(bid2);
+        bids.add(bid3);
+        bids.add(bid4);
+
+        Review review1 = new Review();
+        review1.setReviewID(new ReviewID(10L, 1L));
+        Review review2 = new Review();
+        review2.setReviewID(new ReviewID(10L, 2L));
+        Review review3 = new Review();
+        review3.setReviewID(new ReviewID(20L, 2L));
+        Review review4 = new Review();
+        review4.setReviewID(new ReviewID(10L, 3L));
+        Review review5 = new Review();
+        review5.setReviewID(new ReviewID(20L, 4L));
+        List<Review> reviews1 = new ArrayList<>();
+        reviews1.add(review1);
+        List<Review> reviews2 = new ArrayList<>();
+        reviews2.add(review2);
+        reviews2.add(review3);
+        List<Review> reviews3 = new ArrayList<>();
+        reviews3.add(review4);
+        List<Review> reviews4 = new ArrayList<>();
+        reviews4.add(review5);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDReviewerID(1L)).thenReturn(reviews1);
+        when(reviewRepository.findByReviewIDReviewerID(2L)).thenReturn(reviews2);
+        when(reviewRepository.findByReviewIDReviewerID(3L)).thenReturn(reviews3);
+        when(reviewRepository.findByReviewIDReviewerID(4L)).thenReturn(reviews4);
+        when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
+        when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
+                trackOptional
+        );
+
+        assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(1L)));
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(3L)));
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(4L)));
+        verify(reviewRepository, never()).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(2L)));
+
+
+
+
+    }
+
+    @Test
+    void assignAuto_fourUsersNotInTrack() throws NotFoundException, IllegalAccessException {
+        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
+        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        paper1.setId(paperID);
+        papers.add(paper1);
+        Submission submission = new Submission();
+        submission.setTrackId(trackID);
+        submission.setEventId(conferenceID);
+        Submission submission2 = new Submission();
+        submission2.setTrackId(trackID + 1);
+        submission2.setEventId(conferenceID);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid3 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid4 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        bids.add(bid1);
+        bids.add(bid2);
+        bids.add(bid3);
+        bids.add(bid4);
+
+        Review review1 = new Review();
+        review1.setReviewID(new ReviewID(10L, 1L));
+        Review review2 = new Review();
+        review2.setReviewID(new ReviewID(40L, 2L));
+        Review review3 = new Review();
+        review3.setReviewID(new ReviewID(50L, 2L));
+        Review review4 = new Review();
+        review4.setReviewID(new ReviewID(10L, 3L));
+        Review review5 = new Review();
+        review5.setReviewID(new ReviewID(20L, 4L));
+        List<Review> reviews1 = new ArrayList<>();
+        reviews1.add(review1);
+        List<Review> reviews2 = new ArrayList<>();
+        reviews2.add(review2);
+        reviews2.add(review3);
+        List<Review> reviews3 = new ArrayList<>();
+        reviews3.add(review4);
+        List<Review> reviews4 = new ArrayList<>();
+        reviews4.add(review5);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDReviewerID(1L)).thenReturn(reviews1);
+        when(reviewRepository.findByReviewIDReviewerID(2L)).thenReturn(reviews2);
+        when(reviewRepository.findByReviewIDReviewerID(3L)).thenReturn(reviews3);
+        when(reviewRepository.findByReviewIDReviewerID(4L)).thenReturn(reviews4);
+        when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
+        when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(40L)).thenReturn(submission2);
+        when(submissionsCommunicator.getSubmission(50L)).thenReturn(submission2);
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
+                trackOptional
+        );
+
+        assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(1L)));
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(3L)));
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(2L)));
+        verify(reviewRepository, never()).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(4L)));
+
+
+
+
+    }
+
+    @Test
+    void assignAuto_fourUsersNotInConference() throws NotFoundException, IllegalAccessException {
+        List<nl.tudelft.sem.v20232024.team08b.domain.Paper> papers = new ArrayList<>();
+        nl.tudelft.sem.v20232024.team08b.domain.Paper paper1 = new nl.tudelft.sem.v20232024.team08b.domain.Paper();
+        paper1.setId(paperID);
+        papers.add(paper1);
+        Submission submission = new Submission();
+        submission.setTrackId(trackID);
+        submission.setEventId(conferenceID);
+        Submission submission2 = new Submission();
+        submission2.setTrackId(trackID);
+        submission2.setEventId(conferenceID + 1);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid1 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid2 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid3 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 3L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        nl.tudelft.sem.v20232024.team08b.domain.Bid bid4 = new nl.tudelft.sem.v20232024.team08b.domain.Bid(paperID, 4L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        List<nl.tudelft.sem.v20232024.team08b.domain.Bid> bids = new ArrayList<>();
+        bids.add(bid1);
+        bids.add(bid2);
+        bids.add(bid3);
+        bids.add(bid4);
+
+        Review review1 = new Review();
+        review1.setReviewID(new ReviewID(10L, 1L));
+        Review review2 = new Review();
+        review2.setReviewID(new ReviewID(40L, 2L));
+        Review review3 = new Review();
+        review3.setReviewID(new ReviewID(50L, 2L));
+        Review review4 = new Review();
+        review4.setReviewID(new ReviewID(10L, 3L));
+        Review review5 = new Review();
+        review5.setReviewID(new ReviewID(20L, 4L));
+        List<Review> reviews1 = new ArrayList<>();
+        reviews1.add(review1);
+        List<Review> reviews2 = new ArrayList<>();
+        reviews2.add(review2);
+        reviews2.add(review3);
+        List<Review> reviews3 = new ArrayList<>();
+        reviews3.add(review4);
+        List<Review> reviews4 = new ArrayList<>();
+        reviews4.add(review5);
+        when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
+        when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)).thenReturn(true);
+        when(reviewRepository.findByReviewIDReviewerID(1L)).thenReturn(reviews1);
+        when(reviewRepository.findByReviewIDReviewerID(2L)).thenReturn(reviews2);
+        when(reviewRepository.findByReviewIDReviewerID(3L)).thenReturn(reviews3);
+        when(reviewRepository.findByReviewIDReviewerID(4L)).thenReturn(reviews4);
+        when(bidRepository.findByPaperID(paperID)).thenReturn(bids);
+        when(submissionsCommunicator.getSubmission(10L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(20L)).thenReturn(submission);
+        when(submissionsCommunicator.getSubmission(40L)).thenReturn(submission2);
+        when(submissionsCommunicator.getSubmission(50L)).thenReturn(submission2);
+        TrackID trackID1 = new TrackID(conferenceID, trackID);
+        Optional<nl.tudelft.sem.v20232024.team08b.domain.Track> trackOptional = Optional.of(new nl.tudelft.sem.v20232024.team08b.domain.Track(trackID1, new Date(), false, papers));
+        when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(
+                trackOptional
+        );
+
+        assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(1L)));
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(3L)));
+        verify(reviewRepository).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(2L)));
+        verify(reviewRepository, never()).save(argThat(reviewCheck -> reviewCheck.getReviewID().getPaperID().equals(paperID)
+                && reviewCheck.getReviewID().getReviewerID().equals(4L)));
+
+
+
+
+    }
+
+
     @Test
     void testGetAssignedPaperUserDoesNotExist() {
         Long requesterID = 1L;
@@ -238,103 +628,6 @@ public class AssignmentsServiceTests {
             assignmentsService.getAssignedPapers(requesterID);
         });
         assertEquals("User does not exist!", e.getMessage());
-    }
-
-    @Test
-    void testRemovePaperDoesNotExist() {
-        when(papersVerification.verifyPaper(paperID)).thenReturn(false);
-
-        // Assert that NotFoundException is thrown with the expected message
-        NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> assignmentsService.remove(requesterID, paperID, reviewerID));
-        assertEquals("this paper does not exist", exception.getMessage());
-
-        // Ensure no interactions with other methods
-        verify(papersVerification, times(1)).verifyPaper(paperID);
-        verify(reviewRepository, never()).delete(any(Review.class));
-    }
-
-    @Test
-    void testRemoveNotPCChair() {
-        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
-
-        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
-
-        IllegalAccessException exception = assertThrows(IllegalAccessException.class,
-            () -> assignmentsService.remove(requesterID, paperID, reviewerID));
-        assertEquals("Only pc chairs are allowed to do that", exception.getMessage());
-
-        verify(papersVerification, times(1)).verifyPaper(paperID);
-        verify(usersVerification, times(1))
-            .verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
-        verify(reviewRepository, never()).delete(any(Review.class));
-    }
-
-    @Test
-    void testRemoveNoReviewersAssigned() throws NotFoundException, IllegalAccessException {
-        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
-
-        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
-
-        doNothing().when(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
-
-        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(new ArrayList<>());
-
-        NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> assignmentsService.remove(requesterID, paperID, reviewerID));
-        assertEquals("there are no reviewers assigned to this paper", exception.getMessage());
-
-        verify(papersVerification, times(1)).verifyPaper(paperID);
-        verify(usersVerification, times(1))
-            .verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
-        verify(tracksVerification, times(1))
-            .verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
-        verify(reviewRepository, times(1)).findByReviewIDPaperID(paperID);
-        verify(reviewRepository, never()).delete(any(Review.class));
-    }
-
-    @Test
-    void testRemoveReviewerNotFound() throws NotFoundException, IllegalAccessException {
-        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
-
-        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
-
-        doNothing().when(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
-
-        List<Review> reviews = new ArrayList<>();
-        Review review = new Review();
-        review.setReviewID(new ReviewID(paperID, 10L));
-        reviews.add(review);
-        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
-
-        NotFoundException exception = assertThrows(NotFoundException.class,
-            () -> assignmentsService.remove(requesterID, paperID, reviewerID));
-        assertEquals("There is no such a assignment", exception.getMessage());
-
-        verify(papersVerification, times(1)).verifyPaper(paperID);
-        verify(usersVerification, times(1))
-            .verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
-        verify(tracksVerification, times(1))
-            .verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
-        verify(reviewRepository, times(1)).findByReviewIDPaperID(paperID);
-        verify(reviewRepository, never()).delete(any(Review.class));
-    }
-
-    @Test
-    void testRemove() throws NotFoundException, IllegalAccessException {
-        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
-        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
-        doNothing().when(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
-
-        List<Review> reviews = new ArrayList<>();
-        Review review = new Review();
-        review.setReviewID(new ReviewID(paperID, reviewerID));
-        reviews.add(review);
-        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
-
-        assignmentsService.remove(requesterID, paperID, reviewerID);
-
-        verify(reviewRepository, times(1)).delete(review);
     }
 
     @Test
@@ -513,5 +806,102 @@ public class AssignmentsServiceTests {
 
         Assertions.assertThrows(ConflictException.class,
                 () -> assignmentsService.finalization(requesterID, trackID.getConferenceID(), trackID.getTrackID()));
+    }
+
+    @Test
+    void testRemovePaperDoesNotExist() {
+        when(papersVerification.verifyPaper(paperID)).thenReturn(false);
+
+        // Assert that NotFoundException is thrown with the expected message
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> assignmentsService.remove(requesterID, paperID, reviewerID));
+        assertEquals("this paper does not exist", exception.getMessage());
+
+        // Ensure no interactions with other methods
+        verify(papersVerification, times(1)).verifyPaper(paperID);
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
+
+    @Test
+    void testRemoveNotPCChair() {
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
+
+        IllegalAccessException exception = assertThrows(IllegalAccessException.class,
+                () -> assignmentsService.remove(requesterID, paperID, reviewerID));
+        assertEquals("Only pc chairs are allowed to do that", exception.getMessage());
+
+        verify(papersVerification, times(1)).verifyPaper(paperID);
+        verify(usersVerification, times(1))
+                .verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
+
+    @Test
+    void testRemoveNoReviewersAssigned() throws NotFoundException, IllegalAccessException {
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+
+        doNothing().when(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(new ArrayList<>());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> assignmentsService.remove(requesterID, paperID, reviewerID));
+        assertEquals("there are no reviewers assigned to this paper", exception.getMessage());
+
+        verify(papersVerification, times(1)).verifyPaper(paperID);
+        verify(usersVerification, times(1))
+                .verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        verify(tracksVerification, times(1))
+                .verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+        verify(reviewRepository, times(1)).findByReviewIDPaperID(paperID);
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
+
+    @Test
+    void testRemoveReviewerNotFound() throws NotFoundException, IllegalAccessException {
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+
+        doNothing().when(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+
+        List<Review> reviews = new ArrayList<>();
+        Review review = new Review();
+        review.setReviewID(new ReviewID(paperID, 10L));
+        reviews.add(review);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> assignmentsService.remove(requesterID, paperID, reviewerID));
+        assertEquals("There is no such a assignment", exception.getMessage());
+
+        verify(papersVerification, times(1)).verifyPaper(paperID);
+        verify(usersVerification, times(1))
+                .verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
+        verify(tracksVerification, times(1))
+                .verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+        verify(reviewRepository, times(1)).findByReviewIDPaperID(paperID);
+        verify(reviewRepository, never()).delete(any(Review.class));
+    }
+
+    @Test
+    void testRemove() throws NotFoundException, IllegalAccessException {
+        when(papersVerification.verifyPaper(paperID)).thenReturn(true);
+        when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
+        doNothing().when(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
+
+        List<Review> reviews = new ArrayList<>();
+        Review review = new Review();
+        review.setReviewID(new ReviewID(paperID, reviewerID));
+        reviews.add(review);
+        when(reviewRepository.findByReviewIDPaperID(paperID)).thenReturn(reviews);
+
+        assignmentsService.remove(requesterID, paperID, reviewerID);
+
+        verify(reviewRepository, times(1)).delete(review);
     }
 }

@@ -183,4 +183,30 @@ public class AssignmentsVerification {
         verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
         tracksVerification.verifyIfTrackExists(paperID);
     }
+
+    /**
+     * Verifies if the requester can perform automatic assignment in a given track.
+     *
+     * @param conferenceID the ID of the conference of the track
+     * @param trackID the ID of the track
+     * @param requesterID the ID of the requesting user
+     * @throws IllegalAccessException if no permissions are present
+     * @throws NotFoundException if such track does not exist
+     */
+    public void verifyAutoAssignmentIsPossible(Long conferenceID, long trackID, long requesterID)
+            throws IllegalAccessException, NotFoundException {
+        if (!tracksVerification.verifyTrack(conferenceID, trackID)) {
+            throw new NotFoundException("No such track exists");
+        }
+        // Check if such user exists and has correct privileges
+        if (!usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID,
+                UserRole.REVIEWER)) {
+            throw new NotFoundException("No such user exists");
+        }
+        // Check if such user exists and has correct privileges
+        if (!usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID,
+                UserRole.CHAIR)) {
+            throw new IllegalAccessException("User is not a PC chair");
+        }
+    }
 }
