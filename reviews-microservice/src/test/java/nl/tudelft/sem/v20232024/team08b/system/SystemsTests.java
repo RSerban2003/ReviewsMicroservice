@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
@@ -22,8 +23,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
@@ -56,7 +60,6 @@ class SystemsTests {
 
     @BeforeEach
     void setup() {
-        //assumeTrue(false);
         // Verify that the other microservices are running
         try {
             sendRequest(RequestType.GET, null, Object.class, usersURL, "event");
@@ -240,8 +243,7 @@ class SystemsTests {
      */
     @Test
     void reviewersCanSeeSubmittedPapersInATrack() {
-        throw new TestAbortedException();
-        /*var conferenceID = event1ID;
+        var conferenceID = event1ID;
         var paper1 = new PaperSummaryWithID();
         paper1.setTitle("Title 1");
         paper1.setAbstractSection("Abstract 1");
@@ -257,7 +259,7 @@ class SystemsTests {
         var response = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID +
                 "/tracks/" + track1ID + "/papers?requesterID=" + chair1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(papersSummaryWithIDS, response.getBody());*/
+        assertEquals(papersSummaryWithIDS, response.getBody());
     }
 
     /**
@@ -292,6 +294,7 @@ class SystemsTests {
      */
     @Test
     void chairsCanReadPapersInTheirTrackInAssignmentPhase() {
+
     }
 
     /**
@@ -299,7 +302,7 @@ class SystemsTests {
      * Must-have Requirement #1: The bidding phase automatically starts when the submission deadline passes.
      * Must-have Requirement #6: The bidding phase must end after a certain deadline (default is a few days).
      * Using endpoints: PUT /papers/{paperID}/bid
-     * GET /papers/{paperID}/bids/by-reviewer/{reviewerID}
+     *                  GET /papers/{paperID}/bids/by-reviewer/{reviewerID}
      */
     @Test
     void reviewersCanBidOnPapers() {
@@ -484,6 +487,15 @@ class SystemsTests {
      */
     @Test
     void reviewersCanCheckStatusOfPaper() {
+    }
+
+    /**
+     * Tests Requirements:
+     * Must-have #23: We verify that the users are properly authenticated and have the correct
+     * privileges for what they are trying to do.
+     */
+    @Test
+    void verification() {
     }
 
     /**
