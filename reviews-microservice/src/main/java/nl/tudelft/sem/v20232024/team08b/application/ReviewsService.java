@@ -22,6 +22,7 @@ public class ReviewsService {
     private final PapersVerification papersVerification;
     private final TracksVerification tracksVerification;
     private final UsersVerification usersVerification;
+
     /**
      * Default constructor for the service.
      *
@@ -41,19 +42,15 @@ public class ReviewsService {
     }
 
     /**
-     * Verifies if:
-     *  - given user exists
-     *  - given paper exists
-     *  - the user is a reviewer of that paper.
+     * Verifies if: given user exists, given paper exists, the user is a reviewer of that paper.
      *
      * @param requesterID the ID of the requesting user
      * @param paperID the ID of the paper that is accessed
      * @throws NotFoundException if such paper is not found
      * @throws IllegalAccessException if the user is not allowed to access the paper
      */
-    private void verifyIfReviewerCanSubmitReview(Long requesterID,
-                                                Long paperID) throws NotFoundException,
-                                                                     IllegalAccessException {
+    private void verifyIfReviewerCanSubmitReview(Long requesterID, Long paperID) throws NotFoundException,
+            IllegalAccessException {
         // Check if such paper exists
         if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("No such paper exists");
@@ -85,7 +82,6 @@ public class ReviewsService {
     public void submitReview(nl.tudelft.sem.v20232024.team08b.dtos.review.Review reviewDTO,
                              Long requesterID,
                              Long paperID) throws Exception {
-        // Phase checking is done inside verifyIf...() method
         verifyIfReviewerCanSubmitReview(requesterID, paperID);
 
         ReviewID reviewId = new ReviewID(paperID, requesterID);
@@ -101,7 +97,6 @@ public class ReviewsService {
      * @return the review
      */
     public Review getReview(Long reviewerID, Long paperID) throws NotFoundException {
-
         ReviewID reviewId = new ReviewID(paperID, reviewerID);
         Optional<Review> optional = reviewRepository.findById(reviewId);
         if (optional.isPresent()) {
@@ -148,8 +143,8 @@ public class ReviewsService {
      * @throws IllegalAccessException if the requester is not allowed to access the review.
      */
     public void verifyIfUserCanAccessReview(Long requesterID,
-                                           Long reviewerID,
-                                           Long paperID) throws NotFoundException, IllegalAccessException {
+                                            Long reviewerID,
+                                            Long paperID) throws NotFoundException, IllegalAccessException {
         if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("No such paper exists");
         }
@@ -165,8 +160,7 @@ public class ReviewsService {
             // If the requesting user is author, then he can only access the paper during final phase
             tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.FINAL));
         } else if (isChair || isReviewer) {
-            // If the requesting user is chair or reviewer, they cannot access the review before the
-            // reviewing phase
+            // If the requesting user is chair or reviewer, they cannot access the review before the reviewing phase
             tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
         } else {
             throw new IllegalAccessException("The requester is not a member of the track");
@@ -188,10 +182,9 @@ public class ReviewsService {
     public nl.tudelft.sem.v20232024.team08b.dtos.review.Review getReview(Long requesterID,
                                                                          Long reviewerID,
                                                                          Long paperID) throws NotFoundException,
-                                                                                              IllegalAccessException,
-                                                                                              IllegalCallerException {
-        // Verify if the requesting user is allowed to access and if the given review exists.
-        // Also performs elaborate phase checking, depending on requesting user
+            IllegalAccessException,
+            IllegalCallerException {
+        // Verify if the requesting user is allowed to access and if the given review exists. Also, verifies phase
         verifyIfUserCanAccessReview(requesterID, reviewerID, paperID);
 
         // Get the review from local repository.
