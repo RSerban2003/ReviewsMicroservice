@@ -174,6 +174,18 @@ public class AssignmentsControllerTests {
         verify(assignmentsService).assignments(requesterID, paperID);
     }
 
+    @Test
+    void assignmentsReturnsConflict() throws Exception {
+
+        when(assignmentsService.assignments(requesterID, paperID)).thenThrow(new IllegalArgumentException());
+
+        mockMvc.perform(get("/papers/{paperID}/assignees", paperID)
+                        .param("requesterID", String.valueOf(requesterID))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+
+        verify(assignmentsService).assignments(requesterID, paperID);
+    }
 
     @Test
     void assignAutoReturnsOk() throws Exception {
@@ -239,7 +251,8 @@ public class AssignmentsControllerTests {
 
         mockMvc.perform(put("/conferences/{conferenceID}/tracks/{trackID}/automatic", conferenceID, trackID)
             .param("requesterID", String.valueOf(requesterID))
-            .contentType(MediaType.APPLICATION_JSON));
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError());
 
         verify(assignmentsService).assignAuto(requesterID, conferenceID, trackID);
     }
