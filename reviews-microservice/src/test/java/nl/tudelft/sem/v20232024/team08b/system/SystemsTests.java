@@ -16,6 +16,7 @@ import org.opentest4j.TestAbortedException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -294,6 +295,16 @@ class SystemsTests {
      */
     @Test
     void reviewersCanSeeTitlesAndAbstractsOfPapers() {
+        PaperSummaryWithID paper1 = new PaperSummaryWithID();
+        paper1.setTitle("Title 1");
+        paper1.setAbstractSection("Abstract 1");
+        paper1.setPaperID(submission1ID);
+
+        ResponseEntity<PaperSummary> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+                "/title-and-abstract?requesterID=" + chair1ID, PaperSummary.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Title 1", response.getBody().getTitle());
+        assertEquals("Abstract 1", response.getBody().getAbstractSection());
     }
 
     /**
