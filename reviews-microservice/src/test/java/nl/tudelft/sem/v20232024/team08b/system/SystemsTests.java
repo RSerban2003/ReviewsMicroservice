@@ -62,9 +62,11 @@ class SystemsTests {
     void setup() {
         // Verify that the other microservices are running
         try {
-            sendRequest(RequestType.GET, null, Object.class, usersURL, "event");
+            sendRequest(RequestType.DELETE, null, Object.class, usersURL, "debug");
+            //sendRequest(RequestType.GET, null, Object.class, usersURL, "event");
         } catch (Exception e) {
-            if (e.getCause().toString().contains("java.net.ConnectException")) {
+            if (e.getCause() != null && e.getCause().toString().contains("java.net" +
+                    ".ConnectException")) {
                 throw new TestAbortedException();
             }
         }
@@ -74,7 +76,8 @@ class SystemsTests {
             sendRequest(RequestType.GET, null, Object.class, submissionsURL, "submission",
                     "1000000");
         } catch (Exception e) {
-            if (e.getCause().toString().contains("java.net.ConnectException")) {
+            if (e.getCause() != null && e.getCause().toString().contains("java.net" +
+                    ".ConnectException")) {
                 throw new TestAbortedException();
             }
         }
@@ -83,9 +86,10 @@ class SystemsTests {
         // Make some test data
         Random rng = new Random();
         var user = new User();
-        user.name("1");
+        user.name("John");
         user.surname("Doe");
-        user.email(rng.nextInt() + "@tudelt.nl");
+        user.setWebsite("tudelft.nl");
+        user.email("cowabunga@tudelft.nl");
         var submitter = (User) sendRequest(RequestType.POST, user, User.class, usersURL, "user");
         submitter1ID = submitter.getId();
 
