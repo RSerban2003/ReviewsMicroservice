@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +17,6 @@ public class Review implements Serializable {
     @Id
     private ReviewID reviewID;
 
-    // TODO: make sure that when an empty review is inserted, this is set to null.
     private ConfidenceScore confidenceScore;
 
     private String commentForAuthor;
@@ -29,8 +25,20 @@ public class Review implements Serializable {
 
     private String commentForReviewers;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @ElementCollection
     private List<Comment> confidentialComments;
+
+    /**
+     * Constructs an empty review given paperID and reviewID of
+     * that review.
+     *
+     * @param paperID the paper that is reviewed
+     * @param reviewerID the ID of the reviewer
+     */
+    public Review(Long paperID, Long reviewerID) {
+        this.reviewID = new ReviewID(paperID, reviewerID);
+        this.confidentialComments = new ArrayList<>();
+    }
 
     /**
      * A constructor that parses the DTO into the domain object.

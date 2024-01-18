@@ -1,13 +1,17 @@
 package nl.tudelft.sem.v20232024.team08b.controllers;
 
+import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.BidsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.BidsService;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.BidByReviewer;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 @RestController
@@ -33,9 +37,16 @@ public class BidsController implements BidsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<List<BidByReviewer>> getBidsForPaper(Long requesterID,
-                                                               Long paperID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<List<BidByReviewer>> getBidsForPaper(Long requesterID, Long paperID) {
+        try {
+            return ResponseEntity.ok(bidsService.getBidsForPaper(requesterID, paperID));
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ForbiddenAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return  new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -47,10 +58,18 @@ public class BidsController implements BidsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<Bid> getBidForPaperByReviewer(Long requesterID,
-                                                        Long paperID,
-                                                        Long reviewerID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<Bid> getBidForPaperByReviewer(
+            Long requesterID, Long paperID, Long reviewerID
+    ) {
+        try {
+            return ResponseEntity.ok(bidsService.getBidForPaperByReviewer(requesterID, paperID, reviewerID));
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ForbiddenAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -63,9 +82,21 @@ public class BidsController implements BidsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<Void> bid(Long requesterID,
-                                    Long paperID,
-                                    Bid bid) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<Void> bid(Long requesterID, Long paperID, Bid bid) {
+        try {
+            bidsService.bid(requesterID, paperID, bid);
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ForbiddenAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

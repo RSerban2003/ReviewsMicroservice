@@ -1,12 +1,12 @@
 package nl.tudelft.sem.v20232024.team08b.application.phase;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithUsersMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,23 +18,22 @@ import java.util.Optional;
 @Component
 public class TrackPhaseCalculator {
     private final TrackRepository trackRepository;
-    private final ExternalRepository externalRepository;
+    private final CommunicationWithUsersMicroservice usersCommunicator;
     private final PaperPhaseCalculator paperPhaseCalculator;
     private Clock clock;
     /**
      * Default constructor for the phase calculator.
      *
      * @param trackRepository repository storing the tracks
-     * @param externalRepository repository storing everything outside of
-     *                           this microservice
+     * @param usersCommunicator class that talks with users microservice
      * @param paperPhaseCalculator object that calculates phase of the paper
      */
     @Autowired
     public TrackPhaseCalculator(TrackRepository trackRepository,
-                                ExternalRepository externalRepository,
+                                CommunicationWithUsersMicroservice usersCommunicator,
                                 PaperPhaseCalculator paperPhaseCalculator) {
         this.trackRepository = trackRepository;
-        this.externalRepository = externalRepository;
+        this.usersCommunicator = usersCommunicator;
         this.paperPhaseCalculator = paperPhaseCalculator;
         clock = Clock.systemUTC();
     }
@@ -80,7 +79,7 @@ public class TrackPhaseCalculator {
     public boolean checkIfAllPapersFinalized(Long conferenceID,
                                              Long trackID) throws NotFoundException {
         // Check if such track exists
-        externalRepository.getTrack(conferenceID, trackID);
+        usersCommunicator.getTrack(conferenceID, trackID);
 
         // Get the track
         Optional<Track> trackOptional = trackRepository.findById(
@@ -127,13 +126,13 @@ public class TrackPhaseCalculator {
         // Get the track from external repository. Such track should always
         // exist, since we verified, so the following line will not throw.
         nl.tudelft.sem.v20232024.team08b.dtos.users.Track track =
-                externalRepository.getTrack(conferenceID, trackID);
+                usersCommunicator.getTrack(conferenceID, trackID);
 
         // Get the current timestamp
         long currentTime = clock.instant().toEpochMilli();
 
         // Check if submission deadline has not yet passed
-        Long submissionDeadline = Long.valueOf(track.getDeadline());
+        Long submissionDeadline = track.getDeadline();
         if (currentTime <= submissionDeadline) {
             return TrackPhase.SUBMITTING;
         }

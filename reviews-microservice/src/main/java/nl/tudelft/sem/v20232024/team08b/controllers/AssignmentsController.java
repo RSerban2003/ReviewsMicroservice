@@ -3,12 +3,15 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.AssignmentsAPI;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
-import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 @RestController
@@ -40,7 +43,10 @@ public class AssignmentsController implements AssignmentsAPI {
                                                Long paperID) {
         try {
             assignmentsService.assignManually(requesterID, reviewerID, paperID);
-            return ResponseEntity.ok().build();
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
         } catch (IllegalCallerException | NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
@@ -68,7 +74,28 @@ public class AssignmentsController implements AssignmentsAPI {
     public ResponseEntity<Void> assignAuto(Long requesterID,
                                            Long conferenceID,
                                            Long trackID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            assignmentsService.assignAuto(requesterID, conferenceID, trackID);
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
+
+        } catch (IllegalCallerException | NotFoundException e) {
+            // The requested track or user was not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            // The requester must be a reviewer assigned to the given paper or a chair,
+            // and the review phase must have started
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (IllegalArgumentException e) {
+            // The requester must be a reviewer assigned to the given paper or a chair,
+            // and the review phase must have started
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            // Internal server error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -81,10 +108,17 @@ public class AssignmentsController implements AssignmentsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<Void> finalization(Long requesterID,
-                                             Long conferenceID,
-                                             Long trackID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<Void> finalization(Long requesterID, Long conferenceID, Long trackID) {
+        try {
+            assignmentsService.finalization(requesterID, conferenceID, trackID);
+            return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).build();
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ForbiddenAccessException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 
     /**
@@ -99,11 +133,14 @@ public class AssignmentsController implements AssignmentsAPI {
                                                   Long paperID) {
         try {
             return ResponseEntity.ok(assignmentsService.assignments(requesterID, paperID));
-        } catch (IllegalCallerException e) {
+        } catch (IllegalCallerException | NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
             // The requester must be a pc chair
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (IllegalArgumentException e) {
+            // The requester must be a pc chair
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         } catch (Exception e) {
             // Internal server error
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -122,7 +159,21 @@ public class AssignmentsController implements AssignmentsAPI {
     public ResponseEntity<Void> remove(Long requesterID,
                                        Long paperID,
                                        Long reviewerID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            assignmentsService.remove(requesterID, paperID, reviewerID);
+            return ResponseEntity
+                .ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .build();
+        } catch (IllegalCallerException | NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalAccessException e) {
+            // The requester must be a pc chair
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            // Internal server error
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -133,6 +184,15 @@ public class AssignmentsController implements AssignmentsAPI {
      */
     @Override
     public ResponseEntity<List<PaperSummaryWithID>> getAssignedPapers(Long requesterID) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(assignmentsService.getAssignedPapers(requesterID));
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

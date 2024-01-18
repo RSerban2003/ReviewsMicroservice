@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, ReviewID> {
@@ -29,4 +30,16 @@ public interface ReviewRepository extends JpaRepository<Review, ReviewID> {
      */
     List<Review> findByReviewIDPaperID(Long paperID);
 
+    /**
+     * Finds a list of reviewIDs that are assigned to the reviewer.
+     *
+     * @param reviewerID the ID of the reviewer
+     * @return a list of reviewIDs assigned to the reviewer
+     */
+    List<Review> findByReviewIDReviewerID(Long reviewerID);
+
+    default List<Long> findPapersByReviewer(Long reviewerID) {
+        List<Review> reviews = findByReviewIDReviewerID(reviewerID);
+        return reviews.stream().map(x -> x.getReviewID().getPaperID()).collect(Collectors.toList());
+    }
 }

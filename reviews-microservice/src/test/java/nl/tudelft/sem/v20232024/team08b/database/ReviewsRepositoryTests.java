@@ -80,4 +80,24 @@ public class ReviewsRepositoryTests {
         assertThat(reviewRepository.isReviewerForPaper(3L, 11L)).isFalse();
 
     }
+
+    @Test
+    public void findPapersByReviewer() {
+        // Create fake review 1
+        Review review1 = new Review();
+        ReviewID reviewId1 = new ReviewID(10L, 2L);
+        review1.setReviewID(reviewId1);
+
+        // Create fake review 2
+        Review review2 = new Review();
+        ReviewID reviewId2 = new ReviewID(11L, 2L);
+        review2.setReviewID(reviewId2);
+
+        // Add them to repo
+        reviewRepository.save(review1);
+        reviewRepository.save(review2);
+
+        List<Long> list = reviewRepository.findPapersByReviewer(2L);
+        assertThat(list).isEqualTo(List.of(10L, 11L));
+    }
 }

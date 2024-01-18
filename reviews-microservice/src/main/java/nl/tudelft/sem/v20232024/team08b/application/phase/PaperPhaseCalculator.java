@@ -1,11 +1,11 @@
 package nl.tudelft.sem.v20232024.team08b.application.phase;
 
 import javassist.NotFoundException;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
@@ -19,7 +19,7 @@ import java.util.Optional;
 public class PaperPhaseCalculator {
     private final PaperRepository paperRepository;
     private final TrackRepository trackRepository;
-    private final ExternalRepository externalRepository;
+    private final CommunicationWithSubmissionMicroservice submissionsCommunicator;
     private final ReviewRepository reviewRepository;
 
     /**
@@ -27,17 +27,17 @@ public class PaperPhaseCalculator {
      *
      * @param paperRepository repository storing papers
      * @param trackRepository repository storing tracks
-     * @param externalRepository repository storing external objects
+     * @param submissionsCommunicator class that talks with submissions microservice
      * @param reviewRepository repository storing reviews
      */
     @Autowired
     public PaperPhaseCalculator(PaperRepository paperRepository,
                          TrackRepository trackRepository,
-                         ExternalRepository externalRepository,
+                         CommunicationWithSubmissionMicroservice submissionsCommunicator,
                          ReviewRepository reviewRepository) {
         this.paperRepository = paperRepository;
         this.trackRepository = trackRepository;
-        this.externalRepository = externalRepository;
+        this.submissionsCommunicator = submissionsCommunicator;
         this.reviewRepository = reviewRepository;
     }
 
@@ -110,7 +110,7 @@ public class PaperPhaseCalculator {
     public PaperPhase getPaperPhase(Long paperID) throws NotFoundException {
         // Technically the following line could throw, but this should not be the
         // case, since the calling function will first verify if paper exists
-        var submission = externalRepository.getSubmission(paperID);
+        var submission = submissionsCommunicator.getSubmission(paperID);
         Long trackID = submission.getTrackId();
         Long conferenceID = submission.getEventId();
 

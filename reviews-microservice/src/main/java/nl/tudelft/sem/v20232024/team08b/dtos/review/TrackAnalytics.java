@@ -1,9 +1,11 @@
 package nl.tudelft.sem.v20232024.team08b.dtos.review;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+@AllArgsConstructor
 @Getter
 @Setter
 @Schema(description = "Counts of accepted, rejected and unknown papers")

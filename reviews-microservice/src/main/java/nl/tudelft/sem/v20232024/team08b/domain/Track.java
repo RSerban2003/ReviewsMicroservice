@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-@Entity
+@Entity(name = "TrackReviews")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Track implements Serializable {
@@ -21,8 +21,6 @@ public class Track implements Serializable {
     @Basic(optional = false)
     private Date biddingDeadline;
 
-    // TODO: make sure that when reviewer selection has
-    //       been finalized, this is set to TRUE.
     @Basic(optional = false)
     private Boolean reviewersHaveBeenFinalized = false;
 

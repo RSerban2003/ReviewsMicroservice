@@ -3,13 +3,13 @@ package nl.tudelft.sem.v20232024.team08b.unit.phase;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,14 +28,14 @@ import static org.mockito.Mockito.when;
 
 public class TrackPhaseCalculatorTests {
     private final TrackRepository trackRepository = Mockito.mock(TrackRepository.class);
-    private final ExternalRepository externalRepository = Mockito.mock(ExternalRepository.class);
+    private final UsersMicroserviceCommunicator usersCommunicator = Mockito.mock(UsersMicroserviceCommunicator.class);
     private final PaperPhaseCalculator paperPhaseCalculator = Mockito.mock(PaperPhaseCalculator.class);
     private final Clock clock = Mockito.mock(Clock.class);
 
     private final TrackPhaseCalculator trackPhaseCalculator = Mockito.spy(
             new TrackPhaseCalculator(
                     trackRepository,
-                    externalRepository,
+                    usersCommunicator,
                     paperPhaseCalculator
             )
     );
@@ -87,7 +87,7 @@ public class TrackPhaseCalculatorTests {
         trackDTO = new nl.tudelft.sem.v20232024.team08b.dtos.users.Track();
 
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )
@@ -100,7 +100,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_BeforeSubmissionDeadline() throws NotFoundException {
         // Assume that the current time (10) is before the submission deadline
-        trackDTO.setDeadline(11);
+        trackDTO.setDeadline(11L);
 
         TrackPhase result = trackPhaseCalculator.getTrackPhase(
                 trackID.getConferenceID(),
@@ -113,7 +113,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_ExactlyAtSubmissionDeadline() throws NotFoundException {
         // Assume that the current time (10) is at the time of submission deadline
-        trackDTO.setDeadline(10);
+        trackDTO.setDeadline(10L);
 
         TrackPhase result = trackPhaseCalculator.getTrackPhase(
                 trackID.getConferenceID(),
@@ -126,7 +126,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_NoBiddingDeadline() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline is not set yet
         doReturn(null).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -145,7 +145,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_BeforeBiddingDeadline() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has not yet passed
         doReturn(11L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -164,7 +164,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_ExactlyAtBiddingDeadline() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has not yet passed
         doReturn(10L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -184,7 +184,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_ReviewersAreNotAssigned() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has passed
         doReturn(6L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -209,7 +209,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_NotAllPapersHaveBeenFinalized() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has passed
         doReturn(6L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -240,7 +240,7 @@ public class TrackPhaseCalculatorTests {
     @Test
     void getTrackPhase_AllPapersHaveBeenFinalized() throws NotFoundException {
         // Assume that the current time (10) is after the submission deadline
-        trackDTO.setDeadline(5);
+        trackDTO.setDeadline(5L);
 
         // Assume that the bidding deadline has passed
         doReturn(6L).when(trackPhaseCalculator).getBiddingDeadlineAsLong(
@@ -272,7 +272,7 @@ public class TrackPhaseCalculatorTests {
     void checkIfAllPapersFinalized_NoTrackPresent() throws NotFoundException {
         // Assume that such track exists
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )
@@ -299,7 +299,7 @@ public class TrackPhaseCalculatorTests {
 
         // Assume that such track exists
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )
@@ -327,7 +327,7 @@ public class TrackPhaseCalculatorTests {
         papers.get(0).setReviewsHaveBeenFinalized(true);
         // Assume that such track exists
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )
@@ -354,7 +354,7 @@ public class TrackPhaseCalculatorTests {
 
         // Assume that such track exists
         when(
-                externalRepository.getTrack(
+                usersCommunicator.getTrack(
                         trackID.getConferenceID(),
                         trackID.getTrackID()
                 )

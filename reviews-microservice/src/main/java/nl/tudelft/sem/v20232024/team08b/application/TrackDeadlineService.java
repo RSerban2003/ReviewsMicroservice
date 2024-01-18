@@ -1,14 +1,14 @@
 package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
+import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
+import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithUsersMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.repos.ExternalRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.TrackRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -17,85 +17,29 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class TracksService {
-    private final VerificationService verificationService;
-    private final TrackPhaseCalculator trackPhaseCalculator;
+public class TrackDeadlineService {
+    private final TracksVerification tracksVerification;
     private final TrackRepository trackRepository;
-    private final ExternalRepository externalRepository;
+    private final CommunicationWithUsersMicroservice usersCommunicator;
+    private final UsersVerification usersVerification;
 
     /**
-     * Default constructor for the service.
+     * Constructs the service that handles track deadlines.
      *
-     * @param verificationService service responsible for verifying validity
-     *                            of provided IDs
-     * @param trackPhaseCalculator object responsible for getting the current phase
-     *                             of a track
-     * @param trackRepository repository storing the tracks
-     * @param externalRepository class, that talks to outside microservices
+     * @param tracksVerification responsible for track verification
+     * @param trackRepository responsible for storing tracks
+     * @param usersCommunicator communicates with users microservice
+     * @param usersVerification verifies users
      */
-    @Autowired
-    public TracksService(VerificationService verificationService,
-                         TrackPhaseCalculator trackPhaseCalculator,
-                         TrackRepository trackRepository,
-                         ExternalRepository externalRepository) {
-        this.verificationService = verificationService;
-        this.trackPhaseCalculator = trackPhaseCalculator;
+    public TrackDeadlineService(TracksVerification tracksVerification,
+                                TrackRepository trackRepository,
+                                CommunicationWithUsersMicroservice usersCommunicator,
+                                UsersVerification usersVerification) {
+        this.tracksVerification = tracksVerification;
         this.trackRepository = trackRepository;
-        this.externalRepository = externalRepository;
+        this.usersCommunicator = usersCommunicator;
+        this.usersVerification = usersVerification;
     }
-
-
-    /**
-     * Checks if a given track exists, and if the given user is either a
-     * reviewer or a chair of that track.
-     *
-     * @param requesterID the ID of the requesting user
-     * @param conferenceID the ID of the conference the track is in
-     * @param trackID the ID of the track
-     * @throws NotFoundException if such track does not exist
-     * @throws IllegalAccessException if the user is not a chair/reviewer of the track
-     */
-    public void verifyIfUserCanAccessTrack(Long requesterID,
-                                           Long conferenceID,
-                                           Long trackID) throws NotFoundException, IllegalAccessException {
-        // Verify such track exists
-        if (!verificationService.verifyTrack(conferenceID, trackID)) {
-            throw new NotFoundException("Such track could not be found");
-        }
-
-        boolean isReviewer = verificationService.verifyRoleFromTrack(requesterID, conferenceID,
-                trackID, UserRole.REVIEWER);
-        boolean isChair = verificationService.verifyRoleFromTrack(requesterID, conferenceID,
-                trackID, UserRole.CHAIR);
-        boolean isAuthor = verificationService.verifyRoleFromTrack(requesterID, conferenceID,
-                trackID, UserRole.AUTHOR);
-
-        // Check if the requesting user is either a chair or a reviewer in that conference
-        if (!isReviewer && !isChair && !isAuthor) {
-            throw new IllegalAccessException("The requester is not allowed to access the track");
-        }
-    }
-
-    /**
-     * Returns the current phase of a given track. Also checks if the
-     * requesting user has access to the track.
-     *
-     * @param conferenceID the ID of the conference the track is in
-     * @param trackID the ID of the track
-     * @return the current phase of the track
-     * @throws NotFoundException if such track does not exist
-     * @throws IllegalAccessException if the requesting user does not have permissions
-     */
-    public TrackPhase getTrackPhase(Long requesterID,
-                                    Long conferenceID,
-                                    Long trackID) throws NotFoundException, IllegalAccessException {
-        // Verify if the user and track exist, and if the user is reviewer
-        // or chair of the track. Throws respective exceptions
-        verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
-
-        return trackPhaseCalculator.getTrackPhase(conferenceID, trackID);
-    }
-
 
     /**
      * Get a track from our local repository, but if it is not present there,
@@ -109,7 +53,7 @@ public class TracksService {
      */
     public Track getTrackWithInsertionToOurRepo(Long conferenceID, Long trackID) throws NotFoundException {
         // If such track does not exist, throw error
-        if (!verificationService.verifyTrack(conferenceID, trackID)) {
+        if (!tracksVerification.verifyTrack(conferenceID, trackID)) {
             throw new NotFoundException("Such track does not exist");
         }
 
@@ -120,7 +64,7 @@ public class TracksService {
         // If it is not in the repository, we need to add it there, taking
         // information from the other microservices
         if (optional.isEmpty()) {
-            verificationService.insertTrack(conferenceID, trackID);
+            tracksVerification.insertTrack(conferenceID, trackID);
             optional = trackRepository.findById(id);
         }
 
@@ -143,8 +87,8 @@ public class TracksService {
      * @throws NotFoundException if such track does not exist
      */
     private void setBiddingDeadlineCommon(Long conferenceID,
-                                   Long trackID,
-                                   Date deadline) throws NotFoundException {
+                                          Long trackID,
+                                          Date deadline) throws NotFoundException {
         Track track = getTrackWithInsertionToOurRepo(conferenceID, trackID);
         track.setBiddingDeadline(deadline);
         trackRepository.save(track);
@@ -158,12 +102,13 @@ public class TracksService {
      * @param trackID the ID of the track.
      */
     public void setDefaultBiddingDeadline(Long conferenceID,
-                                           Long trackID) throws NotFoundException {
+                                          Long trackID) throws NotFoundException {
         // Get the submission deadline from the other microservice
-        Integer submissionDeadlineUnix = externalRepository.getTrack(conferenceID, trackID).getDeadline();
+        Long submissionDeadlineUnix =
+            Long.valueOf(usersCommunicator.getTrack(conferenceID, trackID).getDeadline());
 
         // Add exactly 2 days (in milliseconds) to the submission deadline
-        int biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);
+        long biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);
 
         // Convert from Unix timestamp to Date
         Date biddingDeadline = Date.from(Instant.ofEpochMilli(biddingDeadlineUnix));
@@ -186,10 +131,10 @@ public class TracksService {
     public Date getBiddingDeadline(Long requesterID,
                                    Long conferenceID,
                                    Long trackID) throws NotFoundException,
-                                                        IllegalAccessException {
+            IllegalAccessException {
         // No phase verification needs to be done. We only need to check if
         // the requester belongs to the given track.
-        verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        tracksVerification.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
 
         // Check if the track is in our repo at the moment
         boolean isInRepo = trackRepository.findById(new TrackID(conferenceID, trackID)).isPresent();
@@ -223,10 +168,10 @@ public class TracksService {
                                    Long trackID,
                                    Date newDeadline) throws NotFoundException, IllegalAccessException {
         // First, we check if the user in general can access the track
-        verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
+        tracksVerification.verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
 
         // We also check if the user is a chair in the track
-        boolean isChair = verificationService.verifyRoleFromTrack(requesterID, conferenceID,
+        boolean isChair = usersVerification.verifyRoleFromTrack(requesterID, conferenceID,
                 trackID, UserRole.CHAIR);
 
         if (!isChair) {
@@ -234,7 +179,7 @@ public class TracksService {
         }
 
         // Verify that the current phase is either bidding or submitting phase
-        verificationService.verifyTrackPhase(conferenceID, trackID,
+        tracksVerification.verifyTrackPhase(conferenceID, trackID,
                 List.of(TrackPhase.BIDDING, TrackPhase.SUBMITTING));
 
         setBiddingDeadlineCommon(conferenceID, trackID, newDeadline);
