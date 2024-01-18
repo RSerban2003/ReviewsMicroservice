@@ -2,11 +2,6 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-<<<<<<< HEAD
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
-=======
-import nl.tudelft.sem.v20232024.team08b.domain.Paper;
->>>>>>> f6a89090c79cf45c1d5b6b6c098a3c6495fca4fc
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -389,6 +384,17 @@ class SystemsTests {
      */
     @Test
     void chairsCanAssignPapersAutomatically() {
+        PaperSummaryWithID paper1 = new PaperSummaryWithID();
+        paper1.setTitle("Title 1");
+        paper1.setAbstractSection("Abstract 1");
+        paper1.setPaperID(submission1ID);
+
+        ResponseEntity<Object> response = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID +
+                "/tracks/" + track1ID + "/automatic" + "?requesterID=" + reviewer1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        var response2 = testRestTemplate.getForEntity(reviewsURL + "/papers" + submission1ID +
+                "/assignees?requesterID=" + reviewer1ID, Object.class);
+        assertEquals(HttpStatus.OK, response2.getStatusCode());
     }
 
     /**
