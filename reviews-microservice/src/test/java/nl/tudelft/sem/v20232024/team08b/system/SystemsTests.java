@@ -2,14 +2,6 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
@@ -21,8 +13,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.User;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +25,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
@@ -299,8 +301,9 @@ class SystemsTests {
         ResponseEntity<PaperSummary> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
                 "/title-and-abstract?requesterID=" + reviewer1ID, PaperSummary.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Title 1", response.getBody().getTitle());
-        assertEquals("Abstract 1", response.getBody().getAbstractSection());
+        PaperSummary paperSummary = response.getBody();
+        assertEquals("Title 1", paperSummary.getTitle());
+        assertEquals("Abstract 1", paperSummary.getAbstractSection());
     }
 
     /**
@@ -458,6 +461,9 @@ class SystemsTests {
     @Test
     void reviewersCanReadOtherReviewsDuringDiscussionPhase() {
         discussionPhaseBeginsSuccessfully();
+        ResponseEntity<Review> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/" +
+                reviewer1ID, Review.class);
+
     }
 
     /**
