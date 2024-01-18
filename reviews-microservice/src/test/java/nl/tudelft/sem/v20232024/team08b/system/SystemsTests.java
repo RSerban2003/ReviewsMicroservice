@@ -875,6 +875,17 @@ class SystemsTests {
     @Test
     void reviewersAndChairsCanWriteDiscussionCommentsDuringDiscussionPhase() {
         discussionPhaseBeginsSuccessfully();
+        DiscussionComment comment = new DiscussionComment(reviewer1ID, "Comment From Reviewer1");
+        testRestTemplate.postForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "/discussion-comments?requesterID=" + reviewer1ID, comment, DiscussionComment.class);
+        ResponseEntity<DiscussionComment> response = testRestTemplate.getForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "/discussion-comments?requesterID=" + reviewer1ID, DiscussionComment.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(comment, response.getBody());
+
+        comment = new DiscussionComment(chair1ID, "Comment From Chair1");
+        testRestTemplate.postForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/" + chair1ID + "/discussion-comments?requesterID=" + chair1ID, comment, DiscussionComment.class);
+        response = testRestTemplate.getForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/" + chair1ID + "/discussion-comments?requesterID=" + chair1ID, DiscussionComment.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(comment, response.getBody());
     }
 
     /**
