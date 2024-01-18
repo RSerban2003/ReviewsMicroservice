@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
@@ -452,6 +454,51 @@ class SystemsTests {
      */
     @Test
     void discussionPhaseBeginsSuccessfully() {
+        Random rng = new Random();
+        var user = new User();
+        user.name("A");
+        user.surname("A");
+        user.setWebsite("www.tudelft.nl");
+        user.email(rng.nextInt() + "@tudelt.nl");
+        User submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
+        var reviewer2ID = submitter.getId();
+
+        user.name("B");
+        user.surname("B");
+        user.setWebsite("www.tudelft.nl");
+        user.email(rng.nextInt() + "@tudelt.nl");
+        submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
+        var reviewer3ID = submitter.getId();
+
+        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/assignees/" + reviewer1ID + "?requesterID=" + chair1ID, null, Object.class);
+        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/assignees/" + reviewer2ID + "?requesterID=" + chair1ID, null, Object.class);
+        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/assignees/" + reviewer3ID + "?requesterID=" + chair1ID, null, Object.class);
+
+        Review review1 = new Review(
+            new ReviewID(submission1ID, reviewer1ID), null, null,
+            null, null, null);
+        Review review2 = new Review(
+            new ReviewID(submission1ID, reviewer2ID), null, null,
+            null, null, null);
+        Review review3 = new Review(
+            new ReviewID(submission1ID, reviewer3ID), null, null,
+            null, null, null);
+
+        testRestTemplate.put(reviewsURL + "/papers/" + submission1ID +
+            "/reviews?requesterID=" + reviewer1ID, review1);
+        testRestTemplate.put(reviewsURL + "/papers/" + submission1ID +
+            "/reviews?requesterID=" + reviewer2ID, review2);
+        testRestTemplate.put(reviewsURL + "/papers/" + submission1ID +
+            "/reviews?requesterID=" + reviewer3ID, review3);
+
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/reviews/phase?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(PaperPhase.IN_DISCUSSION, response.getBody());
+
     }
 
     /**
