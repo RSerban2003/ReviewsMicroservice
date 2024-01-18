@@ -699,6 +699,77 @@ class SystemsTests {
     @Test
     void chairsAndReviewersCanSeeFinalizedReviews() {
         chairsCanFinalizeReviewsDuringDiscussionPhase();
+        discussionPhaseBeginsSuccessfully();
+        Random rng = new Random();
+        var user = new User();
+        user.name("A");
+        user.surname("A");
+        user.setWebsite("www.tudelft.nl");
+        user.email(rng.nextInt() + "@tudelt.nl");
+        User submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
+        var reviewer2ID = submitter.getId();
+
+        user.name("B");
+        user.surname("B");
+        user.setWebsite("www.tudelft.nl");
+        user.email(rng.nextInt() + "@tudelt.nl");
+        submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
+        var reviewer3ID = submitter.getId();
+
+        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/assignees/" + reviewer1ID + "?requesterID=" + chair1ID, null, Object.class);
+        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/assignees/" + reviewer2ID + "?requesterID=" + chair1ID, null, Object.class);
+        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/assignees/" + reviewer3ID + "?requesterID=" + chair1ID, null, Object.class);
+
+        Review review1 = new Review(
+            new ReviewID(submission1ID, reviewer1ID), null, null,
+            null, null, null);
+        Review review2 = new Review(
+            new ReviewID(submission1ID, reviewer2ID), null, null,
+            null, null, null);
+        Review review3 = new Review(
+            new ReviewID(submission1ID, reviewer3ID), null, null,
+            null, null, null);
+
+
+        var reviewers = List.of(reviewer1ID, reviewer2ID, reviewer3ID);
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/reviewers?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(reviewers, response.getBody());
+
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "reviews/by-reviewer/" + reviewer1ID +"?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(review1, response.getBody());
+
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "reviews/by-reviewer/" + reviewer2ID +"?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(review2, response.getBody());
+
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "reviews/by-reviewer/" + reviewer3ID +"?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(review3, response.getBody());
+
+
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "reviews/by-reviewer/" + reviewer1ID +"?requesterID=" + reviewer1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(review1, response.getBody());
+
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "reviews/by-reviewer/" + reviewer2ID +"?requesterID=" + reviewer2ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(review2, response.getBody());
+
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "reviews/by-reviewer/" + reviewer3ID +"?requesterID=" + reviewer3ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(review3, response.getBody());
     }
 
     /**
