@@ -2,6 +2,12 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+<<<<<<< HEAD
+=======
+
+import nl.tudelft.sem.v20232024.team08b.domain.Bid;
+
+>>>>>>> eb70e6f79568243bc3f32d8c140676ffbf6e7076
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -370,6 +376,13 @@ class SystemsTests {
      */
     @Test
     void reviewersCanBidOnPapers() {
+        Bid bid = new Bid(submission1ID, reviewer1ID, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        testRestTemplate.put(reviewsURL + "/papers/" + submission1ID +
+            "/bid?requesterID=" + reviewer1ID, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/by-reviewer/" + reviewer1ID + "?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(bid, response.getBody());
     }
 
     /**
@@ -405,6 +418,7 @@ class SystemsTests {
      */
     @Test
     void chairsCanFinalizeAssignments() {
+
     }
 
     /**
