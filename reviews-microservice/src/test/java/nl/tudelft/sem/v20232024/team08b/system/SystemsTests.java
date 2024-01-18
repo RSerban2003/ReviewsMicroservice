@@ -3,6 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.system;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
+import nl.tudelft.sem.v20232024.team08b.domain.RecommendationScore;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
@@ -667,13 +668,13 @@ class SystemsTests {
 
         Review review1 = new Review(
                 new ReviewID(submission1ID, reviewer1ID), null, null,
-                null, null, null);
+                RecommendationScore.STRONG_ACCEPT, null, null);
         Review review2 = new Review(
                 new ReviewID(submission1ID, reviewer2ID), null, null,
-                null, null, null);
+                RecommendationScore.STRONG_ACCEPT, null, null);
         Review review3 = new Review(
                 new ReviewID(submission1ID, reviewer3ID), null, null,
-                null, null, null);
+                RecommendationScore.STRONG_ACCEPT, null, null);
 
         testRestTemplate.put(reviewsURL + "/papers/" + submission1ID +
                 "/reviews?requesterID=" + reviewer1ID, review1);
@@ -708,6 +709,10 @@ class SystemsTests {
     @Test
     void authorsCanCheckTheStatusOfTheirPaper() {
         chairsCanFinalizeReviewsDuringDiscussionPhase();
+        // make an accepted paper
+
+        // create an author
+        // check if author can see
     }
 
     /**
