@@ -430,14 +430,16 @@ class SystemsTests {
         // first time submitting a review
         Review review = new Review(new ReviewID(submission1ID, reviewer1ID), null, "Comment version 1", null, null, null);
         testRestTemplate.put(reviewsURL + "/papers/" + submission1ID + "/reviews?requesterID=" + reviewer1ID, review);
-        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID
+                + "/reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review, response.getBody());
         assertEquals("Comment version 1", response.getBody().getCommentForAuthor());
         // updating a review
         review = new Review(new ReviewID(submission1ID, reviewer1ID), null, "Comment version 2", null, null, null);
         testRestTemplate.put(reviewsURL + "/papers/" + submission1ID + "/reviews?requesterID=" + reviewer1ID, review);
-        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/"
+                + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review, response.getBody());
         assertEquals("Comment version 2", response.getBody().getCommentForAuthor());
