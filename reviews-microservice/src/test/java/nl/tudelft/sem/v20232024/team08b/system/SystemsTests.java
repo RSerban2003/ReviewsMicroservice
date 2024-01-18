@@ -3,6 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.system;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
+import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
@@ -304,7 +305,7 @@ class SystemsTests {
         paper1.setPaperID(submission1ID);
 
         ResponseEntity<PaperSummary> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-                "/title-and-abstract?requesterID=" + chair1ID, PaperSummary.class);
+                "/title-and-abstract?requesterID=" + reviewer1ID, PaperSummary.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Title 1", response.getBody().getTitle());
         assertEquals("Abstract 1", response.getBody().getAbstractSection());
@@ -335,6 +336,15 @@ class SystemsTests {
      */
     @Test
     void reviewersCanReadPapersTheyAreAssignedTo() {
+        PaperSummaryWithID paper1 = new PaperSummaryWithID();
+        paper1.setTitle("Title 1");
+        paper1.setAbstractSection("Abstract 1");
+        paper1.setPaperID(submission1ID);
+
+        ResponseEntity<Object> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+                "?requesterID=" + reviewer1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(paper1, response.getBody());
     }
 
     /**
@@ -343,6 +353,15 @@ class SystemsTests {
      */
     @Test
     void chairsCanReadPapersInTheirTrackInAssignmentPhase() {
+        var paper1 = new PaperSummaryWithID();
+        paper1.setTitle("Title 1");
+        paper1.setAbstractSection("Abstract 1");
+        paper1.setPaperID(submission1ID);
+
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(paper1, response.getBody());
 
     }
 
@@ -355,6 +374,13 @@ class SystemsTests {
      */
     @Test
     void reviewersCanBidOnPapers() {
+        Bid bid = new Bid(submission1ID, reviewer1ID, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        testRestTemplate.put(reviewsURL + "/papers/" + submission1ID +
+            "/bid?requesterID=" + reviewer1ID, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/by-reviewer/" + reviewer1ID + "?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(bid, response.getBody());
     }
 
     /**
@@ -369,6 +395,14 @@ class SystemsTests {
      */
     @Test
     void chairsCanAssignPapersAutomatically() {
+        List<Long> userIDs = List.of(1L, 2L, 3L);
+
+        testRestTemplate.put(reviewsURL + "/conferences/" + event1ID + "/tracks/" + track1ID + "/automatic" +
+                "?requesterID=" + reviewer1ID, userIDs);
+        var response2 = testRestTemplate.getForEntity(reviewsURL + "/papers" + submission1ID +
+                "/assignees?requesterID=" + reviewer1ID, List.class);
+        assertEquals(HttpStatus.OK, response2.getStatusCode());
+        assertEquals(userIDs, response2.getBody());
     }
 
     /**
@@ -379,6 +413,7 @@ class SystemsTests {
      */
     @Test
     void chairsCanFinalizeAssignments() {
+
     }
 
     /**
