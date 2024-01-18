@@ -38,7 +38,6 @@ class SystemsTests {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    private final Long ourID = -1L;
     private final String submissionsURL = "http://localhost:8081";
     private final String usersURL = "http://localhost:8082";
     private final String reviewsURL = "http://localhost:8080";
@@ -63,7 +62,6 @@ class SystemsTests {
         // Verify that the other microservices are running
         try {
             sendRequest(RequestType.DELETE, null, Object.class, usersURL, "debug");
-            //sendRequest(RequestType.GET, null, Object.class, usersURL, "event");
         } catch (Exception e) {
             if (e.getCause() != null && e.getCause().toString().contains("java.net" +
                     ".ConnectException")) {
@@ -88,56 +86,64 @@ class SystemsTests {
         var user = new User();
         user.name("John");
         user.surname("Doe");
-        user.setWebsite("tudelft.nl");
-        user.email("cowabunga@tudelft.nl");
+        user.setWebsite("www.tudelft.nl");
+        user.email(rng.nextInt() + "@tudelft.nl");
         var submitter = (User) sendRequest(RequestType.POST, user, User.class, usersURL, "user");
         submitter1ID = submitter.getId();
 
-        user.name("2");
+        user.name("John");
         user.surname("Doe");
+        user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
         submitter2ID = submitter.getId();
 
-        user.name("3");
+        user.name("John");
         user.surname("Doe");
+        user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
         submitter3ID = submitter.getId();
 
         System.out.println(submitter1ID + " " + submitter2ID + " " + submitter3ID);
 
-        user.name("4");
+        user.name("John");
         user.surname("Doe");
+        user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
         reviewer1ID = submitter.getId();
 
         System.out.println(reviewer1ID);
 
-        user.name("5");
+        user.name("John");
         user.surname("Doe");
+        user.website("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
         final var chair1 = submitter;
 
         var event1 = new Event();
-        event1.name("Test Event 1");
-        event1.generalChairs(List.of());
+        event1.name("TestEvent1");
+        event1.generalChairs(List.of(chair1));
         event1.description("This is a test event.");
-        event1.setId(rng.nextLong());
         event1 = sendRequest(RequestType.POST, event1, Event.class, usersURL, "event");
         System.out.println(event1);
 
         var track1 = new Track();
-        track1.setId((long) rng.nextInt());
-        track1.name("Test Track 1");
+        track1.name("TestTrack1");
         track1.maxLength(10000);
         track1.description("This is a test track.");
-        track1.setDeadline(System.currentTimeMillis() + 1000);
+        track1.setDeadline(System.currentTimeMillis() + 10000);
         track1 = sendRequest(RequestType.POST, track1, Track.class, usersURL, "track",
                 event1.getId().toString());
         System.out.println(track1);
+
+        // make chair1 pc chair of track1
+        sendRequest(RequestType.PUT, null, null, usersURL, "event", event1.getId().toString(),
+                track1.getId().toString(), "role",
+                chair1.getId().toString() + "?Assignee=" + chair1.getId().toString()
+                        + "&roleType=PCchair");
 
         sendRequest(RequestType.PUT, null, null, usersURL, "event", event1.getId().toString(),
                 track1.getId().toString(), "role",
@@ -154,6 +160,13 @@ class SystemsTests {
                 event1.getId().toString());
         System.out.println(track2);
 
+        // make chair1 pc chair of track2
+
+        sendRequest(RequestType.PUT, null, null, usersURL, "event", event1.getId().toString(),
+                track2.getId().toString(), "role",
+                chair1.getId().toString() + "?Assignee=" + chair1.getId().toString()
+                        + "&roleType=PCchair");
+
         sendRequest(RequestType.PUT, null, null, usersURL, "event", event1.getId().toString(),
                 track1.getId().toString(), "role",
                 submitter1ID + "?Assignee=" + chair1.getId().toString()
@@ -168,10 +181,12 @@ class SystemsTests {
         fakeSubmission.setTrackId(track1.getId());
         fakeSubmission.setLinkToReplicationPackage("https://github.com");
         var submitter1 = new nl.tudelft.sem.v20232024.team08b.dtos.submissions.User();
+        User submitter1User = sendRequest(RequestType.GET, null, User.class, usersURL, "user",
+                submitter1ID.toString());
         submitter1.setUserId(submitter1ID);
-        submitter1.setEmail("email@tudelft.nl");
-        submitter1.setName("1");
-        submitter1.setSurname("Doe");
+        submitter1.setEmail(submitter1User.getEmail());
+        submitter1.setName(submitter1User.getName());
+        submitter1.setSurname(submitter1.getSurname());
         fakeSubmission.setAuthors(List.of(submitter1));
         fakeSubmission.setConflictsOfInterest(List.of());
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
@@ -193,11 +208,13 @@ class SystemsTests {
         fakeSubmission.setTrackId(track1.getId());
         fakeSubmission.setLinkToReplicationPackage("https://github.com");
         var submitter2 = new nl.tudelft.sem.v20232024.team08b.dtos.submissions.User();
+        User submitter2User = sendRequest(RequestType.GET, null, User.class, usersURL, "user",
+                submitter1ID.toString());
         submitter2.setUserId(submitter1ID);
-        submitter2.setEmail("email@tudelft.nl");
-        submitter2.setName("1");
-        submitter2.setSurname("Doe");
-        fakeSubmission.setAuthors(List.of(submitter1));
+        submitter2.setEmail(submitter2User.getEmail());
+        submitter2.setName(submitter2User.getName());
+        submitter2.setSurname(submitter2.getSurname());
+        fakeSubmission.setAuthors(List.of(submitter2));
         fakeSubmission.setConflictsOfInterest(List.of());
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
                 submissionsURL, "submission", submitter1ID.toString());
@@ -218,10 +235,12 @@ class SystemsTests {
         fakeSubmission.setTrackId(track2.getId());
         fakeSubmission.setLinkToReplicationPackage("https://github.com");
         var submitter3 = new nl.tudelft.sem.v20232024.team08b.dtos.submissions.User();
-        submitter3.setUserId(submitter3ID);
-        submitter3.setEmail("email@tudelft.nl");
-        submitter3.setName("1");
-        submitter3.setSurname("Doe");
+        User submitter3User = sendRequest(RequestType.GET, null, User.class, usersURL, "user",
+                submitter1ID.toString());
+        submitter3.setUserId(submitter1ID);
+        submitter3.setEmail(submitter3User.getEmail());
+        submitter3.setName(submitter3User.getName());
+        submitter3.setSurname(submitter3.getSurname());
         fakeSubmission.setAuthors(List.of(submitter3));
         fakeSubmission.setConflictsOfInterest(List.of());
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
