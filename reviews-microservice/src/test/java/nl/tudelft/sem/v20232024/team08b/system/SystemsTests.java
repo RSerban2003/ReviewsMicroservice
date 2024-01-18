@@ -11,7 +11,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.User;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +32,8 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
@@ -465,7 +466,7 @@ class SystemsTests {
         user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         User submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
-        var reviewer2ID = submitter.getId();
+        final var reviewer2ID = submitter.getId();
 
         user.name("B");
         user.surname("B");
@@ -541,7 +542,8 @@ class SystemsTests {
         testRestTemplate.put(reviewsURL + "/papers/" + submission1ID +
                 "/reviews?requesterID=" + reviewer2ID, review2);
 
-        ResponseEntity<Review> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/" +
+        ResponseEntity<Review> response = testRestTemplate.getForEntity(reviewsURL
+                + "/papers/" + submission1ID + "/reviews/by-reviewer/" +
                 reviewer2ID + "?requesterID=" + reviewer1ID, Review.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review2, response.getBody());
@@ -562,7 +564,7 @@ class SystemsTests {
         user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         User submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
-        var reviewer2ID = submitter.getId();
+        final var reviewer2ID = submitter.getId();
 
         user.name("B");
         user.surname("B");
@@ -578,13 +580,13 @@ class SystemsTests {
         testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
             "/assignees/" + reviewer3ID + "?requesterID=" + chair1ID, null, Object.class);
 
-        Review review1 = new Review(
+        final Review review1 = new Review(
             new ReviewID(submission1ID, reviewer1ID), null, null,
             null, null, null);
-        Review review2 = new Review(
+        final Review review2 = new Review(
             new ReviewID(submission1ID, reviewer2ID), null, null,
             null, null, null);
-        Review review3 = new Review(
+        final Review review3 = new Review(
             new ReviewID(submission1ID, reviewer3ID), null, null,
             null, null, null);
 
@@ -596,17 +598,17 @@ class SystemsTests {
         assertEquals(reviewers, response.getBody());
 
         response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-            "reviews/by-reviewer/" + reviewer1ID +"?requesterID=" + chair1ID, Object.class);
+                "reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + chair1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review1, response.getBody());
 
         response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-            "reviews/by-reviewer/" + reviewer2ID +"?requesterID=" + chair1ID, Object.class);
+                "reviews/by-reviewer/" + reviewer2ID + "?requesterID=" + chair1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review2, response.getBody());
 
         response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-            "reviews/by-reviewer/" + reviewer3ID +"?requesterID=" + chair1ID, Object.class);
+                "reviews/by-reviewer/" + reviewer3ID + "?requesterID=" + chair1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review3, response.getBody());
 
@@ -657,14 +659,14 @@ class SystemsTests {
         user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         User submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
-        var reviewer2ID = submitter.getId();
+        final var reviewer2ID = submitter.getId();
 
         user.name("John");
         user.surname("Doe");
         user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
-        var reviewer3ID = submitter.getId();
+        final var reviewer3ID = submitter.getId();
 
         testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
                 "/assignees/" + reviewer1ID + "?requesterID=" + chair1ID, null, Object.class);
@@ -716,7 +718,7 @@ class SystemsTests {
         user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         User submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
-        var reviewer2ID = submitter.getId();
+        final var reviewer2ID = submitter.getId();
 
         user.name("B");
         user.surname("B");
@@ -732,13 +734,13 @@ class SystemsTests {
         testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
             "/assignees/" + reviewer3ID + "?requesterID=" + chair1ID, null, Object.class);
 
-        Review review1 = new Review(
+        final Review review1 = new Review(
             new ReviewID(submission1ID, reviewer1ID), null, null,
             null, null, null);
-        Review review2 = new Review(
+        final Review review2 = new Review(
             new ReviewID(submission1ID, reviewer2ID), null, null,
             null, null, null);
-        Review review3 = new Review(
+        final Review review3 = new Review(
             new ReviewID(submission1ID, reviewer3ID), null, null,
             null, null, null);
 
@@ -750,33 +752,33 @@ class SystemsTests {
         assertEquals(reviewers, response.getBody());
 
         response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-            "reviews/by-reviewer/" + reviewer1ID +"?requesterID=" + chair1ID, Object.class);
+                "reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + chair1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review1, response.getBody());
 
         response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-            "reviews/by-reviewer/" + reviewer2ID +"?requesterID=" + chair1ID, Object.class);
+                "reviews/by-reviewer/" + reviewer2ID + "?requesterID=" + chair1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review2, response.getBody());
 
         response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-            "reviews/by-reviewer/" + reviewer3ID +"?requesterID=" + chair1ID, Object.class);
+                "reviews/by-reviewer/" + reviewer3ID + "?requesterID=" + chair1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review3, response.getBody());
 
 
         response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-            "reviews/by-reviewer/" + reviewer1ID +"?requesterID=" + reviewer1ID, Object.class);
+                "reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + reviewer1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review1, response.getBody());
 
         response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-            "reviews/by-reviewer/" + reviewer2ID +"?requesterID=" + reviewer2ID, Object.class);
+                "reviews/by-reviewer/" + reviewer2ID + "?requesterID=" + reviewer2ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review2, response.getBody());
 
         response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-            "reviews/by-reviewer/" + reviewer3ID +"?requesterID=" + reviewer3ID, Object.class);
+                "reviews/by-reviewer/" + reviewer3ID + "?requesterID=" + reviewer3ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review3, response.getBody());
     }
@@ -797,7 +799,7 @@ class SystemsTests {
         user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         User submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
-        var reviewer2ID = submitter.getId();
+        final var reviewer2ID = submitter.getId();
 
         user.name("John");
         user.surname("Doe");
@@ -862,7 +864,7 @@ class SystemsTests {
      */
     @Test
     void chairsCanManuallyAssignPapers() {
-        var ids = List.of(reviewer1ID);
+        final var ids = List.of(reviewer1ID);
         var response = testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
             "/assignees/" + reviewer1ID + "?requesterID=" + chair1ID, null, Object.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -889,14 +891,19 @@ class SystemsTests {
     void reviewersAndChairsCanWriteDiscussionCommentsDuringDiscussionPhase() {
         discussionPhaseBeginsSuccessfully();
         DiscussionComment comment = new DiscussionComment(reviewer1ID, "Comment From Reviewer1");
-        testRestTemplate.postForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "/discussion-comments?requesterID=" + reviewer1ID, comment, DiscussionComment.class);
-        ResponseEntity<DiscussionComment> response = testRestTemplate.getForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "/discussion-comments?requesterID=" + reviewer1ID, DiscussionComment.class);
+        testRestTemplate.postForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/"
+                + reviewer1ID + "/discussion-comments?requesterID=" + reviewer1ID, comment, DiscussionComment.class);
+        ResponseEntity<DiscussionComment> response = testRestTemplate.getForEntity("/papers/"
+                + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "/discussion-comments?requesterID="
+                + reviewer1ID, DiscussionComment.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(comment, response.getBody());
 
         comment = new DiscussionComment(chair1ID, "Comment From Chair1");
-        testRestTemplate.postForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/" + chair1ID + "/discussion-comments?requesterID=" + chair1ID, comment, DiscussionComment.class);
-        response = testRestTemplate.getForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/" + chair1ID + "/discussion-comments?requesterID=" + chair1ID, DiscussionComment.class);
+        testRestTemplate.postForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/"
+                + chair1ID + "/discussion-comments?requesterID=" + chair1ID, comment, DiscussionComment.class);
+        response = testRestTemplate.getForEntity("/papers/" + submission1ID + "/reviews/by-reviewer/"
+                + chair1ID + "/discussion-comments?requesterID=" + chair1ID, DiscussionComment.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(comment, response.getBody());
     }
