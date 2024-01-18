@@ -2,8 +2,8 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
@@ -69,24 +69,16 @@ class SystemsTests {
         // Verify that the other microservices are running
         try {
             sendRequest(RequestType.DELETE, null, Object.class, usersURL, "debug");
-        } catch (Exception e) {
-            if (e.getCause() != null && e.getCause().toString().contains("java.net" +
-                    ".ConnectException")) {
-                throw new TestAbortedException();
-            }
-        }
-        System.out.println("[Systems Testing Log] Users microservice is running.");
-
-        try {
+            System.out.println("[Systems Testing Log] Users microservice is running.");
             sendRequest(RequestType.GET, null, Object.class, submissionsURL, "submission",
                     "1000000");
+            System.out.println("[Systems Testing Log] Submissions microservice is running.");
         } catch (Exception e) {
             if (e.getCause() != null && e.getCause().toString().contains("java.net" +
                     ".ConnectException")) {
                 throw new TestAbortedException();
             }
         }
-        System.out.println("[Systems Testing Log] Submissions microservice is running.");
 
         // Make some test data
         Random rng = new Random();
@@ -265,6 +257,7 @@ class SystemsTests {
                 reviewer1ID + "?Assignee=" + chair1.getId().toString()
                         + "&roleType=PCmember");
 
+        // Make sure the tracks are in the BIDDING phase
         Thread.sleep(1000);
     }
 
@@ -591,7 +584,6 @@ class SystemsTests {
      * Tests Requirements:
      * Must-have #23: We verify that the users are properly authenticated and have the correct
      * privileges for what they are trying to do.
-     *
      * Using endpoints:
      * GET /papers/{paperID}/bids
      */
