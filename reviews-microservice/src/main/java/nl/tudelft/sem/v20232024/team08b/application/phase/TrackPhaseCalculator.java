@@ -132,7 +132,7 @@ public class TrackPhaseCalculator {
         long currentTime = clock.instant().toEpochMilli();
 
         // Check if submission deadline has not yet passed
-        Long submissionDeadline = Long.valueOf(track.getDeadline());
+        Long submissionDeadline = track.getDeadline();
         if (currentTime <= submissionDeadline) {
             return TrackPhase.SUBMITTING;
         }

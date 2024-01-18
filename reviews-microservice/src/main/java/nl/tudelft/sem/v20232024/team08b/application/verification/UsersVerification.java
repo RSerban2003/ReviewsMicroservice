@@ -16,9 +16,9 @@ import java.util.Objects;
 
 @Service
 public class UsersVerification {
-    private UsersMicroserviceCommunicator usersCommunicator;
-    private SubmissionsMicroserviceCommunicator submissionsCommunicator;
-    private ReviewRepository reviewRepository;
+    private final UsersMicroserviceCommunicator usersCommunicator;
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private final ReviewRepository reviewRepository;
 
     /**
      * Default constructor for the user verification.
@@ -70,8 +70,8 @@ public class UsersVerification {
             for (RolesOfUserTracksInner thisTrack : roles.getTracks()) {
 
                 // Cast from Integer to Long
-                Long thisTrackID = Long.valueOf(thisTrack.getTrackId());
-                Long thisConferenceID = Long.valueOf(thisTrack.getEventId());
+                Long thisTrackID = thisTrack.getTrackId();
+                Long thisConferenceID = thisTrack.getEventId();
 
                 // If we do not care about this track, continue
                 if (!thisTrackID.equals(trackID) || !thisConferenceID.equals(conferenceID)) {
@@ -126,7 +126,6 @@ public class UsersVerification {
      * @param userID the ID of the user
      * @param paperID the ID of the paper
      * @return true if the user is an author of the paper, false otherwise
-     * @throws NotFoundException if the paperID is not valid
      */
     public boolean isAuthorToPaper(Long userID, Long paperID) {
         try {

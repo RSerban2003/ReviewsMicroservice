@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-
 @Repository
 public interface TrackRepository extends JpaRepository<Track, TrackID> {
     default Optional<Track> findById(Long conferenceID, Long trackID) {
