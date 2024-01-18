@@ -44,18 +44,14 @@ class SystemsTests {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    private final String submissionsURL = "http://localhost:8081";
     private final String usersURL = "http://localhost:8082";
     private final String reviewsURL = "http://localhost:8080";
 
     private Long submitter1ID;
-    private Long submitter2ID;
-    private Long submitter3ID;
 
     private Long reviewer1ID;
 
     private Long track1ID;
-    private Long track2ID;
     private Long event1ID;
     private Long chair1ID;
 
@@ -66,6 +62,7 @@ class SystemsTests {
     @BeforeEach
     void setup() throws InterruptedException {
         // Verify that the other microservices are running
+        String submissionsURL = "http://localhost:8081";
         try {
             sendRequest(RequestType.DELETE, null, Object.class, usersURL, "debug");
             System.out.println("[Systems Testing Log] Users microservice is running.");
@@ -94,14 +91,14 @@ class SystemsTests {
         user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
-        submitter2ID = submitter.getId();
+        final Long submitter2ID = submitter.getId();
 
         user.name("John");
         user.surname("Doe");
         user.setWebsite("www.tudelft.nl");
         user.email(rng.nextInt() + "@tudelt.nl");
         submitter = sendRequest(RequestType.POST, user, User.class, usersURL, "user");
-        submitter3ID = submitter.getId();
+        Long submitter3ID = submitter.getId();
 
         System.out.println(submitter1ID + " " + submitter2ID + " " + submitter3ID);
 
@@ -256,7 +253,6 @@ class SystemsTests {
         System.out.println(fakeSubmission);
 
         track1ID = track1.getId();
-        track2ID = track2.getId();
         event1ID = event1.getId();
         chair1ID = chair1.getId();
 
@@ -275,7 +271,6 @@ class SystemsTests {
      */
     @Test
     void reviewersCanSeeSubmittedPapersInATrack() {
-        var conferenceID = event1ID;
         var paper1 = new PaperSummaryWithID();
         paper1.setTitle("Title 1");
         paper1.setAbstractSection("Abstract 1");
@@ -299,15 +294,11 @@ class SystemsTests {
      */
     @Test
     void reviewersCanSeeTitlesAndAbstractsOfPapers() {
-        PaperSummaryWithID paper1 = new PaperSummaryWithID();
-        paper1.setTitle("Title 1");
-        paper1.setAbstractSection("Abstract 1");
-        paper1.setPaperID(submission1ID);
-
         ResponseEntity<PaperSummary> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
                 "/title-and-abstract?requesterID=" + reviewer1ID, PaperSummary.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         PaperSummary paperSummary = response.getBody();
+        assert paperSummary != null;
         assertEquals("Title 1", paperSummary.getTitle());
         assertEquals("Abstract 1", paperSummary.getAbstractSection());
     }
@@ -847,10 +838,9 @@ class SystemsTests {
      */
     @Test
     void reviewersCannotBeAssignedToPapersIfCOI() {
-        assertThrows(RestClientException.class, () -> {
+        assertThrows(RestClientException.class, () ->
             testRestTemplate.put(reviewsURL + "/papers/" + submission3ID + "/bid?requesterID=" + chair1ID,
-                List.class);
-        });
+                    List.class));
     }
 
     /**
@@ -973,10 +963,9 @@ class SystemsTests {
      */
     @Test
     void verification() {
-        assertThrows(RestClientException.class, () -> {
+        assertThrows(RestClientException.class, () ->
             testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/bids?requesterID=" + submitter1ID,
-                    List.class);
-        });
+                    List.class));
     }
 
     /**
@@ -993,7 +982,7 @@ class SystemsTests {
     <T, U> U sendRequest(RequestType requestType, T body, Class<T> expectedResponseClass,
                          String... url) {
         HttpRequest request;
-        HttpResponse response;
+        HttpResponse<String> response;
         try {
             request = HttpRequest.newBuilder()
                     .uri(URI.create(String.join("/", url)))
@@ -1012,7 +1001,7 @@ class SystemsTests {
             case OK, CREATED -> {
                 try {
                     return expectedResponseClass == null ? null :
-                            (U) objectMapper.readValue((String) response.body(), expectedResponseClass);
+                            (U) objectMapper.readValue(response.body(), expectedResponseClass);
                 } catch (JsonProcessingException e) {
                     System.out.println("[Systems Test Error] Failed to parse response body.");
                     throw new RuntimeException(e);
