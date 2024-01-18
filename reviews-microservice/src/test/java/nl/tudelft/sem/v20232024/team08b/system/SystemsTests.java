@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
@@ -539,10 +541,16 @@ class SystemsTests {
      * Tests Requirements:
      * Must-have #23: We verify that the users are properly authenticated and have the correct
      * privileges for what they are trying to do.
+     *
+     * Using endpoints:
+     * GET /papers/{paperID}/bids
      */
     @Test
     void verification() {
-
+        assertThrows(RestClientException.class, () -> {
+            testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/bids?requesterID=" + submitter1ID,
+                    List.class);
+        });
     }
 
     /**
