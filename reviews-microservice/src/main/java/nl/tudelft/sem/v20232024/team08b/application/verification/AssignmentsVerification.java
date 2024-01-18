@@ -31,8 +31,7 @@ public class AssignmentsVerification {
      */
     @Autowired
     public AssignmentsVerification(PapersVerification papersVerification,
-                                   UsersVerification usersVerification,
-                                   TracksVerification tracksVerification,
+                                   UsersVerification usersVerification, TracksVerification tracksVerification,
                                    CommunicationWithUsersMicroservice userCommunicator,
                                    TrackPhaseCalculator trackPhaseCalculator) {
         this.papersVerification = papersVerification;
@@ -50,8 +49,8 @@ public class AssignmentsVerification {
      * @throws IllegalAccessException if the user is not a chair
      * @throws NotFoundException if such paper does not exist
      */
-    public void verifyPermissionToRemoveAssignment(Long requesterID, Long paperID) throws IllegalAccessException,
-                                                                                          NotFoundException {
+    public void verifyPermissionToRemoveAssignment(Long requesterID, Long paperID)
+            throws IllegalAccessException, NotFoundException {
         if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("this paper does not exist");
         }
@@ -72,21 +71,16 @@ public class AssignmentsVerification {
      * @throws ForbiddenAccessException if the user is not a chair of the track
      * @throws NotFoundException if such track does not exist
      */
-    public void verifyPermissionToFinalize(Long requesterID,
-                                           Long conferenceID,
-                                           Long trackID) throws IllegalStateException,
-                                                                ForbiddenAccessException,
-                                                                NotFoundException {
+    public void verifyPermissionToFinalize(Long requesterID, Long conferenceID, Long trackID)
+            throws IllegalStateException, ForbiddenAccessException, NotFoundException {
         // Ensure the track exists
         userCommunicator.getTrack(conferenceID, trackID);
-
         // Ensure the requester is a PC chair
         if (!usersVerification.verifyRoleFromTrack(
                 requesterID, conferenceID, trackID, UserRole.CHAIR
         )) {
             throw new ForbiddenAccessException();
         }
-
         // Ensure the track is in the ASSIGNING phase
         if (trackPhaseCalculator.getTrackPhase(conferenceID, trackID)
                 != TrackPhase.ASSIGNING) {
@@ -103,8 +97,8 @@ public class AssignmentsVerification {
      * @throws NotFoundException if no such paper exists
      * @throws IllegalAccessException if the requesting user is not a chair
      */
-    public void verifyPermissionToGetAssignments(Long requesterID, Long paperID) throws NotFoundException,
-                                                                                        IllegalAccessException {
+    public void verifyPermissionToGetAssignments(Long requesterID, Long paperID)
+            throws NotFoundException, IllegalAccessException {
         if (!papersVerification.verifyPaper(paperID)) {
             throw new NotFoundException("this paper does not exist");
         }
@@ -129,7 +123,6 @@ public class AssignmentsVerification {
     public boolean verifyIfUserCanAssign(Long userID, Long paperID, UserRole role)
             throws IllegalAccessException, NotFoundException, ConflictOfInterestException {
         tracksVerification.verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.ASSIGNING));
-
         switch (role) {
             case CHAIR:
                 if (!usersVerification.verifyRoleFromPaper(userID, paperID, UserRole.CHAIR)) {
@@ -145,7 +138,6 @@ public class AssignmentsVerification {
             default:
                 throw new IllegalAccessException("You are not pc chair for this track");
         }
-
         return true;
     }
 
@@ -160,7 +152,6 @@ public class AssignmentsVerification {
         if (!usersVerification.verifyIfUserExists(requesterID)) {
             throw new NotFoundException("User does not exist!");
         }
-
     }
 
     /**
@@ -173,11 +164,8 @@ public class AssignmentsVerification {
      * @throws ConflictOfInterestException if the current track phase is not assigning
      * @throws IllegalAccessException if the requester is not a chair in the track
      */
-    public void verifyIfManualAssignmentIsPossible(Long requesterID,
-                                                   Long paperID,
-                                                   Long reviewerID) throws NotFoundException,
-                                                                           ConflictOfInterestException,
-                                                                           IllegalAccessException {
+    public void verifyIfManualAssignmentIsPossible(Long requesterID, Long paperID, Long reviewerID)
+            throws NotFoundException, ConflictOfInterestException, IllegalAccessException {
         verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR);
         verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
         tracksVerification.verifyIfTrackExists(paperID);
