@@ -2,6 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
@@ -281,6 +282,15 @@ class SystemsTests {
      */
     @Test
     void chairsCanReadTitlesAndAbstractsOfPapersInTheirTrackInBiddingPhase() {
+        var paperSummaryWithoutID = new PaperSummary();
+        paperSummaryWithoutID.setTitle("Title 1");
+        paperSummaryWithoutID.setAbstractSection("Abstract 1");
+
+
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/title-and-abstract?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(paperSummaryWithoutID, response.getBody());
     }
 
     /**
