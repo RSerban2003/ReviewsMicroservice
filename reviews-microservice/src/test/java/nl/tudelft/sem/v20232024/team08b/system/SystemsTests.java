@@ -922,6 +922,13 @@ class SystemsTests {
      */
     @Test
     void chairsCanSetBiddingDeadline() {
+        long deadline = System.currentTimeMillis() + 1000;
+        testRestTemplate.put(reviewsURL + "/conferences/" + event1ID + "/tracks/" + track1ID +
+                "/bidding-deadline?requesterID=" + chair1ID, deadline);
+        var response = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID
+                        + "/tracks/" + track1ID + "/bidding-deadline?requesterID=" + chair1ID,
+                Long.class).getBody();
+        assertEquals(deadline, response);
     }
 
     /**
@@ -931,6 +938,11 @@ class SystemsTests {
      */
     @Test
     void chairsCanViewAnalytics() {
+        TrackAnalytics analytics = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID +
+                "/tracks/" + track1ID + "/analytics?requesterID=" + chair1ID, TrackAnalytics.class).getBody();
+        assertEquals(0, analytics.getAccepted());
+        assertEquals(0, analytics.getRejected());
+        assertEquals(2, analytics.getUnknown());
     }
 
     /**
@@ -940,8 +952,8 @@ class SystemsTests {
      */
     @Test
     void reviewersCanCheckStatusOfPaper() {
-        var status = testRestTemplate.getForEntity("/papers/" + submission1ID + "/status" +
-                "?requesterID=" + reviewer1ID, PaperStatus.class).getBody();
+        var status = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+                "/status?requesterID=" + reviewer1ID, PaperStatus.class).getBody();
         assertEquals(PaperStatus.NOT_DECIDED, status);
     }
 
