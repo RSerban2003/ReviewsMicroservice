@@ -59,7 +59,7 @@ class SystemsTests {
     private Long submission3ID;
 
     @BeforeEach
-    void setup() {
+    void setup() throws InterruptedException {
         // Verify that the other microservices are running
         try {
             sendRequest(RequestType.DELETE, null, Object.class, usersURL, "debug");
@@ -135,7 +135,7 @@ class SystemsTests {
         track1.name("TestTrack1");
         track1.maxLength(10000);
         track1.description("This is a test track.");
-        track1.setDeadline(System.currentTimeMillis() + 10000);
+        track1.setDeadline(System.currentTimeMillis() + 1000);
         track1 = sendRequest(RequestType.POST, track1, Track.class, usersURL, "track",
                 event1.getId().toString());
         System.out.println(track1);
@@ -258,6 +258,8 @@ class SystemsTests {
                 track1.getId().toString(), "role",
                 reviewer1ID + "?Assignee=" + chair1.getId().toString()
                         + "&roleType=PCmember");
+
+        Thread.sleep(1000);
     }
 
 
@@ -529,6 +531,7 @@ class SystemsTests {
      */
     @Test
     void verification() {
+
     }
 
     /**
