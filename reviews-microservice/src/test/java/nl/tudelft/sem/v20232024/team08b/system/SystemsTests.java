@@ -185,6 +185,15 @@ class SystemsTests {
         submitter1.setEmail(submitter1User.getEmail());
         submitter1.setName(submitter1User.getName());
         submitter1.setSurname(submitter1.getSurname());
+
+        var reviewer1 = new nl.tudelft.sem.v20232024.team08b.dtos.submissions.User();
+        User reviewer1User = sendRequest(RequestType.GET, null, User.class, usersURL, "user",
+            reviewer1ID.toString());
+        reviewer1.setUserId(reviewer1User.getId());
+        reviewer1.setEmail(reviewer1User.getEmail());
+        reviewer1.setName(reviewer1User.getName());
+        reviewer1.setSurname(reviewer1User.getSurname());
+
         fakeSubmission.setAuthors(List.of(submitter1));
         fakeSubmission.setConflictsOfInterest(List.of());
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
@@ -240,7 +249,7 @@ class SystemsTests {
         submitter3.setName(submitter3User.getName());
         submitter3.setSurname(submitter3.getSurname());
         fakeSubmission.setAuthors(List.of(submitter3));
-        fakeSubmission.setConflictsOfInterest(List.of());
+        fakeSubmission.setConflictsOfInterest(List.of(reviewer1));
         fakeSubmission = sendRequest(RequestType.POST, fakeSubmission, Submission.class,
                 submissionsURL, "submission", submitter3ID.toString());
         submission3ID = fakeSubmission.getSubmissionId();
@@ -788,6 +797,10 @@ class SystemsTests {
      */
     @Test
     void reviewersCannotBeAssignedToPapersIfCOI() {
+        assertThrows(RestClientException.class, () -> {
+            testRestTemplate.put(reviewsURL + "/papers/" + submission3ID + "/bid?requesterID=" + chair1ID,
+                List.class);
+        });
     }
 
     /**
