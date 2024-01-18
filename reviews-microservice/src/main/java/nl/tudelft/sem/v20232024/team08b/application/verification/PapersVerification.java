@@ -2,7 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 public class PapersVerification {
 
-    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private final CommunicationWithSubmissionMicroservice submissionsCommunicator;
     private final UsersVerification usersVerification;
     private final TracksVerification tracksVerification;
     private final PaperPhaseCalculator paperPhaseCalculator;
@@ -31,7 +31,7 @@ public class PapersVerification {
      * @param tracksVerification object used for verifying track information
      */
     @Autowired
-    public PapersVerification(SubmissionsMicroserviceCommunicator submissionsCommunicator,
+    public PapersVerification(CommunicationWithSubmissionMicroservice submissionsCommunicator,
                               UsersVerification usersVerification,
                               TracksVerification tracksVerification,
                               PaperPhaseCalculator paperPhaseCalculator) {

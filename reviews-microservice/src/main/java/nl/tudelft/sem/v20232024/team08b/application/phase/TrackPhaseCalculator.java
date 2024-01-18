@@ -1,7 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.application.phase;
 
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithUsersMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @Component
 public class TrackPhaseCalculator {
     private final TrackRepository trackRepository;
-    private final UsersMicroserviceCommunicator usersCommunicator;
+    private final CommunicationWithUsersMicroservice usersCommunicator;
     private final PaperPhaseCalculator paperPhaseCalculator;
     private Clock clock;
     /**
@@ -30,7 +30,7 @@ public class TrackPhaseCalculator {
      */
     @Autowired
     public TrackPhaseCalculator(TrackRepository trackRepository,
-                                UsersMicroserviceCommunicator usersCommunicator,
+                                CommunicationWithUsersMicroservice usersCommunicator,
                                 PaperPhaseCalculator paperPhaseCalculator) {
         this.trackRepository = trackRepository;
         this.usersCommunicator = usersCommunicator;

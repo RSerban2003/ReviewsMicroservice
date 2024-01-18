@@ -2,7 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.application;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TrackAnalyticsService {
     private final UsersVerification usersVerification;
-    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private final CommunicationWithSubmissionMicroservice submissionsCommunicator;
     private final PapersService papersService;
 
     /**
@@ -26,7 +26,7 @@ public class TrackAnalyticsService {
      */
     @Autowired
     public TrackAnalyticsService(UsersVerification usersVerification,
-                                 SubmissionsMicroserviceCommunicator submissionsCommunicator,
+                                 CommunicationWithSubmissionMicroservice submissionsCommunicator,
                                  PapersService papersService) {
         this.usersVerification = usersVerification;
         this.submissionsCommunicator = submissionsCommunicator;

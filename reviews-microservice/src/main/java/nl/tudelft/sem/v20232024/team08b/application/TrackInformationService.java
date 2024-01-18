@@ -4,7 +4,7 @@ import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
@@ -21,7 +21,7 @@ public class TrackInformationService {
     private final TracksVerification tracksVerification;
     private final UsersVerification usersVerification;
     private final TrackPhaseCalculator trackPhaseCalculator;
-    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private final CommunicationWithSubmissionMicroservice submissionsCommunicator;
 
 
     /**
@@ -37,7 +37,7 @@ public class TrackInformationService {
     public TrackInformationService(TrackPhaseCalculator trackPhaseCalculator,
                                    TracksVerification tracksVerification,
                                    UsersVerification usersVerification,
-                                   SubmissionsMicroserviceCommunicator submissionsCommunicator) {
+                                   CommunicationWithSubmissionMicroservice submissionsCommunicator) {
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.tracksVerification = tracksVerification;
         this.usersVerification = usersVerification;

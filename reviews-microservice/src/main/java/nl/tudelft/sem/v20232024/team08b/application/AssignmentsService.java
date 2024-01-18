@@ -3,7 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.application;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.strategies.AutomaticAssignmentStrategy;
 import nl.tudelft.sem.v20232024.team08b.application.verification.AssignmentsVerification;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Paper;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
@@ -24,7 +24,9 @@ import java.util.Optional;
 @Service
 public class AssignmentsService {
     private final ReviewRepository reviewRepository;
-    private final SubmissionsMicroserviceCommunicator submissionCommunicator;
+
+    private final CommunicationWithSubmissionMicroservice submissionCommunicator;
+
     private final TrackRepository trackRepository;
     private final AssignmentsVerification assignmentsVerification;
     private AutomaticAssignmentStrategy automaticAssignmentStrategy;
@@ -41,7 +43,7 @@ public class AssignmentsService {
     @Autowired
     public AssignmentsService(
             ReviewRepository reviewRepository,
-            SubmissionsMicroserviceCommunicator submissionCommunicator,
+            CommunicationWithSubmissionMicroservice submissionCommunicator,
             TrackRepository trackRepository,
             AssignmentsVerification assignmentsVerification
     ) {

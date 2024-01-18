@@ -3,7 +3,7 @@ package nl.tudelft.sem.v20232024.team08b.application;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
-import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithUsersMicroservice;
 import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.domain.TrackID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
@@ -20,7 +20,7 @@ import java.util.Optional;
 public class TrackDeadlineService {
     private final TracksVerification tracksVerification;
     private final TrackRepository trackRepository;
-    private final UsersMicroserviceCommunicator usersCommunicator;
+    private final CommunicationWithUsersMicroservice usersCommunicator;
     private final UsersVerification usersVerification;
 
     /**
@@ -33,7 +33,7 @@ public class TrackDeadlineService {
      */
     public TrackDeadlineService(TracksVerification tracksVerification,
                                 TrackRepository trackRepository,
-                                UsersMicroserviceCommunicator usersCommunicator,
+                                CommunicationWithUsersMicroservice usersCommunicator,
                                 UsersVerification usersVerification) {
         this.tracksVerification = tracksVerification;
         this.trackRepository = trackRepository;
@@ -105,7 +105,7 @@ public class TrackDeadlineService {
                                           Long trackID) throws NotFoundException {
         // Get the submission deadline from the other microservice
         Long submissionDeadlineUnix =
-                usersCommunicator.getTrack(conferenceID, trackID).getDeadline();
+            Long.valueOf(usersCommunicator.getTrack(conferenceID, trackID).getDeadline());
 
         // Add exactly 2 days (in milliseconds) to the submission deadline
         long biddingDeadlineUnix = submissionDeadlineUnix + (1000 * 60 * 60 * 24 * 2);

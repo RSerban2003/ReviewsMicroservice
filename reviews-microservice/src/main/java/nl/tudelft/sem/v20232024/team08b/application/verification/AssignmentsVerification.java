@@ -2,7 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
-import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithUsersMicroservice;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
@@ -17,7 +17,7 @@ public class AssignmentsVerification {
     private final PapersVerification papersVerification;
     private final UsersVerification usersVerification;
     private final TracksVerification tracksVerification;
-    private final UsersMicroserviceCommunicator userCommunicator;
+    private final CommunicationWithUsersMicroservice userCommunicator;
     private final TrackPhaseCalculator trackPhaseCalculator;
 
     /**
@@ -33,7 +33,7 @@ public class AssignmentsVerification {
     public AssignmentsVerification(PapersVerification papersVerification,
                                    UsersVerification usersVerification,
                                    TracksVerification tracksVerification,
-                                   UsersMicroserviceCommunicator userCommunicator,
+                                   CommunicationWithUsersMicroservice userCommunicator,
                                    TrackPhaseCalculator trackPhaseCalculator) {
         this.papersVerification = papersVerification;
         this.usersVerification = usersVerification;
