@@ -134,9 +134,7 @@ public class ReviewsServiceTests {
     @Test
     void testEmptyListOfReviews() {
         List<Review> reviews = Collections.emptyList();
-        Exception exception = assertThrows(IllegalStateException.class, () -> {
-            DiscussionService.isAgreed(reviews);
-        });
+        Exception exception = assertThrows(IllegalStateException.class, () -> DiscussionService.isAgreed(reviews));
         Assertions.assertEquals("No reviews found.", exception.getMessage());
     }
 
@@ -430,9 +428,8 @@ public class ReviewsServiceTests {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.REVIEWER)).thenReturn(false);
 
-        Exception e = assertThrows(IllegalAccessException.class, () -> {
-            reviewsService.getReviewersFromPaper(requesterID, paperID);
-        });
+        Exception e = assertThrows(IllegalAccessException.class, () ->
+                reviewsService.getReviewersFromPaper(requesterID, paperID));
         assertEquals("Not a chair or reviewer of paper", e.getMessage());
     }
 
@@ -442,8 +439,6 @@ public class ReviewsServiceTests {
         doThrow(new IllegalStateException()).when(tracksVerification)
                 .verifyTrackPhaseThePaperIsIn(paperID, List.of(TrackPhase.REVIEWING, TrackPhase.FINAL));
 
-        assertThrows(IllegalStateException.class, () -> {
-            reviewsService.getReviewersFromPaper(requesterID, paperID);
-        });
+        assertThrows(IllegalStateException.class, () -> reviewsService.getReviewersFromPaper(requesterID, paperID));
     }
 }

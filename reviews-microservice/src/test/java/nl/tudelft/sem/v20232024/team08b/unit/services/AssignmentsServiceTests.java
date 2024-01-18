@@ -29,8 +29,6 @@ import org.mockito.Mockito;
 import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -62,7 +60,6 @@ public class AssignmentsServiceTests {
     private final Long requesterID = 3L;
     private final Long trackID = 4L;
     private final Long conferenceID = 5L;
-    private Submission fakeSubmission;
 
     @BeforeEach
     void setUp() {
@@ -74,9 +71,6 @@ public class AssignmentsServiceTests {
                         assignmentsVerification
                 )
         );
-        fakeSubmission = new Submission();
-        fakeSubmission.setEventId(4L);
-        fakeSubmission.setTrackId(5L);
         assignmentsService.setAutomaticAssignmentStrategy(new AssignmentWithThreeSmallest(
                 bidRepository, reviewRepository, submissionsCommunicator));
     }
@@ -87,7 +81,7 @@ public class AssignmentsServiceTests {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR))
                 .thenReturn(true);
 
-        assertTrue(assignmentsVerification.verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR));
+        Assertions.assertTrue(assignmentsVerification.verifyIfUserCanAssign(requesterID, paperID, UserRole.CHAIR));
 
         verify(usersVerification).verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR);
     }
@@ -123,7 +117,7 @@ public class AssignmentsServiceTests {
         when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
         doNothing().when(papersVerification).verifyCOI(anyLong(), anyLong());
-        assertTrue(assignmentsVerification.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER));
+        Assertions.assertTrue(assignmentsVerification.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER));
 
         verify(papersVerification).verifyCOI(paperID, reviewerID);
     }
@@ -135,16 +129,14 @@ public class AssignmentsServiceTests {
         when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER))
                 .thenReturn(true);
         doThrow(new ConflictOfInterestException("there is coi")).when(papersVerification).verifyCOI(anyLong(), anyLong());
-        assertThrows(ConflictOfInterestException.class, () -> {
-            assignmentsVerification.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER);
-        });
+        assertThrows(ConflictOfInterestException.class, () ->
+                assignmentsVerification.verifyIfUserCanAssign(reviewerID, paperID, UserRole.REVIEWER));
     }
 
     @Test
     void verifyIfUserCanAssignUndefined() {
-        assertThrows(IllegalAccessException.class, () -> {
-            assignmentsVerification.verifyIfUserCanAssign(requesterID, paperID, UserRole.AUTHOR);
-        });
+        assertThrows(IllegalAccessException.class, () ->
+                assignmentsVerification.verifyIfUserCanAssign(requesterID, paperID, UserRole.AUTHOR));
     }
 
 
@@ -175,33 +167,27 @@ public class AssignmentsServiceTests {
 
     @Test
     void assignmentsWrongPhase() throws NotFoundException, IllegalAccessException {
-        List phases = List.of(TrackPhase.ASSIGNING, TrackPhase.FINAL, TrackPhase.REVIEWING);
+        List<TrackPhase> phases = List.of(TrackPhase.ASSIGNING, TrackPhase.FINAL, TrackPhase.REVIEWING);
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(true);
         doThrow(
                 new IllegalAccessException("Wrong phase")
         ).when(tracksVerification).verifyTrackPhaseThePaperIsIn(paperID, phases);
 
-        assertThrows(IllegalAccessException.class, () -> {
-            assignmentsService.assignments(requesterID, paperID);
-        });
+        assertThrows(IllegalAccessException.class, () -> assignmentsService.assignments(requesterID, paperID));
     }
 
     @Test
     void assignmentsWrongRole() {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
         when(papersVerification.verifyPaper(paperID)).thenReturn(true);
-        assertThrows(IllegalAccessException.class, () -> {
-            assignmentsService.assignments(requesterID, paperID);
-        });
+        assertThrows(IllegalAccessException.class, () -> assignmentsService.assignments(requesterID, paperID));
     }
 
     @Test
     void assignmentsPaperNotFound() {
         when(papersVerification.verifyPaper(paperID)).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> {
-            assignmentsService.assignments(requesterID, paperID);
-        });
+        assertThrows(NotFoundException.class, () -> assignmentsService.assignments(requesterID, paperID));
     }
 
     @Test
@@ -230,34 +216,28 @@ public class AssignmentsServiceTests {
 
 
     @Test
-    void assignAuto_trackNotExist() throws NotFoundException, IllegalAccessException {
+    void assignAuto_trackNotExist() {
         when(tracksVerification.verifyTrack(123L, 123L)).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> {
-            assignmentsService.assignAuto(123L, 123L, 123L);
-        });
+        assertThrows(NotFoundException.class, () -> assignmentsService.assignAuto(123L, 123L, 123L));
     }
 
     @Test
-    void assignAuto_userNotExist() throws NotFoundException, IllegalAccessException {
+    void assignAuto_userNotExist() {
         when(tracksVerification.verifyTrack(123L, 123L)).thenReturn(true);
         when(usersVerification.verifyRoleFromTrack(123L, 123L, 123L, UserRole.REVIEWER)).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> {
-            assignmentsService.assignAuto(123L, 123L, 123L);
-        });
+        assertThrows(NotFoundException.class, () -> assignmentsService.assignAuto(123L, 123L, 123L));
     }
 
     @Test
-    void assignAuto_notPcChair() throws NotFoundException, IllegalAccessException {
+    void assignAuto_notPcChair() {
         when(tracksVerification.verifyTrack(123L, 123L)).thenReturn(true);
         when(usersVerification.verifyRoleFromTrack(123L, 123L, 123L, UserRole.REVIEWER)).thenReturn(true);
         when(usersVerification.verifyRoleFromTrack(123L, 123L, 123L, UserRole.CHAIR)).thenReturn(false);
-        assertThrows(IllegalAccessException.class, () -> {
-            assignmentsService.assignAuto(123L, 123L, 123L);
-        });
+        assertThrows(IllegalAccessException.class, () -> assignmentsService.assignAuto(123L, 123L, 123L));
     }
 
     @Test
-    void assignAuto_zeroUser() throws NotFoundException, IllegalAccessException {
+    void assignAuto_zeroUser() {
         List<Paper> papers = new ArrayList<>();
         TrackID trackID1 = new TrackID(conferenceID, trackID);
         Date date = new Date();
@@ -274,9 +254,8 @@ public class AssignmentsServiceTests {
         when(trackRepository.findById(new TrackID(conferenceID, trackID))).thenReturn(trackOptional);
 
         when(bidRepository.findByPaperID(paper.getId())).thenReturn(bids);
-        assertThrows(IllegalArgumentException.class, () -> {
-            assignmentsService.assignAuto(requesterID, conferenceID, trackID);
-        });
+        assertThrows(IllegalArgumentException.class, () ->
+                assignmentsService.assignAuto(requesterID, conferenceID, trackID));
 
 
     }
@@ -310,14 +289,11 @@ public class AssignmentsServiceTests {
     }
 
     @Test
-    void assignAuto_oneUserException() throws NotFoundException, IllegalAccessException {
+    void assignAuto_oneUserException() throws NotFoundException {
         List<Paper> papers = new ArrayList<>();
         Paper paper1 = new Paper();
         paper1.setId(paperID);
         papers.add(paper1);
-        Submission submission = new Submission();
-        submission.setTrackId(trackID);
-        submission.setEventId(conferenceID);
         Bid bid1 = new Bid(paperID, 1L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
         Bid bid2 = new Bid(paperID, 2L, nl.tudelft.sem.v20232024.team08b.dtos.review.Bid.CAN_REVIEW);
         List<Bid> bids = new ArrayList<>();
@@ -343,9 +319,7 @@ public class AssignmentsServiceTests {
                 trackOptional
         );
 
-        assertThrows(RuntimeException.class, () -> {
-            assignmentsService.assignAuto(requesterID, conferenceID, trackID);
-        });
+        assertThrows(RuntimeException.class, () -> assignmentsService.assignAuto(requesterID, conferenceID, trackID));
 
 
     }
@@ -679,7 +653,7 @@ public class AssignmentsServiceTests {
     }
 
     @Test
-    void optionalEmpty() throws NotFoundException, IllegalAccessException {
+    void optionalEmpty() {
         when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
         when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)).thenReturn(true);
         when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.CHAIR)).thenReturn(true);
@@ -689,9 +663,7 @@ public class AssignmentsServiceTests {
             trackOptional
         );
 
-        assertThrows(NotFoundException.class, () -> {
-            assignmentsService.assignAuto(requesterID, conferenceID, trackID);
-        });
+        assertThrows(NotFoundException.class, () -> assignmentsService.assignAuto(requesterID, conferenceID, trackID));
 
 
     }
@@ -702,10 +674,8 @@ public class AssignmentsServiceTests {
         Long requesterID = 1L;
         when(usersVerification.verifyIfUserExists(requesterID)).thenReturn(false);
 
-        Exception e = assertThrows(NotFoundException.class, () -> {
-            assignmentsService.getAssignedPapers(requesterID);
-        });
-        assertEquals("User does not exist!", e.getMessage());
+        Exception e = assertThrows(NotFoundException.class, () -> assignmentsService.getAssignedPapers(requesterID));
+        Assertions.assertEquals("User does not exist!", e.getMessage());
     }
 
     @Test
@@ -738,10 +708,10 @@ public class AssignmentsServiceTests {
 
         List<PaperSummaryWithID> result = assignmentsService.getAssignedPapers(requesterID);
         assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
-        assertEquals(paperID, result.get(0).getPaperID());
-        assertEquals(paper.getTitle(), result.get(0).getTitle());
-        assertEquals(paper.getAbstractSection(), result.get(0).getAbstractSection());
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals(paperID, result.get(0).getPaperID());
+        Assertions.assertEquals(paper.getTitle(), result.get(0).getTitle());
+        Assertions.assertEquals(paper.getAbstractSection(), result.get(0).getAbstractSection());
     }
 
     @Test
@@ -784,13 +754,6 @@ public class AssignmentsServiceTests {
     void finalizationPaperNotInRepository() throws NotFoundException {
         final Long requesterID = 1L;
         final TrackID trackID = new TrackID(2L, 3L);
-        List<Submission> submissions = new ArrayList<>();
-        var s = new Submission();
-        s.setSubmissionId(5L);
-        submissions.add(s);
-        s = new Submission();
-        s.setSubmissionId(6L);
-        submissions.add(s);
 
         when(usersCommunicator.getTrack(trackID.getConferenceID(), trackID.getTrackID()))
                 .thenReturn(new nl.tudelft.sem.v20232024.team08b.dtos.users.Track());
@@ -897,7 +860,7 @@ public class AssignmentsServiceTests {
         // Assert that NotFoundException is thrown with the expected message
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> assignmentsService.remove(requesterID, paperID, reviewerID));
-        assertEquals("this paper does not exist", exception.getMessage());
+        Assertions.assertEquals("this paper does not exist", exception.getMessage());
 
         // Ensure no interactions with other methods
         verify(papersVerification, times(1)).verifyPaper(paperID);
@@ -912,7 +875,7 @@ public class AssignmentsServiceTests {
 
         IllegalAccessException exception = assertThrows(IllegalAccessException.class,
                 () -> assignmentsService.remove(requesterID, paperID, reviewerID));
-        assertEquals("Only pc chairs are allowed to do that", exception.getMessage());
+        Assertions.assertEquals("Only pc chairs are allowed to do that", exception.getMessage());
 
         verify(papersVerification, times(1)).verifyPaper(paperID);
         verify(usersVerification, times(1))
@@ -932,7 +895,7 @@ public class AssignmentsServiceTests {
 
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> assignmentsService.remove(requesterID, paperID, reviewerID));
-        assertEquals("there are no reviewers assigned to this paper", exception.getMessage());
+        Assertions.assertEquals("there are no reviewers assigned to this paper", exception.getMessage());
 
         verify(papersVerification, times(1)).verifyPaper(paperID);
         verify(usersVerification, times(1))
@@ -959,7 +922,7 @@ public class AssignmentsServiceTests {
 
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> assignmentsService.remove(requesterID, paperID, reviewerID));
-        assertEquals("There is no such a assignment", exception.getMessage());
+        Assertions.assertEquals("There is no such a assignment", exception.getMessage());
 
         verify(papersVerification, times(1)).verifyPaper(paperID);
         verify(usersVerification, times(1))

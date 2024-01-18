@@ -2,18 +2,11 @@ package nl.tudelft.sem.v20232024.team08b.controllers;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.api.ReviewsAPI;
-import nl.tudelft.sem.v20232024.team08b.application.DiscussionService;
-import nl.tudelft.sem.v20232024.team08b.application.PapersService;
-import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.Review;
+import nl.tudelft.sem.v20232024.team08b.application.*;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.*;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
 
 @RestController
@@ -49,20 +42,15 @@ public class ReviewsController implements ReviewsAPI {
      * @return a response entity containing the review, or a special error code.
      */
     @Override
-    public ResponseEntity<Review> read(Long requesterID,
-                                       Long reviewerID,
-                                       Long paperID) {
+    public ResponseEntity<Review> read(Long requesterID, Long reviewerID, Long paperID) {
         try {
             Review review = reviewsService.getReview(requesterID, reviewerID, paperID);
             return ResponseEntity.ok(review);
         } catch (NotFoundException e) {
-            // The requested paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
-            // The requester must be a reviewer assigned to the given paper
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         } catch (Exception e) {
-            // Some other problems have occurred
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -81,25 +69,17 @@ public class ReviewsController implements ReviewsAPI {
      *         code indicating if the request was successful
      */
     @Override
-    public ResponseEntity<Void> submit(Review review,
-                                       Long requesterID,
-                                       Long paperID) {
+    public ResponseEntity<Void> submit(Review review, Long requesterID, Long paperID) {
         try {
             reviewsService.submitReview(review, requesterID, paperID);
         } catch (IllegalCallerException | NotFoundException e) {
-            // The requested paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
-            // The requester must be a reviewer assigned to the given paper
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         } catch (Exception e) {
-            // Some other problems have occurred
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .build();
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
     }
 
     /**
@@ -110,13 +90,10 @@ public class ReviewsController implements ReviewsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<List<Long>> getReviewers(Long requesterID,
-                                                   Long paperID) {
+    public ResponseEntity<List<Long>> getReviewers(Long requesterID, Long paperID) {
 
         try {
-            return ResponseEntity
-                    .ok()
-                    .contentType(MediaType.APPLICATION_JSON)
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
                     .body(reviewsService.getReviewersFromPaper(requesterID, paperID));
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -138,9 +115,7 @@ public class ReviewsController implements ReviewsAPI {
     public ResponseEntity<PaperPhase> getPhase(Long requesterID,
                                                Long paperID) {
         try {
-            return ResponseEntity
-                    .ok()
-                    .contentType(MediaType.APPLICATION_JSON)
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
                     .body(papersService.getPaperPhase(requesterID, paperID));
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -163,7 +138,6 @@ public class ReviewsController implements ReviewsAPI {
         try {
             discussionService.finalizeDiscussionPhase(requesterID, paperID);
         } catch (NotFoundException e) {
-            // If paper is invalid, respond with 404 error.
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -172,11 +146,7 @@ public class ReviewsController implements ReviewsAPI {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity
-                .ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .build();
-
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).build();
     }
 
     /**
@@ -189,26 +159,17 @@ public class ReviewsController implements ReviewsAPI {
      * @return response entity with the result
      */
     @Override
-    public ResponseEntity<Void> submitDiscussionComment(Long requesterID,
-                                                        Long reviewerID,
-                                                        Long paperID,
-                                                        String comment) {
+    public ResponseEntity<Void> submitDiscussionComment(Long requesterID, Long reviewerID, Long paperID, String comment) {
         try {
             discussionService.submitDiscussionComment(requesterID, reviewerID, paperID, comment);
         } catch (NotFoundException e) {
-            // The paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
-            // The requester does not have the necessary permissions
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         } catch (Exception e) {
-            // Internal server error
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .contentType(MediaType.APPLICATION_JSON)
-                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).build();
     }
 
     /**
@@ -220,20 +181,15 @@ public class ReviewsController implements ReviewsAPI {
      * @return the list of discussion comments
      */
     @Override
-    public ResponseEntity<List<DiscussionComment>> getDiscussionComments(Long requesterID,
-                                                                         Long reviewerID,
-                                                                         Long paperID) {
+    public ResponseEntity<List<DiscussionComment>> getDiscussionComments(Long requesterID, Long reviewerID, Long paperID) {
         try {
             return ResponseEntity
                     .ok(discussionService.getDiscussionComments(requesterID, reviewerID, paperID));
         } catch (NotFoundException e) {
-            // The paper or reviewer was not found
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IllegalAccessException e) {
-            // The requester does not have the necessary permissions
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         } catch (Exception e) {
-            // Internal server error
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

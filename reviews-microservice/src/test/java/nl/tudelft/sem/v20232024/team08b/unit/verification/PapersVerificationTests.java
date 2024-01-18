@@ -12,6 +12,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.User;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -64,7 +63,7 @@ public class PapersVerificationTests {
     }
 
     @Test
-    void verifyCOI() throws NotFoundException, ConflictOfInterestException {
+    void verifyCOI() throws NotFoundException {
         when(externalRepository.getSubmission(1L)).thenReturn(fakeSubmission);
         //empty coi's list
         assertDoesNotThrow(() -> papersVerification.verifyCOI(1L, 1L));
@@ -82,9 +81,7 @@ public class PapersVerificationTests {
         //not in coi;s list
         assertDoesNotThrow(() -> papersVerification.verifyCOI(1L, 1L));
         //coi exists
-        assertThrows(ConflictOfInterestException.class, () -> {
-            papersVerification.verifyCOI(1L, 5L);
-        });
+        assertThrows(ConflictOfInterestException.class, () -> papersVerification.verifyCOI(1L, 5L));
     }
 
 
@@ -97,7 +94,7 @@ public class PapersVerificationTests {
     }
 
     @Test
-    void verifyPermissionToViewStatus_UserIsReviewerButToDifferentPaper() throws IllegalAccessException {
+    void verifyPermissionToViewStatus_UserIsReviewerButToDifferentPaper() {
         when(usersVerification.isReviewerForPaper(reviewerID, paperID)).thenReturn(false);
         when(usersVerification.verifyRoleFromPaper(reviewerID, paperID, UserRole.REVIEWER)).thenReturn(true);
 
@@ -205,8 +202,7 @@ public class PapersVerificationTests {
     }
 
     @Test
-    void verifyPermissionToGetPaper_Successful_Chair() throws NotFoundException,
-            IllegalAccessException {
+    void verifyPermissionToGetPaper_Successful_Chair() throws NotFoundException {
 
         doReturn(true).when(papersVerification).verifyPaper(paperID);
         when(externalRepository.getSubmission(paperID)).thenReturn(fakeSubmission);
@@ -222,7 +218,7 @@ public class PapersVerificationTests {
 
         when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.REVIEWED);
 
-        assertTrue(papersVerification.verifyPhasePaperIsIn(paperID, phase));
+        Assertions.assertTrue(papersVerification.verifyPhasePaperIsIn(paperID, phase));
     }
 
     @Test
@@ -231,7 +227,7 @@ public class PapersVerificationTests {
 
         when(paperPhaseCalculator.getPaperPhase(paperID)).thenReturn(PaperPhase.REVIEWED);
 
-        assertFalse(papersVerification.verifyPhasePaperIsIn(paperID, phase));
+        Assertions.assertFalse(papersVerification.verifyPhasePaperIsIn(paperID, phase));
     }
 
     @Test

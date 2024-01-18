@@ -23,10 +23,10 @@ import static org.mockito.Mockito.*;
 
 public class UsersVerificationTests {
 
-    private SubmissionsMicroserviceCommunicator submissionsCommunicator =
+    private final SubmissionsMicroserviceCommunicator submissionsCommunicator =
         Mockito.mock(SubmissionsMicroserviceCommunicator.class);
-    private UsersMicroserviceCommunicator usersCommunicator = Mockito.mock(UsersMicroserviceCommunicator.class);
-    private ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
+    private final UsersMicroserviceCommunicator usersCommunicator = Mockito.mock(UsersMicroserviceCommunicator.class);
+    private final ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
     UsersVerification usersVerification = Mockito.spy(new UsersVerification(
             usersCommunicator,
             submissionsCommunicator,

@@ -149,7 +149,6 @@ public class PapersVerification {
      *
      * @param paperID - The ID of the paper
      * @param paperPhase - The phase to check against
-     * @returns true if the paper is in the required phase, false otherwise
      * @throws NotFoundException if the paper does not exist.
      */
     public boolean verifyPhasePaperIsIn(Long paperID, PaperPhase paperPhase) throws NotFoundException {

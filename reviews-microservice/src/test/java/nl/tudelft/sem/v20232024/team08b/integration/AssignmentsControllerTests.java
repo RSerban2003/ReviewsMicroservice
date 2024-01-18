@@ -3,12 +3,10 @@ package nl.tudelft.sem.v20232024.team08b.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.AssignmentsService;
-import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.controllers.AssignmentsController;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ConflictOfInterestException;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -31,18 +29,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AssignmentsControllerTests {
 
 
-    private AssignmentsService assignmentsService = Mockito.mock(AssignmentsService.class);
-    private UsersVerification usersVerification = Mockito.mock(UsersVerification.class);
-    private ReviewRepository reviewRepository = Mockito.mock(ReviewRepository.class);
+    private final AssignmentsService assignmentsService = Mockito.mock(AssignmentsService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     private MockMvc mockMvc;
-    private Long requesterID = 1L;
-    private Long reviewerID = 2L;
-    private Long paperID = 3L;
-    private Long conferenceID = 4L;
-    private Long trackID = 5L;
+    private final Long requesterID = 1L;
+    private final Long reviewerID = 2L;
+    private final Long paperID = 3L;
+    private final Long conferenceID = 4L;
+    private final Long trackID = 5L;
 
     @BeforeEach
     void setup() {
