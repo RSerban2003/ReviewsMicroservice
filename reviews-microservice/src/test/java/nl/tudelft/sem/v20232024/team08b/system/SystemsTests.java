@@ -692,9 +692,11 @@ class SystemsTests {
         testRestTemplate.put(reviewsURL + "/papers/" + submission1ID +
                 "/reviews?requesterID=" + reviewer3ID, review3);
         //finalize them
-        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/finalization?requesterID=" + chair1ID, null, Object.class);
+        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/finalization?requesterID="
+                + chair1ID, null, Object.class);
         //check if it has been finalized
-        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/phase?requesterID=" + chair1ID, PaperPhase.class);
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID
+                + "/reviews/phase?requesterID=" + chair1ID, PaperPhase.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(PaperPhase.REVIEWED, response.getBody());
     }
@@ -830,9 +832,11 @@ class SystemsTests {
         testRestTemplate.put(reviewsURL + "/papers/" + submission1ID +
                 "/reviews?requesterID=" + reviewer3ID, review3);
         //finalize them
-        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/finalization?requesterID=" + chair1ID, null, Object.class);
+        testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/finalization?requesterID="
+                + chair1ID, null, Object.class);
         //get paper status and check if author could read it
-        ResponseEntity<PaperStatus> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "status?requesterID=" + submitter1ID, PaperStatus.class);
+        ResponseEntity<PaperStatus> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID
+                + "status?requesterID=" + submitter1ID, PaperStatus.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
