@@ -3,6 +3,8 @@ package nl.tudelft.sem.v20232024.team08b.system;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
+import nl.tudelft.sem.v20232024.team08b.domain.Review;
+import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -422,6 +424,20 @@ class SystemsTests {
      */
     @Test
     void reviewersCanSubmitAndResubmitReviews() {
+        // first time submitting a review
+        Review review = new Review(new ReviewID(submission1ID, reviewer1ID), null, "Comment version 1", null, null, null);
+        testRestTemplate.put(reviewsURL + "/papers/" + submission1ID + "/reviews?requesterID=" + reviewer1ID, review);
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(review, response.getBody());
+        assertEquals("Comment version 1", response.getBody().getCommentForAuthor());
+        // updating a review
+        review = new Review(new ReviewID(submission1ID, reviewer1ID), null, "Comment version 2", null, null, null);
+        testRestTemplate.put(reviewsURL + "/papers/" + submission1ID + "/reviews?requesterID=" + reviewer1ID, review);
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(review, response.getBody());
+        assertEquals("Comment version 2", response.getBody().getCommentForAuthor());
     }
 
     /**
