@@ -2,12 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-<<<<<<< HEAD
-=======
-
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
-
->>>>>>> eb70e6f79568243bc3f32d8c140676ffbf6e7076
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
