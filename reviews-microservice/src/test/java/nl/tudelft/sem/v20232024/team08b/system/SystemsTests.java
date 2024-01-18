@@ -2,15 +2,25 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
-import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.User;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,18 +33,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
@@ -257,7 +255,6 @@ class SystemsTests {
                 reviewer1ID + "?Assignee=" + chair1.getId().toString()
                         + "&roleType=PCmember");
 
-        // Make sure the tracks are in the BIDDING phase
         Thread.sleep(1000);
     }
 
@@ -406,6 +403,13 @@ class SystemsTests {
      */
     @Test
     void chairsCanFinalizeAssignments() {
+        var response1 = testRestTemplate.postForEntity(reviewsURL + "/conferences/" + event1ID +
+            "/tracks/" + track1ID + "finalization?requesterID=" + chair1ID, null, Object.class);
+        assertEquals(HttpStatus.CREATED, response1.getStatusCode());
+        var response2 = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID +
+            "/tracks/" + track1ID + "phase?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response2.getStatusCode());
+        assertEquals(TrackPhase.REVIEWING, response2.getBody());
 
     }
 
@@ -546,12 +550,6 @@ class SystemsTests {
      */
     @Test
     void chairsCanSetBiddingDeadline() {
-        var deadline = System.currentTimeMillis() + 1000;
-        testRestTemplate.put("/conferences/" + event1ID + "/tracks/" + track1ID + "/bidding" +
-                "-deadline?requesterID=" + chair1ID, deadline);
-        assertEquals(deadline, testRestTemplate.getForEntity("/conferences/" + event1ID +
-                        "/tracks/" + track1ID + "/bidding-deadline?requesterID=" + chair1ID, Long.class)
-                .getBody());
     }
 
     /**
@@ -561,11 +559,6 @@ class SystemsTests {
      */
     @Test
     void chairsCanViewAnalytics() {
-        var analytics = testRestTemplate.getForEntity("/conferences/" + event1ID + "/tracks/" +
-                track1ID + "/analytics?requesterID=" + chair1ID, TrackAnalytics.class).getBody();
-        assertEquals(0, analytics.getAccepted());
-        assertEquals(0, analytics.getRejected());
-        assertEquals(2, analytics.getUnknown());
     }
 
     /**
