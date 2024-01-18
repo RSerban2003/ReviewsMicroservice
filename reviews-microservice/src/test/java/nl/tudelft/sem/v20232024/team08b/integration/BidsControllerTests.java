@@ -1,19 +1,5 @@
 package nl.tudelft.sem.v20232024.team08b.integration;
 
-/*import org.junit.jupiter.api.BeforeEach;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
-@AutoConfigureMockMvc
-public class BidsControllerTests {
-
-    @BeforeEach
-    void setup() {
-
-    }
-}*/
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.BidsService;
