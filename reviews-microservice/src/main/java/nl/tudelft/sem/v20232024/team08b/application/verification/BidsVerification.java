@@ -2,7 +2,7 @@ package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
 import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class BidsVerification {
     private final UsersVerification usersVerification;
     private final TrackPhaseCalculator trackPhaseCalculator;
-    private final SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private final CommunicationWithSubmissionMicroservice submissionsCommunicator;
 
     /**
      * Default constructor.
@@ -27,7 +27,7 @@ public class BidsVerification {
     @Autowired
     public BidsVerification(UsersVerification usersVerification,
                             TrackPhaseCalculator trackPhaseCalculator,
-                            SubmissionsMicroserviceCommunicator submissionsCommunicator) {
+                            CommunicationWithSubmissionMicroservice submissionsCommunicator) {
         this.usersVerification = usersVerification;
         this.trackPhaseCalculator = trackPhaseCalculator;
         this.submissionsCommunicator = submissionsCommunicator;

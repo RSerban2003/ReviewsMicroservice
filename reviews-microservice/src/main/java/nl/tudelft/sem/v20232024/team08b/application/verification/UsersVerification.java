@@ -1,8 +1,8 @@
 package nl.tudelft.sem.v20232024.team08b.application.verification;
 
 import javassist.NotFoundException;
-import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
-import nl.tudelft.sem.v20232024.team08b.communicators.UsersMicroserviceCommunicator;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithSubmissionMicroservice;
+import nl.tudelft.sem.v20232024.team08b.communicators.CommunicationWithUsersMicroservice;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.User;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.RolesOfUser;
@@ -16,8 +16,8 @@ import java.util.Objects;
 
 @Service
 public class UsersVerification {
-    private UsersMicroserviceCommunicator usersCommunicator;
-    private SubmissionsMicroserviceCommunicator submissionsCommunicator;
+    private CommunicationWithUsersMicroservice usersCommunicator;
+    private CommunicationWithSubmissionMicroservice submissionsCommunicator;
     private ReviewRepository reviewRepository;
 
     /**
@@ -27,8 +27,8 @@ public class UsersVerification {
      * @param usersCommunicator class, that talks to submissions microservice
      * @param reviewRepository repository storing all reviews
      */
-    public UsersVerification(UsersMicroserviceCommunicator usersCommunicator,
-                             SubmissionsMicroserviceCommunicator submissionsCommunicator,
+    public UsersVerification(CommunicationWithUsersMicroservice usersCommunicator,
+                             CommunicationWithSubmissionMicroservice submissionsCommunicator,
                              ReviewRepository reviewRepository) {
         this.usersCommunicator = usersCommunicator;
         this.reviewRepository = reviewRepository;
