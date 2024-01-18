@@ -2,8 +2,10 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackAnalytics;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
@@ -284,9 +286,8 @@ class SystemsTests {
         var papersSummaryWithIDS = new ArrayList<PaperSummaryWithID>();
         papersSummaryWithIDS.add(paper1);
         papersSummaryWithIDS.add(paper2);
-
         var response = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID +
-                "/tracks/" + track1ID + "/papers?requesterID=" + chair1ID, Object.class);
+                "/tracks/" + track1ID + "/papers?requesterID=" + reviewer1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(papersSummaryWithIDS, response.getBody());
     }
@@ -517,6 +518,12 @@ class SystemsTests {
      */
     @Test
     void chairsCanSetBiddingDeadline() {
+        var deadline = System.currentTimeMillis() + 1000;
+        testRestTemplate.put("/conferences/" + event1ID + "/tracks/" + track1ID + "/bidding" +
+                "-deadline?requesterID=" + chair1ID, deadline);
+        assertEquals(deadline, testRestTemplate.getForEntity("/conferences/" + event1ID +
+                        "/tracks/" + track1ID + "/bidding-deadline?requesterID=" + chair1ID, Long.class)
+                .getBody());
     }
 
     /**
@@ -526,6 +533,11 @@ class SystemsTests {
      */
     @Test
     void chairsCanViewAnalytics() {
+        var analytics = testRestTemplate.getForEntity("/conferences/" + event1ID + "/tracks/" +
+                track1ID + "/analytics?requesterID=" + chair1ID, TrackAnalytics.class).getBody();
+        assertEquals(0, analytics.getAccepted());
+        assertEquals(0, analytics.getRejected());
+        assertEquals(2, analytics.getUnknown());
     }
 
     /**
@@ -535,6 +547,9 @@ class SystemsTests {
      */
     @Test
     void reviewersCanCheckStatusOfPaper() {
+        var status = testRestTemplate.getForEntity("/papers/" + submission1ID + "/status" +
+                "?requesterID=" + reviewer1ID, PaperStatus.class).getBody();
+        assertEquals(PaperStatus.NOT_DECIDED, status);
     }
 
     /**
