@@ -392,17 +392,14 @@ class SystemsTests {
      */
     @Test
     void chairsCanAssignPapersAutomatically() {
-        PaperSummaryWithID paper1 = new PaperSummaryWithID();
-        paper1.setTitle("Title 1");
-        paper1.setAbstractSection("Abstract 1");
-        paper1.setPaperID(submission1ID);
+        List<Long> userIDs = List.of(1L, 2L, 3L);
 
-        ResponseEntity<Object> response = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID +
-                "/tracks/" + track1ID + "/automatic" + "?requesterID=" + reviewer1ID, Object.class);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        testRestTemplate.put(reviewsURL + "/conferences/" + event1ID + "/tracks/" + track1ID + "/automatic" +
+                "?requesterID=" + reviewer1ID, userIDs);
         var response2 = testRestTemplate.getForEntity(reviewsURL + "/papers" + submission1ID +
-                "/assignees?requesterID=" + reviewer1ID, Object.class);
+                "/assignees?requesterID=" + reviewer1ID, List.class);
         assertEquals(HttpStatus.OK, response2.getStatusCode());
+        assertEquals(userIDs, response2.getBody());
     }
 
     /**
