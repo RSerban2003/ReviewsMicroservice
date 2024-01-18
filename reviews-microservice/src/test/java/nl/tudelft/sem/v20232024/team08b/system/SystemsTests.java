@@ -11,6 +11,7 @@ import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.User;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,9 +33,6 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
@@ -864,6 +862,21 @@ class SystemsTests {
      */
     @Test
     void chairsCanManuallyAssignPapers() {
+        var ids = List.of(reviewer1ID);
+        var response = testRestTemplate.postForEntity(reviewsURL + "/papers/" + submission1ID +
+            "/assignees/" + reviewer1ID + "?requesterID=" + chair1ID, null, Object.class);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "assignees?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(ids, response.getBody());
+        testRestTemplate.delete(reviewsURL + "/papers/" + submission1ID +
+            "/assignees/" + reviewer1ID + "?requesterID=" + chair1ID, Object.class);
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "assignees?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotEquals(ids, response.getBody());
+
     }
 
     /**
