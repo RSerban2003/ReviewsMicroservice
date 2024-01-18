@@ -2,7 +2,11 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+<<<<<<< HEAD
 import nl.tudelft.sem.v20232024.team08b.dtos.review.Paper;
+=======
+import nl.tudelft.sem.v20232024.team08b.domain.Paper;
+>>>>>>> f6a89090c79cf45c1d5b6b6c098a3c6495fca4fc
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
@@ -61,7 +65,7 @@ class SystemsTests {
     private Long submission3ID;
 
     @BeforeEach
-    void setup() {
+    void setup() throws InterruptedException {
         // Verify that the other microservices are running
         try {
             sendRequest(RequestType.DELETE, null, Object.class, usersURL, "debug");
@@ -137,7 +141,7 @@ class SystemsTests {
         track1.name("TestTrack1");
         track1.maxLength(10000);
         track1.description("This is a test track.");
-        track1.setDeadline(System.currentTimeMillis() + 10000);
+        track1.setDeadline(System.currentTimeMillis() + 1000);
         track1 = sendRequest(RequestType.POST, track1, Track.class, usersURL, "track",
                 event1.getId().toString());
         System.out.println(track1);
@@ -260,6 +264,8 @@ class SystemsTests {
                 track1.getId().toString(), "role",
                 reviewer1ID + "?Assignee=" + chair1.getId().toString()
                         + "&roleType=PCmember");
+
+        Thread.sleep(1000);
     }
 
 
@@ -331,14 +337,15 @@ class SystemsTests {
      */
     @Test
     void reviewersCanReadPapersTheyAreAssignedTo() {
-        var paperSummaryWithoutID = new PaperSummary();
-        paperSummaryWithoutID.setTitle("Title 1");
-        paperSummaryWithoutID.setAbstractSection("Abstract 1");
+        PaperSummaryWithID paper1 = new PaperSummaryWithID();
+        paper1.setTitle("Title 1");
+        paper1.setAbstractSection("Abstract 1");
+        paper1.setPaperID(submission1ID);
 
-        ResponseEntity<Paper> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
-                "/title-and-abstract?requesterID=" + chair1ID, Paper.class);
+        ResponseEntity<Object> response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+                "?requesterID=" + reviewer1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(paperSummaryWithoutID, response.getBody());
+        assertEquals(paper1, response.getBody());
     }
 
     /**
@@ -347,6 +354,15 @@ class SystemsTests {
      */
     @Test
     void chairsCanReadPapersInTheirTrackInAssignmentPhase() {
+        var paper1 = new PaperSummaryWithID();
+        paper1.setTitle("Title 1");
+        paper1.setAbstractSection("Abstract 1");
+        paper1.setPaperID(submission1ID);
+
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID +
+            "?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(paper1, response.getBody());
 
     }
 
@@ -549,6 +565,7 @@ class SystemsTests {
      */
     @Test
     void verification() {
+
     }
 
     /**
