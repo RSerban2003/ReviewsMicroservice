@@ -2,14 +2,6 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
@@ -21,8 +13,6 @@ import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.User;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +25,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestClientException;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
@@ -427,14 +429,16 @@ class SystemsTests {
         // first time submitting a review
         Review review = new Review(new ReviewID(submission1ID, reviewer1ID), null, "Comment version 1", null, null, null);
         testRestTemplate.put(reviewsURL + "/papers/" + submission1ID + "/reviews?requesterID=" + reviewer1ID, review);
-        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
+        var response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID
+                + "/reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review, response.getBody());
         assertEquals("Comment version 1", response.getBody().getCommentForAuthor());
         // updating a review
         review = new Review(new ReviewID(submission1ID, reviewer1ID), null, "Comment version 2", null, null, null);
         testRestTemplate.put(reviewsURL + "/papers/" + submission1ID + "/reviews?requesterID=" + reviewer1ID, review);
-        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/" + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
+        response = testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/reviews/by-reviewer/"
+                + reviewer1ID + "?requesterID=" + reviewer1ID, Review.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(review, response.getBody());
         assertEquals("Comment version 2", response.getBody().getCommentForAuthor());
