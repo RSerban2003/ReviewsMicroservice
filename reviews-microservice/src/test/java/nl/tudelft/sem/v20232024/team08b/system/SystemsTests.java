@@ -2,15 +2,27 @@ package nl.tudelft.sem.v20232024.team08b.system;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import nl.tudelft.sem.v20232024.team08b.domain.Bid;
 import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.domain.ReviewID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummary;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
+import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Event;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.users.User;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,17 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.springframework.web.client.RestClientException;
 
 @ExtendWith(SpringExtension.class)
 @RunWith(SpringRunner.class)
@@ -67,24 +69,16 @@ class SystemsTests {
         // Verify that the other microservices are running
         try {
             sendRequest(RequestType.DELETE, null, Object.class, usersURL, "debug");
-        } catch (Exception e) {
-            if (e.getCause() != null && e.getCause().toString().contains("java.net" +
-                    ".ConnectException")) {
-                throw new TestAbortedException();
-            }
-        }
-        System.out.println("[Systems Testing Log] Users microservice is running.");
-
-        try {
+            System.out.println("[Systems Testing Log] Users microservice is running.");
             sendRequest(RequestType.GET, null, Object.class, submissionsURL, "submission",
                     "1000000");
+            System.out.println("[Systems Testing Log] Submissions microservice is running.");
         } catch (Exception e) {
             if (e.getCause() != null && e.getCause().toString().contains("java.net" +
                     ".ConnectException")) {
                 throw new TestAbortedException();
             }
         }
-        System.out.println("[Systems Testing Log] Submissions microservice is running.");
 
         // Make some test data
         Random rng = new Random();
@@ -285,9 +279,8 @@ class SystemsTests {
         var papersSummaryWithIDS = new ArrayList<PaperSummaryWithID>();
         papersSummaryWithIDS.add(paper1);
         papersSummaryWithIDS.add(paper2);
-
         var response = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID +
-                "/tracks/" + track1ID + "/papers?requesterID=" + chair1ID, Object.class);
+                "/tracks/" + track1ID + "/papers?requesterID=" + reviewer1ID, Object.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(papersSummaryWithIDS, response.getBody());
     }
@@ -412,6 +405,13 @@ class SystemsTests {
      */
     @Test
     void chairsCanFinalizeAssignments() {
+        var response1 = testRestTemplate.postForEntity(reviewsURL + "/conferences/" + event1ID +
+            "/tracks/" + track1ID + "finalization?requesterID=" + chair1ID, null, Object.class);
+        assertEquals(HttpStatus.CREATED, response1.getStatusCode());
+        var response2 = testRestTemplate.getForEntity(reviewsURL + "/conferences/" + event1ID +
+            "/tracks/" + track1ID + "phase?requesterID=" + chair1ID, Object.class);
+        assertEquals(HttpStatus.OK, response2.getStatusCode());
+        assertEquals(TrackPhase.REVIEWING, response2.getBody());
 
     }
 
@@ -584,16 +584,24 @@ class SystemsTests {
      */
     @Test
     void reviewersCanCheckStatusOfPaper() {
+        var status = testRestTemplate.getForEntity("/papers/" + submission1ID + "/status" +
+                "?requesterID=" + reviewer1ID, PaperStatus.class).getBody();
+        assertEquals(PaperStatus.NOT_DECIDED, status);
     }
 
     /**
      * Tests Requirements:
      * Must-have #23: We verify that the users are properly authenticated and have the correct
      * privileges for what they are trying to do.
+     * Using endpoints:
+     * GET /papers/{paperID}/bids
      */
     @Test
     void verification() {
-
+        assertThrows(RestClientException.class, () -> {
+            testRestTemplate.getForEntity(reviewsURL + "/papers/" + submission1ID + "/bids?requesterID=" + submitter1ID,
+                    List.class);
+        });
     }
 
     /**
