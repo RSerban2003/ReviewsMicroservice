@@ -179,7 +179,7 @@ public class DiscussionVerificationTests {
     }
 
     @Test
-    public void verifyIfUserCanFinalizeDiscussionPhase_InvalidRequester() throws Exception {
+    public void verifyIfUserCanFinalizeDiscussionPhase_InvalidRequester() {
         when(usersVerification.verifyRoleFromPaper(requesterID, paperID, UserRole.CHAIR)).thenReturn(false);
         assertThrows(IllegalAccessException.class, () ->
                 discussionVerification.verifyIfUserCanFinalizeDiscussionPhase(requesterID, paperID));

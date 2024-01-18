@@ -42,9 +42,9 @@ public class TrackDeadlineServiceTests {
             )
     );
     
-    private Long requesterID = 0L;
-    private Long conferenceID = 1L;
-    private Long trackID = 2L;
+    private final Long requesterID = 0L;
+    private final Long conferenceID = 1L;
+    private final Long trackID = 2L;
     private Track track;
     @BeforeEach
     void init() {
@@ -60,8 +60,8 @@ public class TrackDeadlineServiceTests {
         // Set the submission deadline of the track
         Date submissionDeadline = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH)
                 .parse("1970-01-01 22:01:23");
-        Long submissionDeadlineLong = submissionDeadline.toInstant().toEpochMilli();
-        trackDTO.setDeadline(Long.valueOf(submissionDeadlineLong.toString()));
+        long submissionDeadlineLong = submissionDeadline.toInstant().toEpochMilli();
+        trackDTO.setDeadline(Long.valueOf(Long.toString(submissionDeadlineLong)));
         when(usersCommunicator.getTrack(conferenceID, trackID)).thenReturn(trackDTO);
 
         // Make sure that our fake track is returned from DB
@@ -83,7 +83,7 @@ public class TrackDeadlineServiceTests {
     }
 
     @Test
-    void getTrackWithInsertionToOurRepo_NoSuchTrack() throws NotFoundException {
+    void getTrackWithInsertionToOurRepo_NoSuchTrack() {
         when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () ->
@@ -128,7 +128,7 @@ public class TrackDeadlineServiceTests {
     }
 
     @Test
-    void getTrackWithInsertionToOurRepo_NotPresentInRepoAndErrorLater() throws NotFoundException {
+    void getTrackWithInsertionToOurRepo_NotPresentInRepoAndErrorLater() {
         // Assume such track exists
         when(tracksVerification.verifyTrack(conferenceID, trackID)).thenReturn(true);
 

@@ -32,7 +32,6 @@ public class BidsVerificationTests {
 
     Long requesterID = 1L;
     Long paperID = 2L;
-    Long reviewerID = 3L;
 
     @Test
     void verifyPermissionToAccessBid_ByReviewer() {

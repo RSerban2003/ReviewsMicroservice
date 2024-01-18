@@ -43,10 +43,9 @@ public class TracksVerificationTests {
     ));
 
     private Submission fakeSubmission;
-    private Long requesterID = 0L;
-    private Long conferenceID = 1L;
-    private Long trackID = 2L;
-    private Track track;
+    private final Long requesterID = 0L;
+    private final Long conferenceID = 1L;
+    private final Long trackID = 2L;
 
     @BeforeEach
     void init() {
@@ -54,7 +53,6 @@ public class TracksVerificationTests {
         fakeSubmission = new Submission();
         fakeSubmission.setTrackId(3L);
 
-        track = new Track();
         // Assume that the user has no role
         when(
                 usersVerification.verifyRoleFromTrack(requesterID, conferenceID, trackID, UserRole.REVIEWER)

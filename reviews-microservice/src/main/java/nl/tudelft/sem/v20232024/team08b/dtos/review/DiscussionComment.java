@@ -1,6 +1,7 @@
 package nl.tudelft.sem.v20232024.team08b.dtos.review;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import nl.tudelft.sem.v20232024.team08b.domain.Comment;
 
 @Getter
 @Setter
+@Data
 @NoArgsConstructor
 @Schema(description = "Discussion comment - it can only be seen by the reviewers and chairs" +
         " and not authors.")

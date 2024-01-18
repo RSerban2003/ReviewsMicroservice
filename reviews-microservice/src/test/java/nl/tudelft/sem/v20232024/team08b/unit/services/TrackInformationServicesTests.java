@@ -6,13 +6,11 @@ import nl.tudelft.sem.v20232024.team08b.application.phase.TrackPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.TracksVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
 import nl.tudelft.sem.v20232024.team08b.communicators.SubmissionsMicroserviceCommunicator;
-import nl.tudelft.sem.v20232024.team08b.domain.Track;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperSummaryWithID;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.TrackPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
 import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.exceptions.ForbiddenAccessException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -40,21 +38,15 @@ public class TrackInformationServicesTests {
             )
     );
 
-    private Long requesterID = 0L;
-    private Long conferenceID = 1L;
-    private Long trackID = 2L;
-    private Track track;
-    @BeforeEach
-    void init() {
-        track = new Track();
-    }
-
     @Test
     void getTrackPhase() throws NotFoundException, IllegalAccessException {
         // Assume that the current phase is bidding
+        Long conferenceID = 1L;
+        Long trackID = 2L;
         when(trackPhaseCalculator.getTrackPhase(conferenceID, trackID)).thenReturn(TrackPhase.BIDDING);
 
         // Assume that the provided input to function is valid
+        Long requesterID = 0L;
         doNothing().when(tracksVerification).verifyIfUserCanAccessTrack(requesterID, conferenceID, trackID);
 
         // Make sure, that the service returns the same result that the calculator returns
@@ -71,9 +63,8 @@ public class TrackInformationServicesTests {
         Long trackID = 5L;
         when(usersVerification.verifyRoleFromTrack(requesterID, conferenceID,
                 trackID, UserRole.CHAIR)).thenReturn(false);
-        assertThrows(ForbiddenAccessException.class, () -> {
-            trackInformationService.getPapers(requesterID, conferenceID, trackID);
-        });
+        assertThrows(ForbiddenAccessException.class, () ->
+                trackInformationService.getPapers(requesterID, conferenceID, trackID));
     }
 
     @Test
@@ -85,9 +76,8 @@ public class TrackInformationServicesTests {
                 trackID, UserRole.CHAIR)).thenReturn(true);
         when(tracksVerification.verifyTrack(conferenceID,
                 trackID)).thenReturn(false);
-        assertThrows(NotFoundException.class, () -> {
-            trackInformationService.getPapers(requesterID, conferenceID, trackID);
-        });
+        assertThrows(NotFoundException.class, () ->
+                trackInformationService.getPapers(requesterID, conferenceID, trackID));
     }
 
     @Test

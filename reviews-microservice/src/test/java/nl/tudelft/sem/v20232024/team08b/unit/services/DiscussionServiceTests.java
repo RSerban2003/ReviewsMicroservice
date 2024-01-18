@@ -6,12 +6,14 @@ import nl.tudelft.sem.v20232024.team08b.application.ReviewsService;
 import nl.tudelft.sem.v20232024.team08b.application.phase.PaperPhaseCalculator;
 import nl.tudelft.sem.v20232024.team08b.application.verification.DiscussionVerification;
 import nl.tudelft.sem.v20232024.team08b.application.verification.UsersVerification;
-import nl.tudelft.sem.v20232024.team08b.domain.*;
+import nl.tudelft.sem.v20232024.team08b.domain.Comment;
+import nl.tudelft.sem.v20232024.team08b.domain.Paper;
+import nl.tudelft.sem.v20232024.team08b.domain.RecommendationScore;
+import nl.tudelft.sem.v20232024.team08b.domain.Review;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.DiscussionComment;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperPhase;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.PaperStatus;
 import nl.tudelft.sem.v20232024.team08b.dtos.review.UserRole;
-import nl.tudelft.sem.v20232024.team08b.dtos.submissions.Submission;
 import nl.tudelft.sem.v20232024.team08b.repos.PaperRepository;
 import nl.tudelft.sem.v20232024.team08b.repos.ReviewRepository;
 import org.junit.jupiter.api.Assertions;
@@ -42,8 +44,6 @@ public class DiscussionServiceTests {
             discussionVerification
     );
 
-    private nl.tudelft.sem.v20232024.team08b.dtos.review.Review reviewDTO;
-    private Submission fakeSubmission;
     private Review fakeReview;
     private final Long requesterID = 0L;
     private final Long reviewerID = 3L;
@@ -51,22 +51,11 @@ public class DiscussionServiceTests {
 
     @BeforeEach
     void prepare() {
-        reviewDTO = new nl.tudelft.sem.v20232024.team08b.dtos.review.Review(
-                ConfidenceScore.BASIC,
-                "Comment for author",
-                "Confidential comment",
-                RecommendationScore.WEAK_REJECT
-        );
-
         fakeReview = new Review();
         List<Comment> comments = new ArrayList<>();
         comments.add(new Comment(2L, "comment"));
         comments.add(new Comment(3L, "comment"));
         fakeReview.setConfidentialComments(comments);
-
-        fakeSubmission = new Submission();
-        fakeSubmission.setTrackId(2L);
-        fakeSubmission.setEventId(1L);
     }
 
     @Test
@@ -119,7 +108,7 @@ public class DiscussionServiceTests {
     }
 
     @Test
-    void testGetDomainPaperSuccess() throws NotFoundException, IllegalAccessException {
+    void testGetDomainPaperSuccess() throws NotFoundException {
         Paper expectedPaper = new Paper();
         when(paperRepository.findById(paperID)).thenReturn(Optional.of(expectedPaper));
 
@@ -130,12 +119,11 @@ public class DiscussionServiceTests {
     }
 
     @Test
-    void testGetDomainPaperNotFoundException() throws NotFoundException, IllegalAccessException {
+    void testGetDomainPaperNotFoundException() {
         when(paperRepository.findById(paperID)).thenReturn(Optional.empty());
 
-        Exception e = assertThrows(NotFoundException.class, () -> {
-            discussionService.getDomainPaper(paperID);
-        });
+        Exception e = assertThrows(NotFoundException.class, () ->
+                discussionService.getDomainPaper(paperID));
         assertEquals("Paper was not found", e.getMessage());
     }
 
@@ -253,7 +241,7 @@ public class DiscussionServiceTests {
 
         discussionService.submitDiscussionComment(requesterID, reviewerID, paperID, "text");
         Comment comment = new Comment(requesterID, "text");
-        assertThat(fakeReview.getConfidentialComments().contains(comment));
+        assertThat(fakeReview.getConfidentialComments().contains(comment)).isTrue();
         verify(reviewRepository).save(fakeReview);
 
     }
@@ -288,8 +276,7 @@ public class DiscussionServiceTests {
 
         List<DiscussionComment> actualComments = discussionService.getDiscussionComments(requesterID, reviewerID, paperID);
 
-        assertThat(actualComments)
-                .isEqualToComparingFieldByFieldRecursively(expectedComments);
+        assertThat(actualComments).isEqualTo(expectedComments);
     }
 
 }

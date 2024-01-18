@@ -99,9 +99,7 @@ public class TrackAnalyticsServiceTests {
         when(submissionsCommunicator.getSubmissionsInTrack(trackID.getConferenceID(), trackID.getTrackID(), requesterID))
                 .thenThrow(NotFoundException.class);
 
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            trackAnalyticsService.getAnalytics(trackID, requesterID);
-        });
+        Assertions.assertThrows(NotFoundException.class, () -> trackAnalyticsService.getAnalytics(trackID, requesterID));
     }
 
     @Test
@@ -114,9 +112,8 @@ public class TrackAnalyticsServiceTests {
         when(usersVerification.verifyRoleFromTrack(requesterID, trackID.getConferenceID(),
                 trackID.getTrackID(), UserRole.CHAIR)).thenReturn(false);
 
-        Assertions.assertThrows(ForbiddenAccessException.class, () -> {
-            trackAnalyticsService.getAnalytics(trackID, requesterID);
-        });
+        Assertions.assertThrows(ForbiddenAccessException.class, () ->
+                trackAnalyticsService.getAnalytics(trackID, requesterID));
     }
 
     @Test
@@ -140,8 +137,6 @@ public class TrackAnalyticsServiceTests {
 
         when(papersService.getState(1L, requesterID)).thenThrow(new IllegalAccessException());
 
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            trackAnalyticsService.getAnalytics(trackID, requesterID);
-        });
+        Assertions.assertThrows(RuntimeException.class, () -> trackAnalyticsService.getAnalytics(trackID, requesterID));
     }
 }
