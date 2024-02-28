@@ -2,10 +2,10 @@ The aim of this project was to create a microservice focused on the reviewing pr
 
 Here are more resources that describe the scope of the project:
 
-The complete specifications:
-[Requirements](https://github.com/RSerban2003/ReviewsMicroservice/blob/main/Requirements.pdf)
-[OpenAPI Specification](https://github.com/RSerban2003/ReviewsMicroservice/blob/main/OpenAPI%20Specification.yaml)
-[API Specification](https://github.com/RSerban2003/ReviewsMicroservice/blob/main/API%20Specification.pdf)
+The complete specifications:<br>
+[Requirements](https://github.com/RSerban2003/ReviewsMicroservice/blob/main/Requirements.pdf)<br>
+[OpenAPI Specification](https://github.com/RSerban2003/ReviewsMicroservice/blob/main/OpenAPI%20Specification.yaml)<br>
+[API Specification](https://github.com/RSerban2003/ReviewsMicroservice/blob/main/API%20Specification.pdf)<br>
 
-Code Quality Report:
+Code Quality Report:<br>
 [Report](https://github.com/RSerban2003/ReviewsMicroservice/blob/main/Code%20Quality.pdf)
